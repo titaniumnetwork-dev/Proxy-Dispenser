@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { Client, Events, GatewayIntentBits, Collection } from "discord.js";
+import { Client, GatewayIntentBits, Collection } from "discord.js";
 
 interface DiscordClient extends Client {
 	commands?: Collection<string, { data; execute }>;

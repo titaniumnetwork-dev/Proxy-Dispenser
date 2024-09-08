@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"rootDir": ".",
+		"typeRoots": ["./types"],
+		"target": "ES2022",
+		"module": "ES2022",
+        "noEmit": true,
+        "allowImportingTsExtensions": true
+	},
+	"typeRoots": ["./node_modules/@types", "./types"],
+	"include": ["."],
+}

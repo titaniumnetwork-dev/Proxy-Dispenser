@@ -40,3 +40,11 @@ This project uses `pnpm` as the package manager.
 - Run `pnpm run dev` to automatically refresh.
 
 An invite link will be generated in the terminal.
+
+## Config
+
+Todo
+
+## Commands
+
+Todo

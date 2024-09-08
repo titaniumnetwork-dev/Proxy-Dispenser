@@ -1,0 +1,12 @@
+{
+	"activity": {
+		"type": "Playing",
+		"name": "with proxies"
+	},
+	"services": [
+		{
+			"name": "Service Name",
+			"emoji": "Emoji ID"
+		}
+	]
+}

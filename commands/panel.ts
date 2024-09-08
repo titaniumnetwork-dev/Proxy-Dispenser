@@ -6,6 +6,9 @@ import {
 	PermissionFlagsBits,
 	EmbedBuilder,
 } from "discord.js";
+import config from "../config.json" with {type: "json"};
+
+const { services }: Config = config;
 
 export default {
 	data: new SlashCommandBuilder()
@@ -23,29 +26,22 @@ export default {
 			.setTitle("Proxy Dispenser")
 			.setDescription("Choose a proxy below to revieve a new link!");
 
-		const incognito = new ButtonBuilder()
-			.setCustomId("Ingonito")
-			.setLabel("Incognito")
-			.setStyle(ButtonStyle.Secondary)
-			.setEmoji("🔥");
+		const buttons: Array<ButtonBuilder> = [];
 
-		const alu = new ButtonBuilder()
-			.setCustomId("Alu")
-			.setLabel("Alu")
-			.setStyle(ButtonStyle.Secondary)
-			.setEmoji("🔥");
+		for (let service of services) {
+			const newButton = new ButtonBuilder()
+				.setCustomId(service.name)
+				.setLabel(service.name)
+				.setStyle(ButtonStyle.Secondary)
+			if (service.emoji) {
+				newButton.setEmoji(service.emoji);
+			}
 
-		const holyUnblocker = new ButtonBuilder()
-			.setCustomId("Holy Unblocker")
-			.setLabel("Holy Unblocker")
-			.setStyle(ButtonStyle.Secondary)
-			.setEmoji("🔥");
+			buttons.push(newButton)
+		}
 
-		const row = new ActionRowBuilder().addComponents(
-			incognito,
-			alu,
-			holyUnblocker
-		);
+		const row = new ActionRowBuilder()
+		row.setComponents(buttons);
 
 		await interaction.reply({
 			embeds: [embed],
