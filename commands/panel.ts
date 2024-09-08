@@ -30,7 +30,7 @@ export default {
 
 		for (let service of services) {
 			const newButton = new ButtonBuilder()
-				.setCustomId(service.name)
+				.setCustomId("dispense/" + service.name)
 				.setLabel(service.name)
 				.setStyle(ButtonStyle.Secondary)
 			if (service.emoji) {
@@ -50,7 +50,7 @@ export default {
 
 		if (canSendMessages) {
 			const removeSendMessages = new ButtonBuilder()
-				.setCustomId("Remove SendMessages Permission")
+				.setCustomId("removeSendMessagesPermission")
 				.setLabel("Remove Permission")
 				.setStyle(ButtonStyle.Danger);
 
@@ -58,7 +58,7 @@ export default {
 
 			await interaction.followUp({
 				content:
-					"Everyone in this channel has the SendMessages permission. Would you like to remove this permission?",
+					"Everyone in this channel has the Send Messages permission. Would you like to remove this permission?",
 				components: [row],
 				ephemeral: true,
 			});

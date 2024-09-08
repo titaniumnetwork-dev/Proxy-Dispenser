@@ -10,7 +10,7 @@ export default {
 	name: Events.ClientReady,
 	once: true,
 	execute(client) {
-		console.clear();
+		//console.clear();
 
 		deployCommands(client.user.id);
 

@@ -4,6 +4,7 @@ import { Client, GatewayIntentBits, Collection } from "discord.js";
 
 interface DiscordClient extends Client {
 	commands?: Collection<string, { data; execute }>;
+	buttons?: Collection<string, { name: string; execute }>;
 }
 
 const client: DiscordClient = new Client({
@@ -22,6 +23,22 @@ for (const file of commandFiles) {
 	} else {
 		console.log(
 			`The command at ${filePath} is missing a required "data" or "execute" property.`
+		);
+	}
+}
+
+client.buttons = new Collection();
+const buttonsPath = path.join(import.meta.dirname, "buttons");
+const buttonFiles = fs.readdirSync(buttonsPath);
+
+for (const file of buttonFiles) {
+	const filePath = path.join(buttonsPath, file);
+	const button = (await import(filePath)).default;
+	if ("name" in button && "execute" in button) {
+		client.buttons.set(button.name, button);
+	} else {
+		console.log(
+			`The button at ${filePath} is missing a required "name" or "execute" property.`
 		);
 	}
 }

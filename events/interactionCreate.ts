@@ -3,31 +3,65 @@ import { Events } from "discord.js";
 export default {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-		const command = interaction.client.commands.get(interaction.commandName);
+		if (interaction.isCommand()) {
+			const command = interaction.client.commands.get(interaction.commandName);
 
-		if (!command) {
-			console.error(
-				`No command matching ${interaction.commandName} was found.`
-			);
-			return;
-		}
-
-		try {
-			//@ts-ignore
-			await command.execute(interaction);
-		} catch (error) {
-			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({
-					content: "There was an error while executing this command!",
-					ephemeral: true,
-				});
-			} else {
-				await interaction.reply({
-					content: "There was an error while executing this command!",
-					ephemeral: true,
-				});
+			if (!command) {
+				console.error(
+					`No command matching ${interaction.commandName} was found.`
+				);
+				return;
 			}
+
+			try {
+				await command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				if (interaction.replied || interaction.deferred) {
+					await interaction.followUp({
+						content: "There was an error while executing this command!",
+						ephemeral: true,
+					});
+				} else {
+					await interaction.reply({
+						content: "There was an error while executing this command!",
+						ephemeral: true,
+					});
+				}
+			}
+		} else if (interaction.isButton()) {
+			const buttonId = interaction.customId.includes("/")
+				? interaction.customId.split("/")[0]
+				: interaction.customId;
+
+			const button = interaction.client.buttons.get(buttonId);
+
+			if (!button) {
+				console.error(`No button matching ${buttonId} was found.`);
+				return;
+			}
+
+			try {
+				await button.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				if (interaction.replied || interaction.deferred) {
+					await interaction.followUp({
+						content: "There was an error while executing this button!",
+						ephemeral: true,
+					});
+				} else {
+					await interaction.reply({
+						content: "There was an error while executing this button!",
+						ephemeral: true,
+					});
+				}
+			}
+		} else if (interaction.isModalSubmit()) {
+			await interaction.reply({
+				content: "Modal Submit",
+				ephemeral: true,
+			});
 		}
 	},
 };
