@@ -35,4 +35,8 @@ This project uses `pnpm` as the package manager.
 > [!TIP]
 > Run `pnpm install` to install the required dependencies.
 
-Run `pnpm start` to start the bot.
+- Run `pnpm start` to start the bot.
+
+- Run `pnpm run dev` to automatically refresh.
+
+An invite link will be generated in the terminal.
