@@ -3,6 +3,7 @@ import chalk from "chalk";
 import terminalLink from "terminal-link";
 import deployCommands from "../deploy-commands.ts";
 import config from "../config.json" with {type: "json"};
+import { initDatabase } from "../db.ts";
 
 const { activity }: Config = config;
 
@@ -13,6 +14,7 @@ export default {
 		//console.clear();
 
 		deployCommands(client.user.id);
+		initDatabase()
 
 		if (activity) {
 			if ("name" in activity && "type" in activity) {
@@ -29,7 +31,8 @@ export default {
 			}
 		}
 
-		console.log(chalk.bold(chalk.greenBright("Proxy Dispenser Online")));
+		const theme = chalk.hex(config.theme);
+		console.log(chalk.bold(theme("Proxy Dispenser Online")));
 		const permissions = "8"; //Todo
 		const inviteLink = terminalLink(
 			"Invite",
@@ -47,7 +50,7 @@ export default {
 
 		if (client.guilds.cache.size > 1) {
 			client.guilds.cache.forEach(async (guild) => {
-				if (guild.id !== process.env.SERVER_ID) {
+				if (guild.id !== config.serverID) {
 					await guild.leave();
 					console.log(`Left unauthorized server: ${guild.name}`);
 				}

@@ -1,4 +1,8 @@
 {
+	"serverID": "Server ID",
+	"theme": "#0099ff",
+	"limit": 3,
+	"reportsID": "Reports Channel ID",
 	"activity": {
 		"type": "Playing",
 		"name": "with proxies"

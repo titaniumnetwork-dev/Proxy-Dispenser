@@ -1,9 +1,10 @@
 # Proxy Dispenser
+
 The most advanced proxy dispenser bot for Discord.
 
 ## Setup Bot
 
-1. Open the [Discord developer portal](https://discord.com/developers/applications)
+1. Open the [Discord developer portal](https://discord.com/developers/applications).
 
 2. Create a new application.
 
@@ -17,15 +18,13 @@ The most advanced proxy dispenser bot for Discord.
 
 7. Next click Reset Token and add it to the `TOKEN` field of your `.env` file.
 
-8. Now find the server you want to use and copy the server ID. Add that ID to the `SERVER_ID` field of your `.env` file.
-
 ## Setup
 
-Node.js v22.6.0 is required. You can install this using `nvm`.
+Node.js v22.8.0 is required. You can install this using `nvm`.
 
 ```bash
-nvm i 22.6.0
-nvm alias default 22.6.0
+nvm i 22.8.0
+nvm alias default 22.8.0
 ```
 
 This project uses `pnpm` as the package manager.
@@ -37,14 +36,28 @@ This project uses `pnpm` as the package manager.
 
 - Run `pnpm start` to start the bot.
 
-- Run `pnpm run dev` to automatically refresh.
+- Run `pnpm run dev` to automatically refresh the bot when a file is changed.
 
-An invite link will be generated in the terminal.
+An invite link will be generated in the console.
 
 ## Config
 
-Todo
+First rename `config.example.json` to `config.json`.
+
+Set `serverID` to the ID of the server you are using.
+
+Set `theme` to a hex color of your choice.
+
+Set `limit` to the allowed proxies per month.
+
+Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to disable reports.
 
 ## Commands
 
-Todo
+`/docs` => Sends docs link
+
+`/panel` => Sends proxy panel
+
+### Context Menu
+
+`User > Apps > Reset` => Reset user limit

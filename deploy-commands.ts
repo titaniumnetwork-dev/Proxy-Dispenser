@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { REST, Routes } from "discord.js";
+import config from "./config.json" with {type: "json"};
 
 const commands: Array<string> = [];
 const commandsPath = path.join(import.meta.dirname, "commands");
@@ -23,7 +24,7 @@ const rest = new REST().setToken(process.env.TOKEN || "");
 export default async function (clientID) {
 	try {
 		await rest.put(
-			Routes.applicationGuildCommands(clientID, process.env.SERVER_ID || ""),
+			Routes.applicationGuildCommands(clientID, config.serverID || ""),
 			{ body: commands }
 		);
 	} catch (error) {
