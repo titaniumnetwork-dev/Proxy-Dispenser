@@ -66,6 +66,8 @@ Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to
 
 `/panel` => Sends proxy panel
 
+`/links [service]` => Returns all links in [service] (todo)
+
 `/add-links [service] [links]` => Adds [links] to [service] (todo)
 
 `/remove-links [service] [links]` => Remove [links] from [service] (todo)
