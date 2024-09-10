@@ -54,10 +54,34 @@ Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to
 
 ## Commands
 
+### Everybody
+
 `/docs` => Sends docs link
+
+`/speechbubble [url]` => Returns https://titanium-net.work/speechbubble?url=[url] (todo)
+
+`/history [service]` => Returns a paged list of request proxies of type [service] (todo)
+
+### Admin
 
 `/panel` => Sends proxy panel
 
-### Context Menu
+`/add-links [service] [links]` => Adds [links] to [service] (todo)
 
-`User > Apps > Reset` => Reset user limit
+`/remove-links [service] [links]` => Remove [links] from [service] (todo)
+
+`/remove-all [service]` => Remove all links from [service] (todo)
+
+`/reset` => Reset monthly count for all users (todo)
+
+`/reset-user [user]` => Reset monthly count for [user] (context menu) (todo)
+
+`/say [message]` => Say a message through the bot (todo)
+
+`/blacklist [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
+
+`/remove-blacklist [user]` => Remove proxy blacklist from user (context menu) (todo)
+
+## Fail
+
+%proxy [anything] and /proxy [anything] return proxyfail and a message directing them to the proxy panel channel.
