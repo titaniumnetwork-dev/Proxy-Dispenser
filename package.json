@@ -5,7 +5,7 @@
 	"type": "module",
 	"main": "index.ts",
 	"scripts": {
-		"main": "node --no-warnings=ExperimentalWarning --experimental-strip-types --env-file=.env --experimental-sqlite",
+		"main": "node --no-warnings=ExperimentalWarning --experimental-strip-types --env-file=.env",
 		"start": "pnpm run main index.ts",
 		"dev": "pnpm run main --watch index.ts"
 	},
@@ -18,6 +18,7 @@
 		"chalk": "^5.3.0",
 		"discord.js": "^14.16.1",
 		"lowdb": "^7.0.1",
+		"pagination.djs": "^4.0.15",
 		"terminal-link": "^3.0.0"
 	}
 }

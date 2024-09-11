@@ -62,7 +62,7 @@ Set `fail` to send a message when a user uses "/proxy" or "%proxy". Optional.
 
 `/speechbubble [url]` => Returns https://titanium-net.work/speechbubble?url=[url]
 
-`/history [service]` => Returns a paged list of request proxies of type [service] (todo)
+`/history [service]` => Returns a paged list of request proxies of type [service]
 
 ### Admin
 
@@ -72,7 +72,7 @@ Set `fail` to send a message when a user uses "/proxy" or "%proxy". Optional.
 
 `/reset-user [user]` => Reset monthly count for [user] (context menu)
 
-`/say [message] [reply]` => Say a message through the bot
+`/say [message]` => Say a message through the bot
 
 `/links [service]` => Returns all links in [service] (todo)
 
@@ -82,6 +82,6 @@ Set `fail` to send a message when a user uses "/proxy" or "%proxy". Optional.
 
 `/remove-all [service]` => Remove all links from [service] (todo)
 
-`/blacklist [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
+`/ban [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
 
-`/remove-blacklist [user]` => Remove proxy blacklist from user (context menu) (todo)
+`/unban [user]` => Remove proxy blacklist from user (context menu) (todo)

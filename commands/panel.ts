@@ -5,6 +5,7 @@ import {
 	ButtonStyle,
 	PermissionFlagsBits,
 	EmbedBuilder,
+	type ColorResolvable,
 } from "discord.js";
 import config from "../config.json" with {type: "json"};
 
@@ -22,9 +23,9 @@ export default {
 		const canSendMessages = permissions.has(PermissionFlagsBits.SendMessages);
 
 		const embed = new EmbedBuilder()
-			.setColor(0x0099ff)
+			.setColor(config.theme as ColorResolvable)
 			.setTitle("Proxy Dispenser")
-			.setDescription("Choose a proxy below to revieve a new link!");
+			.setDescription(`Choose a proxy below to revieve a new link! Use </history:${interaction.client.historyCommandID}> to view previously requested links.`);
 
 		const rows: Array<ActionRowBuilder> = [];
 

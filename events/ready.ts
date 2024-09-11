@@ -10,10 +10,16 @@ const { activity }: Config = config;
 export default {
 	name: Events.ClientReady,
 	once: true,
-	execute(client) {
+	execute: async (client) => {
 		//console.clear();
 
 		deployCommands(client.user.id);
+		const guildCommands = await client.guilds.cache
+			.get(config.serverID)
+			?.commands.fetch();
+		const historyCommandID = guildCommands.find((command) => command.name === "history").id;
+		client.historyCommandID = historyCommandID;
+
 		initDatabase()
 
 		if (activity) {
