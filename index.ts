@@ -8,7 +8,11 @@ interface DiscordClient extends Client {
 }
 
 const client: DiscordClient = new Client({
-	intents: [GatewayIntentBits.Guilds],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMessages,
+	],
 });
 
 client.commands = new Collection();

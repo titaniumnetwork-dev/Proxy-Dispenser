@@ -10,7 +10,7 @@ The most advanced proxy dispenser bot for Discord.
 
 3. Go to the Bot tab.
 
-4. Choose a username, profile picture and banner.
+4. Choose a username, profile picture and banner. Toggle on Message Content Intent.
 
 5. It is recommended to not make your bot public so others can add it to their servers. To do this first go to the Installation tab, set the installation link to none, then go to the Bot tab and uncheck Public Bot.
 
@@ -20,11 +20,11 @@ The most advanced proxy dispenser bot for Discord.
 
 ## Setup
 
-Node.js v22.8.0 is required. You can install this using `nvm`.
+Node.js v22.6.0 is required. You can install this using `nvm`.
 
 ```bash
-nvm i 22.8.0
-nvm alias default 22.8.0
+nvm i 22.6.0
+nvm alias default 22.6.0
 ```
 
 This project uses `pnpm` as the package manager.
@@ -52,13 +52,15 @@ Set `limit` to the allowed proxies per month.
 
 Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to disable reports.
 
+Set `fail` to send a message when a user uses "/proxy" or "%proxy".
+
 ## Commands
 
 ### Everybody
 
 `/docs` => Sends docs link
 
-`/speechbubble [url]` => Returns https://titanium-net.work/speechbubble?url=[url] (todo)
+`/speechbubble [url]` => Returns https://titanium-net.work/speechbubble?url=[url]
 
 `/history [service]` => Returns a paged list of request proxies of type [service] (todo)
 
@@ -83,7 +85,3 @@ Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to
 `/blacklist [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
 
 `/remove-blacklist [user]` => Remove proxy blacklist from user (context menu) (todo)
-
-## Fail
-
-%proxy [anything] and /proxy [anything] return proxyfail and a message directing them to the proxy panel channel.

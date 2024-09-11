@@ -26,26 +26,35 @@ export default {
 			.setTitle("Proxy Dispenser")
 			.setDescription("Choose a proxy below to revieve a new link!");
 
-		const buttons: Array<ButtonBuilder> = [];
+		const rows: Array<ActionRowBuilder> = [];
 
-		for (let service of services) {
-			const newButton = new ButtonBuilder()
-				.setCustomId("dispense/" + service.name)
-				.setLabel(service.name)
-				.setStyle(ButtonStyle.Secondary)
-			if (service.emoji) {
-				newButton.setEmoji(service.emoji);
+		for (let n = 0; n < services.length; n += 5) {
+			const fiveServices = services.slice(n, n + 5);
+
+			const row = new ActionRowBuilder();
+
+			const buttons: Array<ButtonBuilder> = [];
+
+			for (let service of fiveServices) {
+				const newButton = new ButtonBuilder()
+					.setCustomId("dispense/" + service.name)
+					.setLabel(service.name)
+					.setStyle(ButtonStyle.Secondary)
+				if (service.emoji) {
+					newButton.setEmoji(service.emoji);
+				}
+	
+				buttons.push(newButton)
 			}
 
-			buttons.push(newButton)
-		}
+			row.setComponents(buttons);
 
-		const row = new ActionRowBuilder()
-		row.setComponents(buttons);
+			rows.push(row);
+		}
 
 		await interaction.reply({
 			embeds: [embed],
-			components: [row],
+			components: rows,
 		});
 
 		if (canSendMessages) {
