@@ -1,10 +1,13 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, type ColorResolvable } from "discord.js";
 import config from "../config.json" with {type: "json"};
-import { users } from "../db.ts";
+import { users, requested, links } from "../db.ts";
 
 export default {
     name: "dispense",
     async execute(interaction) {
+        //Boosted get more links
+        const maxLinks = config.limit;
+
         const serviceName = interaction.customId.split(this.name + "/")[1];
         const service = config.services.find(service => service.name === serviceName)
 
@@ -19,21 +22,52 @@ export default {
 
         if (!user) {
             user = await users.set(interaction.user.id, {
-                remaining: 3,
-                requested: {}
+                used: 0,
             })
         }
 
-        if (user.remaining <= 0) {
+        if (user.used >= maxLinks) {
             return await interaction.reply({
                 content: "You have reached your maximum proxy limit for this month!",
                 ephemeral: true,
             });
         }
 
+        let serviceLinks = await links.get(service.name) || [];
+        let userRequested = await requested.get(interaction.user.id);
+
+        if (userRequested) {
+            if (userRequested[service.name]) {
+                serviceLinks = serviceLinks.filter((item) => !userRequested[service.name].includes(item));
+            } else {
+                userRequested = await requested.set(interaction.user.id, {
+                    ...userRequested,
+                    [service.name]: []
+                })
+            }
+        } else {
+            userRequested = await requested.set(interaction.user.id, {
+                [service.name]: []
+            })
+        }
+
+        if (!serviceLinks.length) {
+            return interaction.reply({
+                content: "No links are available at this time.",
+                ephemeral: true
+            });
+        }
+
+        const randomLink = serviceLinks[Math.floor(Math.random() * serviceLinks.length)];
+
+        userRequested[service.name].push(randomLink);
+        await requested.set(interaction.user.id, {
+            ...userRequested
+        })
+
         user = await users.set(interaction.user.id, {
             ...user,
-            remaining: user.remaining - 1
+            used: user.used + 1
         })
 
         const embed = new EmbedBuilder()
@@ -42,17 +76,26 @@ export default {
             .setDescription("Enjoy your brand new proxy link!")
             .addFields(
                 { name: "Type", value: serviceName },
-                { name: "Link", value: "https://example.com" },
-                { name: "Remaining", value: String(user.remaining) }
+                { name: "Link", value: randomLink },
+                { name: "Remaining", value: String(maxLinks - user.used) }
             );
+        const row = new ActionRowBuilder()
 
         const link = new ButtonBuilder()
             .setLabel("Open")
             .setStyle(ButtonStyle.Link)
-            .setURL("https://example.com");
+            .setURL(randomLink);
 
-        const row = new ActionRowBuilder()
         row.addComponents(link);
+
+        if ((user.used < maxLinks) && serviceLinks.length > 1) {
+            const requestAnother = new ButtonBuilder()
+                .setLabel("Request Another")
+                .setStyle(ButtonStyle.Secondary)
+                .setCustomId(interaction.customId);
+
+            row.addComponents(requestAnother);
+        }
 
         if (config.reportsID) {
             const report = new ButtonBuilder()

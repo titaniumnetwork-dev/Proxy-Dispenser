@@ -68,6 +68,12 @@ Set `fail` to send a message when a user uses "/proxy" or "%proxy".
 
 `/panel` => Sends proxy panel
 
+`/reset` => Reset monthly count for all users
+
+`/reset-user [user]` => Reset monthly count for [user] (context menu)
+
+`/say [message] [reply]` => Say a message through the bot
+
 `/links [service]` => Returns all links in [service] (todo)
 
 `/add-links [service] [links]` => Adds [links] to [service] (todo)
@@ -75,12 +81,6 @@ Set `fail` to send a message when a user uses "/proxy" or "%proxy".
 `/remove-links [service] [links]` => Remove [links] from [service] (todo)
 
 `/remove-all [service]` => Remove all links from [service] (todo)
-
-`/reset` => Reset monthly count for all users (todo)
-
-`/reset-user [user]` => Reset monthly count for [user] (context menu) (todo)
-
-`/say [message]` => Say a message through the bot (todo)
 
 `/blacklist [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
 

@@ -26,9 +26,16 @@ class Database {
 		await this.db.write();
         return value;
 	}
+	async clear() {
+		await this.init();
+		this.db.data = {};
+		await this.db.write();
+	}
 }
 
 const users = new Database("/users.json");
+const requested = new Database("/requested.json");
+const links = new Database("/links.json");
 
 async function initDatabase() {
 	const dir = join(import.meta.dirname, "/database/");
@@ -37,4 +44,4 @@ async function initDatabase() {
 	}
 }
 
-export { users, initDatabase };
+export { users, requested, links, initDatabase };
