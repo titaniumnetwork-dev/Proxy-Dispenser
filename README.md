@@ -52,7 +52,7 @@ Set `limit` to the allowed proxies per month.
 
 Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to disable reports.
 
-Set `fail` to send a message when a user uses "/proxy" or "%proxy".
+Set `fail` to send a message when a user uses "/proxy" or "%proxy". Optional.
 
 ## Commands
 

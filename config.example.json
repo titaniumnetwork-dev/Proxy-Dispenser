@@ -3,6 +3,7 @@
 	"theme": "#0099ff",
 	"limit": 3,
 	"reportsID": "Reports Channel ID",
+	"fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
 	"activity": {
 		"type": "Playing",
 		"name": "with proxies"
