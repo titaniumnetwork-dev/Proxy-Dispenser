@@ -54,6 +54,21 @@ Set `reportsID` to the ID of a channel that will recieve reports. Leave blank to
 
 Set `fail` to send a message when a user uses "/proxy" or "%proxy". Optional.
 
+Set `bonus` to give some roles a higher monthly limit.
+
+```json
+"bonus": [
+	{
+		"roleID": "Role ID",
+		"limit": 6
+	},
+    {
+		"roleID": "Role ID",
+		"limit": 10
+	}
+]
+```
+
 ## Commands
 
 ### Everybody

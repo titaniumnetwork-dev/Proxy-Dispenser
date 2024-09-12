@@ -5,8 +5,15 @@ import { users, requested, links } from "../db.ts";
 export default {
     name: "dispense",
     async execute(interaction) {
-        //Boosted get more links
-        const maxLinks = config.limit;
+        const maxLinksList = [config.limit]
+        if (config.bonus) {
+            for (let bonus of config.bonus) {
+                if (interaction.member.roles.cache.has(bonus.roleID)) {
+                    maxLinksList.push(bonus.limit)
+                }
+            }
+        }
+        const maxLinks = Math.max.apply(null, maxLinksList);
 
         const serviceName = interaction.customId.split(this.name + "/")[1];
         const service = config.services.find(service => service.name === serviceName)

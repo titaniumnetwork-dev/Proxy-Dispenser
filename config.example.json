@@ -4,6 +4,12 @@
 	"limit": 3,
 	"reportsID": "Reports Channel ID",
 	"fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
+	"bonus": [
+		{
+			"roleID": "Role ID",
+			"limit": 6
+		}
+	],
 	"activity": {
 		"type": "Playing",
 		"name": "with proxies"
