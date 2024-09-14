@@ -5,6 +5,7 @@ import { Client, GatewayIntentBits, Collection } from "discord.js";
 interface DiscordClient extends Client {
 	commands?: Collection<string, { data; execute }>;
 	buttons?: Collection<string, { name: string; execute }>;
+	modals?: Collection<string, { name: string; execute }>;
 }
 
 const client: DiscordClient = new Client({
@@ -43,6 +44,22 @@ for (const file of buttonFiles) {
 	} else {
 		console.log(
 			`The button at ${filePath} is missing a required "name" or "execute" property.`
+		);
+	}
+}
+
+client.modals = new Collection();
+const modalsPath = path.join(import.meta.dirname, "modals");
+const modalFiles = fs.readdirSync(modalsPath);
+
+for (const file of modalFiles) {
+	const filePath = path.join(modalsPath, file);
+	const modal = (await import(filePath)).default;
+	if ("name" in modal && "execute" in modal) {
+		client.modals.set(modal.name, modal);
+	} else {
+		console.log(
+			`The modal at ${filePath} is missing a required "name" or "execute" property.`
 		);
 	}
 }
