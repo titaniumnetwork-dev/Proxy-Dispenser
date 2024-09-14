@@ -102,9 +102,9 @@ Set `bonus` to give some roles a higher monthly limit.
 `/unban [user]` => Remove proxy blacklist from user (context menu) (todo)
 
 ## Todo
-- Ban and unban
 - Add all TN services
 - Add real permissions to invite
 - Typescript
 - Reporting modal
+- Banned roles from using the bot
 - Make README docs

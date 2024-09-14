@@ -36,6 +36,7 @@ class Database {
 const users = new Database("/users.json");
 const requested = new Database("/requested.json");
 const links = new Database("/links.json");
+const bans = new Database("/bans.json");
 
 async function initDatabase() {
 	const dir = join(import.meta.dirname, "/database/");
@@ -44,4 +45,4 @@ async function initDatabase() {
 	}
 }
 
-export { users, requested, links, initDatabase };
+export { users, requested, links, bans, initDatabase };

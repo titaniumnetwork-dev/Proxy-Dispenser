@@ -1,8 +1,18 @@
 import { Events } from "discord.js";
+import { bans } from "../db.ts";
 
 export default {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
+		const userBanned = false//(await bans.get(interaction.user.id)) || false;
+
+		if (userBanned) {
+			return await interaction.reply({
+				content: "You are banned from the proxy dispenser.",
+				ephemeral: true,
+			});
+		}
+
 		if (interaction.isCommand()) {
 			const command = interaction.client.commands.get(interaction.commandName);
 
