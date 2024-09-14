@@ -1,18 +1,24 @@
-import addLinks from "../commands/add-links.ts";
 import { links } from "../db.ts";
 
 export default {
-	name: "addLinks",
+	name: "removeLinks",
 	async execute(interaction) {
 		const serviceName = interaction.customId.split(this.name + "/")[1];
 		const urlInput = interaction.fields.getTextInputValue("urlsInput");
+		const allLinks = (await links.get(serviceName)) || [];
 
+		const notIncludedURLs = [];
 		const invalidURLs = [];
 		let urls = urlInput.split(/[\n, ]+/).map((url) => url.trim());
 
 		for (let url in urls) {
 			try {
 				new URL(urls[url]);
+
+				if (!allLinks.includes(urls[url])) {
+					notIncludedURLs.push(urls[url]);
+					delete urls[url];
+				}
 			} catch {
 				invalidURLs.push(urls[url]);
 				delete urls[url];
@@ -28,22 +34,30 @@ export default {
 			});
 		}
 
-		const allLinks = (await links.get(serviceName)) || [];
-
-		await links.set(serviceName, allLinks.concat(urls));
+		await links.set(
+			serviceName,
+			allLinks.filter((url) => !urls.includes(url))
+		);
 
 		await interaction.reply({
-			content: `Added ${String(urls.length)} link${
+			content: `Removed ${String(urls.length)} link${
 				urls.length === 1 ? "s" : ""
-			} to ${serviceName}.`,
+			} from ${serviceName}.`,
 			ephemeral: true,
 		});
 
 		const invalidLinks = invalidURLs.map((url) => "- " + url).join("\n");
+        const notIncludedLinks = notIncludedURLs.map((url) => "- " + url).join("\n");
 
 		if (invalidURLs.length > 0) {
 			await interaction.followUp({
-				content: `Some links were not added due to being invalid: \n${invalidLinks}`,
+				content: `Some links were not removed due to being invalid: \n${invalidLinks}`,
+				ephemeral: true,
+			});
+		}
+		if (notIncludedURLs.length > 0) {
+			await interaction.followUp({
+				content: `Some links were not added due to not existing in the ${serviceName} database: \n${notIncludedLinks}`,
 				ephemeral: true,
 			});
 		}

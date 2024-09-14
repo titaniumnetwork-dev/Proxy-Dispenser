@@ -19,12 +19,12 @@ const servicesChoices = services.map((service) => {
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("add-links")
-		.setDescription("Add links to the database.")
+		.setName("remove-links")
+		.setDescription("Remove links to the database.")
 		.addStringOption((option) =>
 			option
 				.setName("service")
-				.setDescription("The service to add links for.")
+				.setDescription("The service to remove links for.")
 				.setRequired(true)
 				.setChoices(servicesChoices)
 		)
@@ -33,8 +33,8 @@ export default {
         const service = interaction.options.getString("service");
 
 		const modal = new ModalBuilder()
-			.setCustomId("addLinks/" + service)
-			.setTitle(service + " | Add Links")
+			.setCustomId("removeLinks/" + service)
+			.setTitle(service + " | Remoe Links")
 
 		const urlsInput = new TextInputBuilder()
 			.setCustomId("urlsInput")
