@@ -47,7 +47,9 @@ export default {
 		});
 
 		const invalidLinks = invalidURLs.map((url) => "- " + url).join("\n");
-        const notIncludedLinks = notIncludedURLs.map((url) => "- " + url).join("\n");
+		const notIncludedLinks = notIncludedURLs
+			.map((url) => "- " + url)
+			.join("\n");
 
 		if (invalidURLs.length > 0) {
 			await interaction.followUp({

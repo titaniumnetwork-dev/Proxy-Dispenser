@@ -24,7 +24,7 @@ class Database {
 		await this.init();
 		this.db.data![key] = value;
 		await this.db.write();
-        return value;
+		return value;
 	}
 	async clear() {
 		await this.init();

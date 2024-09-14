@@ -18,23 +18,27 @@ export default {
 			const guildCommands = await client.guilds.cache
 				.get(config.serverID)
 				?.commands.fetch();
-			client.historyCommandID = guildCommands.find((command) => command.name === "history")?.id;
+			client.historyCommandID = guildCommands.find(
+				(command) => command.name === "history"
+			)?.id;
 		}
 
-		initDatabase()
+		initDatabase();
 
 		if (activity) {
 			if ("name" in activity && "type" in activity) {
 				if (ActivityType[activity.type] !== undefined) {
 					client.user.setPresence({
-						activities: [{ name: activity.name, type: ActivityType[activity.type] }],
+						activities: [
+							{ name: activity.name, type: ActivityType[activity.type] },
+						],
 						status: "online",
 					});
 				} else {
-					console.error("Invalid activity type.")
+					console.error("Invalid activity type.");
 				}
 			} else {
-				console.error("Activity is missing name or type.")
+				console.error("Activity is missing name or type.");
 			}
 		}
 

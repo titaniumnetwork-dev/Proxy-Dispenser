@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from "discord.js";
-import { url } from "inspector";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -27,12 +26,12 @@ export default {
 			});
 		}
 
-        let finalURL = "";
-        if (file) {
-            finalURL = file.url;
-        } else {
-            finalURL = url;
-        }
+		let finalURL = "";
+		if (file) {
+			finalURL = file.url;
+		} else {
+			finalURL = url;
+		}
 
 		await interaction.reply({
 			content: "https://titanium-net.work/speechbubble?url=" + finalURL,

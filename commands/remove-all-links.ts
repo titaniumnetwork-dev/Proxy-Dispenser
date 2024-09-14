@@ -1,7 +1,4 @@
-import {
-	SlashCommandBuilder,
-	PermissionFlagsBits,
-} from "discord.js";
+import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 import { links } from "../db.ts";
 import config from "../config.json" with {type: "json"};
 
@@ -27,17 +24,17 @@ export default {
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	async execute(interaction) {
-        const service = interaction.options.getString("service");
+		const service = interaction.options.getString("service");
 		const allLinks = (await links.get(service)) || [];
-        
+
 		await links.set(service, []);
 
-        if (allLinks.length === 0) {
-            return await interaction.reply({
-                content: `${service} has no links in the database.`,
-                ephemeral: true,
-            });
-        } 
+		if (allLinks.length === 0) {
+			return await interaction.reply({
+				content: `${service} has no links in the database.`,
+				ephemeral: true,
+			});
+		}
 
 		await interaction.reply({
 			content: `Removed ${String(allLinks.length)} link${

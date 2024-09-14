@@ -30,11 +30,11 @@ export default {
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	async execute(interaction) {
-        const service = interaction.options.getString("service");
+		const service = interaction.options.getString("service");
 
 		const modal = new ModalBuilder()
 			.setCustomId("addLinks/" + service)
-			.setTitle(service + " | Add Links")
+			.setTitle(service + " | Add Links");
 
 		const urlsInput = new TextInputBuilder()
 			.setCustomId("urlsInput")
@@ -42,7 +42,9 @@ export default {
 			.setStyle(TextInputStyle.Paragraph)
 			.setPlaceholder("URLs separated by new lines, spaces, or commas.");
 
-		const row = new ActionRowBuilder<TextInputBuilder>().addComponents(urlsInput);
+		const row = new ActionRowBuilder<TextInputBuilder>().addComponents(
+			urlsInput
+		);
 
 		modal.addComponents(row);
 

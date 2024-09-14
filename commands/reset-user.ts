@@ -12,10 +12,10 @@ export default {
 				.setDescription("The user to reset.")
 				.setRequired(true)
 		),
-        async execute(interaction) {
-        const userOption = interaction.options.getUser("user");
+	async execute(interaction) {
+		const userOption = interaction.options.getUser("user");
 
-        const user = await users.get(userOption.id);
+		const user = await users.get(userOption.id);
 
 		if (user) {
 			await users.set(userOption.id, {
@@ -26,5 +26,5 @@ export default {
 		await interaction.reply({
 			content: `Reset proxy limit for <@${userOption.id}>`,
 		});
-        }
+	},
 };

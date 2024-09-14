@@ -9,7 +9,7 @@ export default {
 
 			await interaction.update({
 				content: `Send Messages permission removed for everyone in <#${channel.id}>`,
-                components: [],
+				components: [],
 				ephemeral: true,
 			});
 		} catch {

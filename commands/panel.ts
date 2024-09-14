@@ -25,7 +25,9 @@ export default {
 		const embed = new EmbedBuilder()
 			.setColor(config.theme as ColorResolvable)
 			.setTitle("Proxy Dispenser")
-			.setDescription(`Choose a proxy below to revieve a new link! Use </history:${interaction.client.historyCommandID}> to view previously requested links.`);
+			.setDescription(
+				`Choose a proxy below to revieve a new link! Use </history:${interaction.client.historyCommandID}> to view previously requested links.`
+			);
 
 		const rows: Array<ActionRowBuilder> = [];
 
@@ -40,12 +42,12 @@ export default {
 				const newButton = new ButtonBuilder()
 					.setCustomId("dispense/" + service.name)
 					.setLabel(service.name)
-					.setStyle(ButtonStyle.Secondary)
+					.setStyle(ButtonStyle.Secondary);
 				if (service.emoji) {
 					newButton.setEmoji(service.emoji);
 				}
-	
-				buttons.push(newButton)
+
+				buttons.push(newButton);
 			}
 
 			row.setComponents(buttons);

@@ -77,19 +77,19 @@ Set `banned` to an array of role ID's that are banned from using the bot.
 
 `/docs` => Sends docs link
 
-`/speechbubble [url]` => Returns https://titanium-net.work/speechbubble?url=[url]
+`/speechbubble [url] [file]` => Returns https://titanium-net.work/speechbubble?url=[url or file]
 
-`/history [service]` => Returns a paged list of request proxies of type [service]
+`/history [service]` => Returns history of proxies for type [service]
 
 ### Admin
 
-`/panel` => Sends proxy panel
+`/panel` => Sends the proxy panel
 
 `/reset` => Reset monthly count for all users
 
 `/reset-user [user]` => Reset monthly count for [user] (context menu)
 
-`/say [message]` => Say a message through the bot
+`/say [message]` => Send a message through the bot
 
 `/links [service]` => Returns all links in [service]
 
@@ -99,6 +99,6 @@ Set `banned` to an array of role ID's that are banned from using the bot.
 
 `/remove-all [service]` => Remove all links from [service]
 
-`/ban [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
+`/ban [user]` => Blacklist a user for obtaining proxies (context menu)
 
-`/unban [user]` => Remove proxy blacklist from user (context menu) (todo)
+`/unban [user]` => Remove proxy blacklist from user (context menu)
