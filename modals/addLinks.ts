@@ -34,7 +34,7 @@ export default {
 
 		await interaction.reply({
 			content: `Added ${String(urls.length)} link${
-				urls.length === 1 ? "s" : ""
+				urls.length === 1 ? "" : "s"
 			} to ${serviceName}.`,
 			ephemeral: true,
 		});

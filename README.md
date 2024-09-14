@@ -93,9 +93,9 @@ Set `bonus` to give some roles a higher monthly limit.
 
 `/add-links [service]` => Add links to [service]
 
-`/remove-links [service]` => Remove links from [service] (todo)
+`/remove-links [service]` => Remove links from [service]
 
-`/remove-all [service]` => Remove all links from [service] (todo)
+`/remove-all [service]` => Remove all links from [service]
 
 `/ban [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
 
@@ -103,7 +103,6 @@ Set `bonus` to give some roles a higher monthly limit.
 
 ## Todo
 - Ban and unban
-- Remove links + remove-all
 - Add all TN services
 - Add real permissions to invite
 - Typescript

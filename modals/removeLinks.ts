@@ -41,7 +41,7 @@ export default {
 
 		await interaction.reply({
 			content: `Removed ${String(urls.length)} link${
-				urls.length === 1 ? "s" : ""
+				urls.length === 1 ? "" : "s"
 			} from ${serviceName}.`,
 			ephemeral: true,
 		});
