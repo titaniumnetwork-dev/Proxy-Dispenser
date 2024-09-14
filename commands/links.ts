@@ -1,6 +1,6 @@
-import { type ColorResolvable, SlashCommandBuilder } from "discord.js";
+import { type ColorResolvable, SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 import { Pagination } from "pagination.djs";
-import { requested } from "../db.ts";
+import { links } from "../db.ts";
 import config from "../config.json" with {type: "json"};
 
 const { services }: Config = config;
@@ -14,47 +14,35 @@ const servicesChoices = services.map((service) => {
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("history")
-		.setDescription("View previously requested links.")
+		.setName("links")
+		.setDescription("View all links added to the bot.")
 		.addStringOption((option) =>
 			option
 				.setName("service")
 				.setDescription("The service to get links for.")
 				.setRequired(true)
 				.setChoices(servicesChoices)
-		),
+		)
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	async execute(interaction) {
         const service = interaction.options.getString("service");
-        let userRequested = await requested.get(interaction.user.id);
+        const allLinks = await links.get(service) || [];
 
-        if (userRequested) {
-            if (!userRequested[service]) {
-                userRequested = await requested.set(interaction.user.id, {
-                    ...userRequested,
-                    [service]: []
-                })
-            }
-        } else {
-            userRequested = await requested.set(interaction.user.id, {
-                [service]: []
-            })
-        }
-
-        if (!userRequested[service].length) {
+        if (!allLinks.length) {
             return await interaction.reply({
-                content: "You haven't requested any proxies of this service yet.",
-                ephemeral: true,
+                content: service + " has no links.",
+                ephemeral: true
             })
         }
 
-        const serviceLinks = userRequested[service].map((link) => "- " + link);
+        const serviceLinks = allLinks.map((link) => "- " + link);
 
 		const pagination = new Pagination(interaction, {
 			limit: 10,
 			ephemeral: true,
 		});
 
-		pagination.setTitle(service + " | History");
+		pagination.setTitle(service + " | Links");
 		pagination.setDescriptions(serviceLinks);
 		pagination.setColor(config.theme as ColorResolvable);
         delete pagination.buttons.first;

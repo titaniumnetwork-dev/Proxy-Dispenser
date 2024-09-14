@@ -89,7 +89,7 @@ Set `bonus` to give some roles a higher monthly limit.
 
 `/say [message]` => Say a message through the bot
 
-`/links [service]` => Returns all links in [service] (todo)
+`/links [service]` => Returns all links in [service]
 
 `/add-links [service] [links]` => Adds [links] to [service] (todo)
 
@@ -100,3 +100,11 @@ Set `bonus` to give some roles a higher monthly limit.
 `/ban [user]` => Blacklist a user for obtaining proxies (context menu) (todo)
 
 `/unban [user]` => Remove proxy blacklist from user (context menu) (todo)
+
+## Todo
+- Ban and unban
+- Add and remove links + remove-all
+- Add all TN services
+- Add real permissions to invite
+- Typescript
+- Make README docs
