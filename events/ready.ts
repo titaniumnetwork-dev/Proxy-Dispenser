@@ -2,8 +2,8 @@ import { Events, ActivityType } from "discord.js";
 import chalk from "chalk";
 import terminalLink from "terminal-link";
 import deployCommands from "../deploy-commands.ts";
-import config from "../config.json" with {type: "json"};
 import { initDatabase } from "../db.ts";
+import config from "../config.json" with {type: "json"};
 
 const { activity }: Config = config;
 
@@ -13,12 +13,13 @@ export default {
 	execute: async (client) => {
 		console.clear();
 
-		deployCommands(client.user.id);
-		const guildCommands = await client.guilds.cache
-			.get(config.serverID)
-			?.commands.fetch();
-		const historyCommandID = guildCommands.find((command) => command.name === "history").id;
-		client.historyCommandID = historyCommandID;
+		if (await client.guilds.cache.has(config.serverID)) {
+			await deployCommands(client.user.id);
+			const guildCommands = await client.guilds.cache
+				.get(config.serverID)
+				?.commands.fetch();
+			client.historyCommandID = guildCommands.find((command) => command.name === "history")?.id;
+		}
 
 		initDatabase()
 
@@ -39,7 +40,7 @@ export default {
 
 		const theme = chalk.hex(config.theme);
 		console.log(chalk.bold(theme("Proxy Dispenser Online")));
-		const permissions = "8"; //Todo
+		const permissions = "268618768";
 		const inviteLink = terminalLink(
 			"Invite",
 			`https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=${permissions}&integration_type=0&scope=bot`
