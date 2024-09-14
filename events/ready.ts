@@ -11,7 +11,7 @@ export default {
 	name: Events.ClientReady,
 	once: true,
 	execute: async (client) => {
-		//console.clear();
+		console.clear();
 
 		deployCommands(client.user.id);
 		const guildCommands = await client.guilds.cache

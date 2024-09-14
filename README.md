@@ -104,8 +104,6 @@ Set `banned` to an array of role ID's that are banned from using the bot.
 `/unban [user]` => Remove proxy blacklist from user (context menu) (todo)
 
 ## Todo
-- Add all TN services
 - Add real permissions to invite
 - Typescript
-- Reporting modal
 - Make README docs

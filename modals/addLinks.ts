@@ -1,4 +1,3 @@
-import addLinks from "../commands/add-links.ts";
 import { links } from "../db.ts";
 
 export default {
