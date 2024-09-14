@@ -5,7 +5,15 @@ import config from "../config.json" with {type: "json"};
 export default {
 	name: Events.MessageCreate,
 	execute: async (message) => {
-        const userBanned = (await bans.get(message.author.id)) || false;
+        let userBanned = (await bans.get(message.member.id)) || false;
+
+        if (config.banned) {
+			for (let bannedRole of config.banned) {
+				if (message.member.roles.cache.has(bannedRole)) {
+					userBanned = true;
+				}
+			}
+		}
 
 		if (userBanned) {
 			return;

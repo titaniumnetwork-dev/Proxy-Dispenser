@@ -69,6 +69,8 @@ Set `bonus` to give some roles a higher monthly limit.
 ]
 ```
 
+Set `banned` to an array of role ID's that are banned from using the bot.
+
 ## Commands
 
 ### Everybody
@@ -106,5 +108,4 @@ Set `bonus` to give some roles a higher monthly limit.
 - Add real permissions to invite
 - Typescript
 - Reporting modal
-- Banned roles from using the bot
 - Make README docs

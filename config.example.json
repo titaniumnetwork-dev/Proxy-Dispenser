@@ -10,6 +10,7 @@
 			"limit": 6
 		}
 	],
+	"banned": ["Role ID"],
 	"activity": {
 		"type": "Playing",
 		"name": "with proxies"

@@ -1,10 +1,19 @@
 import { Events } from "discord.js";
 import { bans } from "../db.ts";
+import config from "../config.json" with {type: "json"};
 
 export default {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-		const userBanned = false//(await bans.get(interaction.user.id)) || false;
+		let userBanned = (await bans.get(interaction.user.id)) || false;
+
+		if (config.banned) {
+			for (let bannedRole of config.banned) {
+				if (interaction.member.roles.cache.has(bannedRole)) {
+					userBanned = true;
+				}
+			}
+		}
 
 		if (userBanned) {
 			return await interaction.reply({
