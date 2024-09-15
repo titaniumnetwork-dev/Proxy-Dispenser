@@ -11,13 +11,13 @@ export default {
 		}
 
 		if (await guild.client.guilds.cache.has(config.serverID)) {
-			await deployCommands(guild.client.user.id);
-			const guildCommands = await guild.client.guilds.cache
-				.get(config.serverID)
-				?.commands.fetch();
-			guild.client.historyCommandID = guildCommands.find(
+			const currentGuild = guild.client.guilds.cache.get(config.serverID);
+			const guildCommands = await currentGuild.commands.fetch();	
+			const historyCommand = guildCommands.find(
 				(command) => command.name === "history"
-			)?.id;
+			);
+	
+			guild.client.historyCommandID = historyCommand.id;
 		}
 	},
 };

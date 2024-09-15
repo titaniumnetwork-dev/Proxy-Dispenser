@@ -19,7 +19,7 @@ const servicesChoices = services.map((service) => {
 export default {
 	data: new SlashCommandBuilder()
 		.setName("links")
-		.setDescription("View all links added to the bot.")
+		.setDescription("View all links for a service in the database.")
 		.addStringOption((option) =>
 			option
 				.setName("service")

@@ -20,7 +20,7 @@ const servicesChoices = services.map((service) => {
 export default {
 	data: new SlashCommandBuilder()
 		.setName("remove-links")
-		.setDescription("Remove links to the database.")
+		.setDescription("Remove links from the database.")
 		.addStringOption((option) =>
 			option
 				.setName("service")
