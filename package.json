@@ -1,25 +1,25 @@
 {
-	"name": "proxy-dispenser",
-	"version": "1.0.0",
-	"description": "The most advanced proxy dispenser bot for Discord.",
-	"type": "module",
-	"main": "index.ts",
-	"scripts": {
-		"main": "node --no-warnings=ExperimentalWarning --experimental-strip-types --env-file=.env",
-		"start": "pnpm run main index.ts",
-		"dev": "pnpm run main --watch index.ts"
-	},
-	"author": "Nebelung",
-	"license": "AGPL-3.0-only",
-	"devDependencies": {
-		"@types/node": "^22.5.4"
-	},
-	"dependencies": {
-		"chalk": "^5.3.0",
-		"discord.js": "^14.16.1",
-		"lowdb": "^7.0.1",
-		"pagination.djs": "^4.0.15",
-		"sharp": "^0.33.5",
-		"terminal-link": "^3.0.0"
-	}
+  "name": "proxy-dispenser",
+  "version": "1.0.0",
+  "description": "The most advanced proxy dispenser bot for Discord.",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "main": "node --no-warnings=ExperimentalWarning --experimental-strip-types --env-file=.env",
+    "start": "pnpm run main index.ts",
+    "dev": "pnpm run main --watch index.ts"
+  },
+  "author": "Nebelung",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@types/node": "^22.5.4"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "discord.js": "^14.16.1",
+    "lowdb": "^7.0.1",
+    "pagination.djs": "^4.0.15",
+    "sharp": "^0.33.5",
+    "terminal-link": "^3.0.0"
+  }
 }

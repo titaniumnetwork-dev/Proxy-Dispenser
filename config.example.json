@@ -1,24 +1,24 @@
 {
-	"serverID": "Server ID",
-	"theme": "#0099ff",
-	"limit": 3,
-	"reportsID": "Reports Channel ID",
-	"fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
-	"bonus": [
-		{
-			"roleID": "Role ID",
-			"limit": 6
-		}
-	],
-	"banned": ["Role ID"],
-	"activity": {
-		"type": "Playing",
-		"name": "with proxies"
-	},
-	"services": [
-		{
-			"name": "Service Name",
-			"emoji": "Emoji ID"
-		}
-	]
+  "serverID": "Server ID",
+  "theme": "#0099ff",
+  "limit": 3,
+  "reportsID": "Reports Channel ID",
+  "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
+  "bonus": [
+    {
+      "roleID": "Role ID",
+      "limit": 6
+    }
+  ],
+  "banned": ["Role ID"],
+  "activity": {
+    "type": "Playing",
+    "name": "with proxies"
+  },
+  "services": [
+    {
+      "name": "Service Name",
+      "emoji": "Emoji ID"
+    }
+  ]
 }

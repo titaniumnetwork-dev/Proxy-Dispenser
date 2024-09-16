@@ -1,13 +1,13 @@
 {
-	"compilerOptions": {
-		"rootDir": ".",
-		"typeRoots": ["./types"],
-		"target": "ESNext",
-		"module": "ESNext",
-		"noEmit": true,
-		"allowImportingTsExtensions": true,
-		"moduleResolution": "Bundler"
-	},
-	"typeRoots": ["./node_modules/@types", "./types"],
-	"include": ["."]
+  "compilerOptions": {
+    "rootDir": ".",
+    "typeRoots": ["./types"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "Bundler"
+  },
+  "typeRoots": ["./node_modules/@types", "./types"],
+  "include": ["."]
 }

@@ -40,28 +40,23 @@ Use the template and replace the values with the correct ones.
 
 ```yaml
 {
-	"serverID": "Server ID",
-	"theme": "Hex Code",
-	"limit": 3,
-	"reportsID": "Reports Channel ID", # Leave blank to disable reporting.
-	"fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
-	"bonus": [
-		{
-			"roleID": "Role ID",
-			"limit": 6
-		}
-	],
-	"banned": ["Role ID"],
-	"activity": {
-		"type": "Playing", # Competing, Playing, Streaming, Listening, or Watching
-		"name": "with proxies"
-	},
-	"services": [
-		{
-			"name": "Service Name",
-			"emoji": "Emoji ID" # Optional
-		}
-	]
+  "serverID": "Server ID",
+  "theme": "Hex Code",
+  "limit": 3,
+  "reportsID": "Reports Channel ID", # Leave blank to disable reporting.
+  "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
+  "bonus": [{ "roleID": "Role ID", "limit": 6 }],
+  "banned": ["Role ID"],
+  "activity": {
+      "type": "Playing", # Competing, Playing, Streaming, Listening, or Watching
+      "name": "with proxies",
+    },
+  "services": [
+      {
+        "name": "Service Name",
+        "emoji": "Emoji ID", # Optional
+      },
+    ],
 }
 ```
 
@@ -80,36 +75,37 @@ An invite link for the bot will be generated in the console.
 
 ### Everyone
 
-| Command  | Description |
-| ------------- | ------------- |
-| `/docs` | Provides the documentation link.  |
-| `/speechbubble [file] [flip]` | Adds a speech bubble to an image.  |
-| `/history [service]` | View previously requested links. |
+| Command                       | Description                       |
+| ----------------------------- | --------------------------------- |
+| `/docs`                       | Provides the documentation link.  |
+| `/speechbubble [file] [flip]` | Adds a speech bubble to an image. |
+| `/history [service]`          | View previously requested links.  |
 
 ### Administrator
 
-| Command  | Description |
-| ------------- | ------------- |
-| `/panel` | Generates the proxy panel. |
-| `/reset` | Reset the monthly link count for all users. |
-| `/reset-user [user]` | Reset the monthly link count for a user. |
-| `/say [text]` | Say anything through the bot. |
-| `/links [service]` | View all links for a service in the database. |
-| `add-links [service]` | Add links to the database. |
-| `remove-links [service]` | Remove links from the database. |
+| Command                       | Description                                            |
+| ----------------------------- | ------------------------------------------------------ |
+| `/panel`                      | Generates the proxy panel.                             |
+| `/reset`                      | Reset the monthly link count for all users.            |
+| `/reset-user [user]`          | Reset the monthly link count for a user.               |
+| `/say [text]`                 | Say anything through the bot.                          |
+| `/links [service]`            | View all links for a service in the database.          |
+| `add-links [service]`         | Add links to the database.                             |
+| `remove-links [service]`      | Remove links from the database.                        |
 | `/remove-all-links [service]` | Removes every link link for a service in the database. |
-| `/ban [user]` | Ban a user from using the bot. |
-| `/unban [user]` | Unban a user from using the bot. |
+| `/ban [user]`                 | Ban a user from using the bot.                         |
+| `/unban [user]`               | Unban a user from using the bot.                       |
 
 ### Context Menu (Administrator)
 
 Right click a user and hover over Apps.
 
-| Name  | Equivalent Command |
-| ------------- | ------------- |
+| Name  | Equivalent Command   |
+| ----- | -------------------- |
 | Reset | `/reset-user [user]` |
-| Ban | `/ban [user]` |
-| Unban | `/unban [user]` |
+| Ban   | `/ban [user]`        |
+| Unban | `/unban [user]`      |
 
 ## License
+
 Proxy Dispenser uses the AGPL-3.0 license.
