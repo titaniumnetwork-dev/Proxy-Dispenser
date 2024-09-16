@@ -4,6 +4,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
 } from "discord.js";
+import config from "../config.json" with {type: "json"};
 
 export default {
   data: new SlashCommandBuilder()
@@ -11,8 +12,8 @@ export default {
     .setDescription("Provides the documentation link."),
   async execute(interaction) {
     const docs = new ButtonBuilder()
-      .setLabel("Titanium Network Docs")
-      .setURL("https://docs.titaniumnetwork.org/")
+      .setLabel("Documentation")
+      .setURL(config.docsURL)
       .setStyle(ButtonStyle.Link);
 
     const row = new ActionRowBuilder().addComponents(docs);

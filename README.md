@@ -45,18 +45,24 @@ Use the template and replace the values with the correct ones.
   "limit": 3,
   "reportsID": "Reports Channel ID", # Leave blank to disable reporting.
   "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
-  "bonus": [{ "roleID": "Role ID", "limit": 6 }],
+  "bonus": [
+    {
+      "roleID": "Role ID",
+      "limit": 6
+    }
+  ],
   "banned": ["Role ID"],
   "activity": {
-      "type": "Playing", # Competing, Playing, Streaming, Listening, or Watching
-      "name": "with proxies",
-    },
+    "type": "Playing", # Competing, Playing, Streaming, Listening, or Watching
+    "name": "with proxies"
+  },
+  "docsURL": "https://documentation-url.com",
   "services": [
-      {
-        "name": "Service Name",
-        "emoji": "Emoji ID", # Optional
-      },
-    ],
+    {
+      "name": "Service Name",
+      "emoji": "Emoji ID" # Optional
+    }
+  ]
 }
 ```
 
@@ -90,8 +96,8 @@ An invite link for the bot will be generated in the console.
 | `/reset-user [user]`          | Reset the monthly link count for a user.               |
 | `/say [text]`                 | Say anything through the bot.                          |
 | `/links [service]`            | View all links for a service in the database.          |
-| `add-links [service]`         | Add links to the database.                             |
-| `remove-links [service]`      | Remove links from the database.                        |
+| `/add-links [service]`         | Add links to the database.                             |
+| `/remove-links [service]`      | Remove links from the database.                        |
 | `/remove-all-links [service]` | Removes every link link for a service in the database. |
 | `/ban [user]`                 | Ban a user from using the bot.                         |
 | `/unban [user]`               | Unban a user from using the bot.                       |

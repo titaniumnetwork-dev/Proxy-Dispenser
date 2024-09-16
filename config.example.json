@@ -1,6 +1,6 @@
 {
   "serverID": "Server ID",
-  "theme": "#0099ff",
+  "theme": "Hex Code",
   "limit": 3,
   "reportsID": "Reports Channel ID",
   "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
@@ -15,6 +15,7 @@
     "type": "Playing",
     "name": "with proxies"
   },
+  "docsURL": "https://documentation-url.com",
   "services": [
     {
       "name": "Service Name",
