@@ -19,6 +19,7 @@
 		"discord.js": "^14.16.1",
 		"lowdb": "^7.0.1",
 		"pagination.djs": "^4.0.15",
+		"sharp": "^0.33.5",
 		"terminal-link": "^3.0.0"
 	}
 }

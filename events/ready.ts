@@ -14,13 +14,14 @@ export default {
 		console.clear();
 
 		if (await client.guilds.cache.has(config.serverID)) {
+			await deployCommands(client.user.id);
 			const guild = client.guilds.cache.get(config.serverID);
 			const guildCommands = await guild.commands.fetch();	
 			const historyCommand = guildCommands.find(
 				(command) => command.name === "history"
 			);
 	
-			client.historyCommandID = historyCommand.id;
+			client.historyCommandID = historyCommand?.id;
 		}
 
 		initDatabase();

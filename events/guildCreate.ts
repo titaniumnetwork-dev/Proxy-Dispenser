@@ -10,14 +10,12 @@ export default {
 			console.log(`Left unauthorized server: ${guild.name}`);
 		}
 
-		if (await guild.client.guilds.cache.has(config.serverID)) {
-			const currentGuild = guild.client.guilds.cache.get(config.serverID);
-			const guildCommands = await currentGuild.commands.fetch();	
-			const historyCommand = guildCommands.find(
-				(command) => command.name === "history"
-			);
-	
-			guild.client.historyCommandID = historyCommand.id;
-		}
+		await deployCommands(guild.client.user.id);
+		const guildCommands = await guild.commands.fetch();	
+		const historyCommand = guildCommands.find(
+			(command) => command.name === "history"
+		);
+
+		guild.client.historyCommandID = historyCommand?.id;
 	},
 };

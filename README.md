@@ -83,7 +83,7 @@ An invite link for the bot will be generated in the console.
 | Command  | Description |
 | ------------- | ------------- |
 | `/docs` | Provides the documentation link.  |
-| `/speechbubble [url] [file]` | Adds a speech bubble to an image or gif.  |
+| `/speechbubble [file] [flip]` | Adds a speech bubble to an image.  |
 | `/history [service]` | View previously requested links. |
 
 ### Administrator
