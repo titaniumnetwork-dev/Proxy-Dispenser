@@ -1,6 +1,6 @@
 # Proxy Dispenser
 
-The most advanced proxy dispenser bot for Discord.
+The most advanced proxy dispenser bot for Discord. Used in Titanium Network.
 
 Currently no Masqr support.
 
