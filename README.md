@@ -2,6 +2,8 @@
 
 The most advanced proxy dispenser bot for Discord.
 
+Currently no Masqr support.
+
 ## Setup Bot
 
 1. Go to the [Discord developer portal](https://discord.com/developers/applications).
