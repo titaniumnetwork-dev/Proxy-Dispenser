@@ -75,8 +75,35 @@ export default {
       });
     }
 
-    const randomLink =
-      serviceLinks[Math.floor(Math.random() * serviceLinks.length)];
+
+    let randomLink = new URL(serviceLinks[Math.floor(Math.random() * serviceLinks.length)]);
+
+    if (service.masqr) {
+      if (process.env.PSK) {
+          randomLink.username = "u";
+
+          const license_response = await (await fetch(config.masqrURL + "/newLicense?host=" + randomLink.host, {
+            headers: [
+              ["psk", process.env.PSK]
+            ]
+          })).json();
+
+          if (license_response["assignedLicense"] != undefined) {
+            randomLink.password = license_response["assignedLicense"];
+          } else {
+            return interaction.reply({
+              content: "The Masqr licensing server did not provide a license. Please ask the Dispenser hosts to double check their PSK and server status of the licensing server.",
+              ephemeral: true,
+            });
+          }
+
+      } else {
+        return interaction.reply({
+          content: "The Masqr enviornment variable is not set, but the link you requested is protected by Masqr. Please contact the Dispenser hosts.",
+          ephemeral: true,
+        });
+      }
+    }
 
     userRequested[service.name].push(randomLink);
     await requested.set(interaction.user.id, {
@@ -94,7 +121,8 @@ export default {
       .setDescription("Enjoy your brand new proxy link!")
       .addFields(
         { name: "Type", value: serviceName },
-        { name: "Link", value: randomLink },
+        // enclose Masqr'd URLs in backticks, or they won't show up with the username/password
+        { name: "Link", value: service.masqr ? "`" + randomLink.href + "`" : randomLink.href },
         { name: "Remaining", value: String(maxLinks - user.used) }
       );
     const row = new ActionRowBuilder();
@@ -102,7 +130,7 @@ export default {
     const link = new ButtonBuilder()
       .setLabel("Open")
       .setStyle(ButtonStyle.Link)
-      .setURL(randomLink);
+      .setURL(randomLink.href);
 
     row.addComponents(link);
 

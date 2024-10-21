@@ -6,5 +6,6 @@ interface Config {
   services: Array<{
     name: string;
     emoji?: string;
+    masqr: boolean;
   }>;
 }
