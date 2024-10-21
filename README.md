@@ -2,7 +2,6 @@
 
 The most advanced proxy dispenser bot for Discord. Used in Titanium Network.
 
-Currently no Masqr support.
 
 ## Setup Bot
 
@@ -19,6 +18,8 @@ Currently no Masqr support.
 6. Rename `.env.example` to `.env`
 
 7. Next click Reset Token and add it to the `TOKEN` field of your `.env` file.
+
+8. If you're using Masqr, paste your PSK into `.env` too.
 
 > [!TIP]
 > Use the Emojis tab to upload emoji to the application instead of the server.
@@ -59,10 +60,12 @@ Use the template and replace the values with the correct ones.
     "name": "with proxies"
   },
   "docsURL": "https://documentation-url.com",
+  "masqrURL": "https://masqr-url.com", # Masqr licensing server URL, don't include a trailing slash
   "services": [
     {
       "name": "Service Name",
-      "emoji": "Emoji ID" # Optional
+      "emoji": "Emoji ID", # Optional
+      "masqr": false # If Masqr is enabled for this service
     }
   ]
 }

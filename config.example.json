@@ -16,10 +16,12 @@
     "name": "with proxies"
   },
   "docsURL": "https://documentation-url.com",
+  "masqrURL": "https://masqr-url.com",
   "services": [
     {
       "name": "Service Name",
-      "emoji": "Emoji ID"
+      "emoji": "Emoji ID",
+      "masqr": false
     }
   ]
 }
