@@ -105,7 +105,7 @@ export default {
       }
     }
 
-    userRequested[service.name].push(randomLink);
+    userRequested[service.name].push(randomLink.href);
     await requested.set(interaction.user.id, {
       ...userRequested,
     });
