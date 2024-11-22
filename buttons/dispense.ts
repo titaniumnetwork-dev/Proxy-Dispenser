@@ -152,7 +152,6 @@ export default {
       row.addComponents(report);
     }
 
-    // reporter start
     if (config.logsID) {
       const logembed = new EmbedBuilder()
         .setColor(config.theme as ColorResolvable)
