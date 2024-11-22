@@ -151,14 +151,16 @@ export default {
 
       row.addComponents(report);
     }
-
+  
+  // service.emoji ? "<:" + interaction.client.emojis.cache.get(service.emoji).name + ":" + service.emoji + ">  " + serviceName : serviceName
+  // no idea why this didnt work in prod
     if (config.logsID) {
       const logembed = new EmbedBuilder()
         .setColor(config.theme as ColorResolvable)
         .setTitle("Proxy Log")
         .setDescription("A user has requested a link.")
         .addFields(
-          { name: "Type", value: service.emoji ? "<:" + interaction.client.emojis.cache.get(service.emoji).name + ":" + service.emoji + ">  " + serviceName : serviceName},
+          { name: "Type", value: serviceName},
           { name: "Link", value: service.masqr ? "`" + randomLink.href + "`" : randomLink.href },
           { name: "User", value: `<@${interaction.user.id}>` },
           { name: "Remaining Links", value: String(maxLinks - user.used)}
