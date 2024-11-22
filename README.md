@@ -47,6 +47,7 @@ Use the template and replace the values with the correct ones.
   "theme": "Hex Code",
   "limit": 3,
   "reportsID": "Reports Channel ID", # Leave blank to disable reporting.
+  "logsID": "Logging Channel ID", # Leave blank to disable logging.
   "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
   "bonus": [
     {

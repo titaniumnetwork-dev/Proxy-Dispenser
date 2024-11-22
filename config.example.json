@@ -3,6 +3,7 @@
   "theme": "Hex Code",
   "limit": 3,
   "reportsID": "Reports Channel ID",
+  "logsID": "Logging Channel ID",
   "fail": "Requesting a proxy has changed, use <#Channel ID> to request a proxy link.",
   "bonus": [
     {
