@@ -11,21 +11,10 @@ import config from "../config.json" with {type: "json"};
 export default {
   name: "dispense",
   async execute(interaction) {
-    const maxLinksList = [config.limit];
-    if (config.bonus) {
-      for (let bonus of config.bonus) {
-        if (interaction.member.roles.cache.has(bonus.roleID)) {
-          maxLinksList.push(bonus.limit);
-        }
-      }
-    }
-    const maxLinks = Math.max.apply(null, maxLinksList);
-
     const serviceName = interaction.customId.split(this.name + "/")[1];
     const service = config.services.find(
       (service) => service.name === serviceName
     );
-
     if (!service) {
       await interaction.reply({
         content: "The requested service ${serviceName} does not exist.",
@@ -33,19 +22,54 @@ export default {
       });
     }
 
-    let user = await users.get(interaction.user.id);
+    let real_limit: any;
 
+    if (service.name == "Holy Unblocker (Mass Pool)") {
+      real_limit = 5;
+    } else {
+      real_limit = config.limit
+    }
+
+    const maxLinksList = [real_limit];
+
+    if (config.bonus) {
+      for (let bonus of config.bonus) {
+        if (interaction.member.roles.cache.has(bonus.roleID)) {
+          maxLinksList.push(bonus.limit);
+        }
+      }
+    }
+
+    const maxLinks = Math.max.apply(null, maxLinksList);
+
+    let user = await users.get(interaction.user.id);
     if (!user) {
       user = await users.set(interaction.user.id, {
         used: 0,
+        used_hu: 0,
+      });
+    }
+    if (!user.used_hu) {
+      user = await users.set(interaction.user.id, {
+        used: user.used,
+        used_hu: 0,
       });
     }
 
-    if (user.used >= maxLinks) {
-      return await interaction.reply({
-        content: "You have reached your maximum proxy limit for this month!",
-        ephemeral: true,
-      });
+    if (service.name == "Holy Unblocker (Mass Pool)") {
+      if (user.used_hu >= maxLinks) {
+        return await interaction.reply({
+          content: "You have reached your proxy limit for the Holy Unblocker Mass Pool for this month! You can still request other proxy services.",
+          ephemeral: true,
+        });
+      }
+    } else {
+      if (user.used >= maxLinks) {
+        return await interaction.reply({
+          content: "You have reached your maximum proxy limit for this month!",
+          ephemeral: true,
+        });
+      }
     }
 
     let serviceLinks = (await links.get(service.name)) || [];
@@ -110,11 +134,19 @@ export default {
       ...userRequested,
     });
 
-    user = await users.set(interaction.user.id, {
-      ...user,
-      used: user.used + 1,
-    });
+    if (service.name == "Holy Unblocker (Mass Pool)") {
+      user = await users.set(interaction.user.id, {
+        ...user,
+        used_hu: user.used_hu + 1,
+      });
+    } else {
+      user = await users.set(interaction.user.id, {
+        ...user,
+        used: user.used + 1,
+      });
+    }
 
+    
     const embed = new EmbedBuilder()
       .setColor(config.theme as ColorResolvable)
       .setTitle("Proxy Delivery")
@@ -123,7 +155,7 @@ export default {
         { name: "Type", value: serviceName },
         // enclose Masqr'd URLs in backticks, or they won't show up with the username/password
         { name: "Link", value: service.masqr ? "`" + randomLink.href + "`" : randomLink.href },
-        { name: "Remaining", value: String(maxLinks - user.used) }
+        { name: "Remaining", value: String(maxLinks - (service.name === "Holy Unblocker (Mass Pool)" ? user.used_hu : user.used)) }
       );
     const row = new ActionRowBuilder();
 
@@ -163,7 +195,7 @@ export default {
           { name: "Type", value: serviceName},
           { name: "Link", value: service.masqr ? "`" + randomLink.href + "`" : randomLink.href },
           { name: "User", value: `<@${interaction.user.id}>` },
-          { name: "Remaining Links", value: String(maxLinks - user.used)}
+          { name: "Remaining Links", value: String(maxLinks - (service.name === "Holy Unblocker (Mass Pool)" ? user.used_hu : user.used))}
         );
 
       interaction.client.channels.cache.get(config.logsID).send({
