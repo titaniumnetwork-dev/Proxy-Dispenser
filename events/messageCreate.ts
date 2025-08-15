@@ -5,6 +5,7 @@ import config from "../config.json" with {type: "json"};
 export default {
   name: Events.MessageCreate,
   execute: async (message) => {
+    if (!message.member) return;
     let userBanned = (await bans.get(message.member.id)) || false;
 
     if (config.banned) {
