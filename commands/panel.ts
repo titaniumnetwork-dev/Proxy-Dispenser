@@ -26,7 +26,7 @@ export default {
       .setColor(config.theme as ColorResolvable)
       .setTitle("Proxy Dispenser")
       .setDescription(
-        `Choose a proxy below to revieve a new link! Use </history:${interaction.client.historyCommandID}> to view previously requested links.`
+        `Choose a proxy below to receive a new link! Use </history:${interaction.client.historyCommandID}> to view previously requested links.`
       );
 
     const rows: Array<ActionRowBuilder> = [];
