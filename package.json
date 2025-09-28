@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "main": "node --no-warnings=ExperimentalWarning --experimental-strip-types --env-file=.env",
+    "main": "node --no-warnings=ExperimentalWarning --experimental-strip-types",
     "start": "pnpm run main index.ts",
     "dev": "pnpm run main --watch index.ts"
   },
