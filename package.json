@@ -11,15 +11,18 @@
   },
   "author": "Nebelung",
   "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "devDependencies": {
-    "@types/node": "^22.5.4"
+    "@types/node": "^24.5.2"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
-    "discord.js": "^14.16.1",
+    "chalk": "^5.6.2",
+    "discord.js": "^14.22.1",
     "lowdb": "^7.0.1",
-    "pagination.djs": "^4.0.15",
-    "sharp": "^0.33.5",
-    "terminal-link": "^3.0.0"
+    "pagination.djs": "^4.0.18",
+    "sharp": "^0.34.4",
+    "terminal-link": "^5.0.0"
   }
 }
