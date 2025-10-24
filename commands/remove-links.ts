@@ -34,7 +34,7 @@ export default {
 
     const modal = new ModalBuilder()
       .setCustomId("removeLinks/" + service)
-      .setTitle(service + " | Remoe Links");
+      .setTitle(service + " | Remove Links");
 
     const urlsInput = new TextInputBuilder()
       .setCustomId("urlsInput")
