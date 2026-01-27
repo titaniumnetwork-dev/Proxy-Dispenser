@@ -12,6 +12,7 @@
   "engines": {
     "node": ">=24.0.0"
   },
+  "packageManager": "pnpm@10.18.3",
   "author": "Nebelung",
   "license": "AGPL-3.0-only",
   "devDependencies": {
