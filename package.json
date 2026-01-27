@@ -1,19 +1,23 @@
 {
-	"name": "proxy-dispenser-v2",
-	"author": "soap phia",
 	"private": true,
+	"name": "dispenser-v2",
+	"workspaces": [
+		"packages/**"
+	],
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@trivago/prettier-plugin-sort-imports": "^6.0.2",
+		"@types/bun": "latest",
+		"@types/node": "^22.7.5",
+		"gts": "^7.0.0",
+		"typescript": "^5.6.3"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
 	},
-	"dependencies": {
-		"seyfert": "^4.1.0"
-	},
 	"scripts": {
-		"clear": "rm ./commands.json || true",
-		"start": "bun src/index.ts",
-		"dev": "npm run clear && npm run start"
+		"lint": "gts lint",
+		"clean": "gts clean",
+		"fix": "gts fix",
+		"posttest": "npm run lint"
 	}
 }

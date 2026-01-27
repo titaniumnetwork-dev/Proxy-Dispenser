@@ -1,0 +1,21 @@
+{
+	"name": "@dispenser/bot",
+	"private": true,
+	"type": "module",
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@stellite/db": "workspace:*",
+		"seyfert": "^4.1.0",
+		"try": "^1.0.3"
+	},
+	"scripts": {
+		"clear": "rm ./commands.json || true",
+		"start": "bun src/index.ts",
+		"dev": "npm run clear && npm run start"
+	}
+}
