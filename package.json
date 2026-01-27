@@ -1,0 +1,19 @@
+{
+	"name": "proxy-dispenser-v2",
+	"author": "soap phia",
+	"private": true,
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"seyfert": "^4.1.0"
+	},
+	"scripts": {
+		"clear": "rm ./commands.json || true",
+		"start": "bun src/index.ts",
+		"dev": "npm run clear && npm run start"
+	}
+}
