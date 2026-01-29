@@ -1,6 +1,7 @@
 {
 	"private": true,
 	"name": "dispenser-v2",
+	"author": "soap phia",
 	"workspaces": [
 		"packages/**"
 	],
@@ -15,6 +16,9 @@
 		"typescript": "^5"
 	},
 	"scripts": {
+		"clear": "rm ./commands.json || true",
+		"start": "bun src/index.ts",
+		"dev": "npm run clear && npm run start",
 		"lint": "gts lint",
 		"clean": "gts clean",
 		"fix": "gts fix",
