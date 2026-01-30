@@ -8,19 +8,19 @@ import {
 
 const options = {
   host: createStringOption({
-    description: 'The host to remove',
+    description: 'The BYOD host to unset',
     required: true,
   }),
 };
 
 @Declare({
-  name: 'remove',
-  description: 'Remove a BYOD host',
+  name: 'unset',
+  description: 'Unset a BYOD host',
   integrationTypes: ['GuildInstall', 'UserInstall'],
   contexts: ['Guild', 'BotDM', 'PrivateChannel'],
 })
 @Options(options)
-export class RemoveCommand extends SubCommand {
+export class UnsetCommand extends SubCommand {
   async run(ctx: CommandContext<typeof options>) {
     try {
       if (ctx.guildId) await ctx.deferReply();
@@ -38,16 +38,16 @@ export class RemoveCommand extends SubCommand {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to remove host: ${response.statusText}`);
+        throw new Error(`Failed to unset BYOD host: ${response.statusText}`);
       }
 
       await ctx.editOrReply({
-        content: `Successfully removed host: ${host}`,
+        content: `Successfully unset BYOD host: ${host}`,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '';
       await ctx.editOrReply({
-        content: `Error removing host. ${errorMessage}`,
+        content: `Error removing BYOD host. ${errorMessage}`,
       });
     }
   }

@@ -29,7 +29,7 @@ export class ListCommand extends SubCommand {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '';
       await ctx.editOrReply({
-        content: `Error fetching hosts. ${errorMessage}`,
+        content: `Error fetching BYOD hosts. ${errorMessage}`,
       });
     }
   }
