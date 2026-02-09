@@ -38,3 +38,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env
 config.json
 commands.json
+broken commands/
+src/packages/db/drizzle/meta/
+sqlite.db
+drizzle/
+dist/

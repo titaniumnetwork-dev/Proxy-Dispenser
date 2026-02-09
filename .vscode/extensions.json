@@ -3,6 +3,7 @@
 		"rvest.vs-code-prettier-eslint",
 		"oven.bun-vscode",
 		"yoavbls.pretty-ts-errors",
-		"christian-kohler.path-intellisense"
+		"christian-kohler.path-intellisense",
+		"idered.npm"
 	]
 }

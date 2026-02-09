@@ -1,27 +1,36 @@
 {
-	"name": "dispenser-v2",
 	"private": true,
-	"author": "TitaniumNetwork",
+	"name": "dispenser",
 	"workspaces": [
 		"packages/**"
 	],
-	"scripts": {
-		"clear": "rm ./packages/bot/commands.json || true",
-		"start": "cd packages/bot/ && bun src/index.ts",
-		"dev": "npm run clear && npm run start",
-		"lint": "gts lint",
-		"clean": "gts clean",
-		"fix": "gts fix",
-		"posttest": "npm run lint"
-	},
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^6.0.2",
-		"@types/bun": "^1.3.8",
-		"@types/node": "^24.10.9",
-		"gts": "^7.0.0",
-		"typescript": "^5.9.3"
+		"@babel/preset-typescript": "^7.28.5",
+		"@biomejs/biome": "2.3.14",
+		"@types/bun": "latest",
+		"@types/node": "^22.7.5",
+		"drizzle-orm": "^0.45.1",
+		"typescript": "^5.6.3"
 	},
 	"peerDependencies": {
-		"typescript": "^5.9.3"
+		"typescript": "^5"
+	},
+	"scripts": {
+		"clear": "rm ./packages/bot/commands.json || true",
+		"start": "cd packages/bot && npm run start",
+		"dev": "npm run clear && npm run start",
+		"fmt": "biome format --write",
+		"lint": "biome lint --write",
+		"check": "biome check --write",
+		"typecheck": "tsgo -b",
+		"typecheck:bot": "tsgo -b packages/bot",
+		"typecheck:db": "tsgo -b packages/db",
+		"posttest": "npm run lint",
+		"db:generate": "cd packages/db && npm run db:generate",
+		"db:migrate": "cd packages/db && npm run db:migrate"
+	},
+	"dependencies": {
+		"@typescript/native-preview": "^7.0.0-dev.20260207.1",
+		"drizzle-kit": "^0.31.8"
 	}
 }

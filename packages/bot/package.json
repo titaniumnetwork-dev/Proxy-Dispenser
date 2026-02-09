@@ -9,13 +9,13 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"@stellite/db": "workspace:*",
+		"@dispenser/db": "workspace:*",
 		"seyfert": "^4.1.0",
 		"try": "^1.0.3"
 	},
 	"scripts": {
 		"clear": "rm ./commands.json || true",
-		"start": "bun src/index.ts",
+		"start": "bun ./src/index.ts",
 		"dev": "npm run clear && npm run start"
 	}
 }

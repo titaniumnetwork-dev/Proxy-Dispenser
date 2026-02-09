@@ -1,6 +1,13 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
-  "include": [
-    "packages/**/*.ts",
-  ]
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"module": "Preserve",
+		"moduleDetection": "force",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true
+	},
+	"files": [],
+	"references": [{ "path": "./packages/bot" }, { "path": "./packages/db" }]
 }

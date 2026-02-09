@@ -1,7 +1,53 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
 	"compilerOptions": {
+		// Seyfert
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-	}
+
+		// Environment setup & latest features
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"module": "Preserve",
+		"moduleDetection": "force",
+		"jsx": "react-jsx",
+		"allowJs": true,
+
+		// Bundler mode
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+
+		// Composite project settings for monorepo
+		"composite": true,
+		"declaration": true,
+		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
+
+		// Best practices
+		"strict": true,
+		"skipLibCheck": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+
+		// Some stricter flags (disabled by default)
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noPropertyAccessFromIndexSignature": false,
+
+		// Path aliases
+		"paths": {
+			"@/*": ["./src/*"],
+			"@utils/*": ["./src/utils/*"]
+		}
+	},
+	"include": [
+		"src/**/*.ts",
+		"types.d.ts",
+		"src/commands/links/list.ts",
+		"src/commands/links/remove.ts",
+		"src/commands/links/rename-category.ts"
+	],
+	"exclude": ["node_modules", "dist", "src/broken commands"]
 }
