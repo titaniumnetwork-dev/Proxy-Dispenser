@@ -20,9 +20,40 @@ export const guild = sqliteTable("guild", {
 		.$type<string[]>()
 		.notNull()
 		.default(sql`(json_array())`),
+	adminUserIds: text("admin_user_ids", { mode: "json" })
+		.$type<string[]>()
+		.notNull()
+		.default(sql`(json_array())`),
 	logChannelId: snowflake("log_channel_id"),
+	monthlyCycle: text("monthly_cycle", {
+		enum: ["first_of_month", "relative_to_user"],
+	})
+		.notNull()
+		.default("relative_to_user"),
 	isBanned: integer("is_banned").notNull().default(0),
+	customByodHost: text("custom_byod_host"),
+	customByodHostAPIKey: text("custom_byod_host_api_key"),
 });
+
+export const guildConfigHistory = sqliteTable(
+	"guild_config_history",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		guildId: snowflake("guild_id").notNull(),
+		configKey: text("config_key").notNull(),
+		previousValue: text("previous_value"),
+		changedAt: integer("changed_at", { mode: "timestamp_ms" })
+			.notNull()
+			.default(sql`(unixepoch() * 1000)`),
+	},
+	(t) => [
+		foreignKey({
+			columns: [t.guildId],
+			foreignColumns: [guild.guildId],
+			name: "config_history_guild_fk",
+		}).onDelete("cascade"),
+	],
+);
 
 export const globalBannedUsers = sqliteTable("global_banned_users", {
 	userId: snowflake("user_id").notNull().primaryKey(),
@@ -44,6 +75,7 @@ export const users = sqliteTable(
 			.$type<string[]>()
 			.notNull()
 			.default(sql`(json_array())`),
+		// We should still track all the cycles in case the server decides to change the monthly cycle type
 		timesMonthlyCycle: integer("times_monthly_cycle").notNull().default(0),
 		timesUserCycle: integer("times_user_cycle").notNull().default(0),
 		firstTimeUserCycleTimestamp: integer("first_time_user_cycle_timestamp", {
@@ -112,7 +144,18 @@ export const guildRelations = relations(guild, ({ many }) => ({
 	users: many(users),
 	categories: many(categories),
 	links: many(links),
+	configHistory: many(guildConfigHistory),
 }));
+
+export const guildConfigHistoryRelations = relations(
+	guildConfigHistory,
+	({ one }) => ({
+		guild: one(guild, {
+			fields: [guildConfigHistory.guildId],
+			references: [guild.guildId],
+		}),
+	}),
+);
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
 	guild: one(guild, {
@@ -136,6 +179,9 @@ export const linksRelations = relations(links, ({ one }) => ({
 // Types
 export type InsertGuild = typeof guild.$inferInsert;
 export type SelectGuild = typeof guild.$inferSelect;
+
+export type InsertGuildConfigHistory = typeof guildConfigHistory.$inferInsert;
+export type SelectGuildConfigHistory = typeof guildConfigHistory.$inferSelect;
 
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
