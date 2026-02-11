@@ -15,7 +15,7 @@
 	},
 	"scripts": {
 		"clear": "rm ./commands.json || true",
-		"start": "bun ./src/index.ts",
-		"dev": "npm run clear && npm run start"
+		"start": "bun --env-file=../../.env ./src/index.ts",
+		"dev": "bun run clear && bun run start"
 	}
 }

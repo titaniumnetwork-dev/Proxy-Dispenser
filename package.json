@@ -17,17 +17,17 @@
 	},
 	"scripts": {
 		"clear": "rm ./packages/bot/commands.json || true",
-		"start": "cd packages/bot && npm run start",
-		"dev": "npm run clear && npm run start",
+		"start": "cd packages/bot && bun run start",
+		"dev": "bun run clear && bun run start",
 		"fmt": "biome format --write",
 		"lint": "biome lint --write",
 		"check": "biome check --write",
 		"typecheck": "tsgo -b",
 		"typecheck:bot": "tsgo -b packages/bot",
 		"typecheck:db": "tsgo -b packages/db",
-		"posttest": "npm run lint",
-		"db:generate": "cd packages/db && npm run db:generate",
-		"db:migrate": "cd packages/db && npm run db:migrate"
+		"posttest": "bun run lint",
+		"db:generate": "cd packages/db && bun run db:generate",
+		"db:migrate": "cd packages/db && bun run db:migrate"
 	},
 	"dependencies": {
 		"@typescript/native-preview": "^7.0.0-dev.20260207.1",
