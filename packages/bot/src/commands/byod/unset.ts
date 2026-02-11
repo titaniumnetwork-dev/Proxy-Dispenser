@@ -4,10 +4,10 @@
 
 import {
 	type CommandContext,
-	createStringOption,
 	Declare,
 	Options,
 	SubCommand,
+	createStringOption,
 } from "seyfert";
 import { t } from "try";
 import {
@@ -19,6 +19,47 @@ const options = {
 	host: createStringOption({
 		description: "The BYOD host to unset",
 		required: true,
+		autocomplete: async (interaction) => {
+			try {
+				const response = await fetch(
+					`http://${process.env.API_IP}:${process.env.API_PORT || 3000}/hosts`,
+					{
+						method: "GET",
+						headers: {
+							"x-api-key": process.env.API_KEY!,
+							"Content-Type": "application/json",
+						},
+					}
+				);
+
+				if (!response.ok) {
+					console.error("Error fetching hosts:", response.statusText);
+					return interaction.respond([]);
+				}
+
+				const data = (await response.json()) as {
+					hosts: Array<{ service: string; hostname: string }>;
+				};
+				const hosts = Array.isArray(data) ? data : data.hosts || [];
+
+				const filtered = hosts.filter((host) => {
+					const name = host.hostname.toLowerCase();
+					const service = host.service.toLowerCase();
+					const input = interaction.getInput().toLowerCase();
+					return name.includes(input) || service.includes(input);
+				});
+
+				const choices = filtered.slice(0, 25).map((host) => ({
+					name: `(${host.service})        ${" ".repeat(30 - host.service.length)}https://${host.hostname}`,
+					value: host.hostname,
+				}));
+
+				return interaction.respond(choices);
+			} catch (error) {
+				console.error("Error fetching hosts:", error);
+				return interaction.respond([]);
+			}
+		},
 	}),
 };
 
