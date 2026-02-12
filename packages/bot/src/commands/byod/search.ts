@@ -1,5 +1,5 @@
 /**
- * @fileoverview A slash command to list all BYOD hosts.
+ * @fileoverview A slash command to search BYOD hosts by hostname.
  */
 import {
 	ActionRow,
@@ -20,66 +20,27 @@ import {
 } from "@/utils/info-embeds";
 
 const options = {
-	service: createStringOption({
-		description: "Filter by service name",
-		required: false,
-		autocomplete: async (interaction) => {
-			try {
-				const response = await fetch(
-					`http://${process.env.API_IP}:${process.env.API_PORT || 3000}/hosts`,
-					{
-						method: "GET",
-						headers: {
-							"x-api-key": process.env.API_KEY!,
-							"Content-Type": "application/json",
-						},
-					},
-				);
-
-				if (!response.ok) {
-					console.error("Error fetching hosts:", response.statusText);
-					return interaction.respond([]);
-				}
-
-				const hosts = (await response.json()) as Array<{
-					service: string;
-					hostname: string;
-				}>;
-
-				const services = [...new Set(hosts.map((host) => host.service))];
-
-				const input = interaction.getInput().toLowerCase();
-				const filtered = services.filter((service) =>
-					service.toLowerCase().includes(input),
-				);
-
-				const choices = filtered.slice(0, 25).map((service) => ({
-					name: service,
-					value: service,
-				}));
-
-				return interaction.respond(choices);
-			} catch (error) {
-				console.error("Error fetching services:", error);
-				return interaction.respond([]);
-			}
-		},
+	query: createStringOption({
+		description: "Search query for hostname",
+		required: true,
 	}),
 };
 
 @Declare({
-	name: "list",
-	description: "List all BYOD hosts",
+	name: "search",
+	description: "Search BYOD hosts by hostname",
 	integrationTypes: ["GuildInstall", "UserInstall"],
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class ListCommand extends SubCommand {
+export class SearchCommand extends SubCommand {
 	async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
+
+		const query = ctx.options.query.toLowerCase();
 
 		// We need to yield some time for fetching from the BYOD API
 		await ctx.deferReply();
@@ -105,21 +66,23 @@ export class ListCommand extends SubCommand {
 			return;
 		}
 
-		let hosts = (await response.json()) as Array<{
+		const all = (await response.json()) as Array<{
 			service: string;
 			hostname: string;
 		}>;
 
-		const serviceFilter = ctx.options.service;
-		if (serviceFilter) {
-			hosts = hosts.filter((host) => host.service === serviceFilter);
-		}
+		const hosts = all.filter((host) =>
+			host.hostname.toLowerCase().includes(query),
+		);
 
 		if (hosts.length === 0) {
+			const noResultsEmbed = new Embed()
+				.setTitle("No Results Found")
+				.setDescription(`No hosts found matching: \`${query}\``)
+				.setColor("#FF0000");
+
 			await ctx.editOrReply({
-				content: serviceFilter
-					? `No hosts found for service: ${serviceFilter}`
-					: "No hosts found",
+				embeds: [noResultsEmbed],
 			});
 			return;
 		}
@@ -134,9 +97,8 @@ export class ListCommand extends SubCommand {
 			const slicedHosts = hosts.slice(start, end);
 
 			const embed = new Embed()
-				.setTitle(
-					serviceFilter ? `BYOD Hosts - ${serviceFilter}` : "BYOD Hosts",
-				)
+				.setTitle("BYOD Hosts Search Results")
+				.setDescription(`Found ${hosts.length} host(s) matching: \`${query}\``)
 				.setColor("#5865F2") // blurple
 				.setFooter({ text: `Page ${page + 1} of ${totalPages}` });
 
@@ -152,13 +114,13 @@ export class ListCommand extends SubCommand {
 		};
 
 		const backBtn = new Button()
-			.setCustomId("byod:previous")
+			.setCustomId("byod:search:previous")
 			.setLabel("Previous")
 			.setStyle(ButtonStyle.Secondary)
 			.setDisabled(true);
 
 		const nextBtn = new Button()
-			.setCustomId("byod:next")
+			.setCustomId("byod:search:next")
 			.setLabel("Next")
 			.setStyle(ButtonStyle.Primary)
 			.setDisabled(totalPages <= 1);
@@ -172,7 +134,7 @@ export class ListCommand extends SubCommand {
 
 		const collector = message.createComponentCollector();
 
-		collector.run("byod:next", async (i) => {
+		collector.run("byod:search:next", async (i) => {
 			if (i.isButton()) {
 				currentPage++;
 
@@ -188,7 +150,7 @@ export class ListCommand extends SubCommand {
 			}
 		});
 
-		collector.run("byod:previous", async (i) => {
+		collector.run("byod:search:previous", async (i) => {
 			if (i.isButton()) {
 				currentPage--;
 

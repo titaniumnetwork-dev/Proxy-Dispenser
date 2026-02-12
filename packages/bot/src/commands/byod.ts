@@ -1,12 +1,13 @@
-import {Declare, Command, Options} from 'seyfert';
-import {ListCommand} from './byod/list';
-import {UnsetCommand} from './byod/unset';
+import { Command, Declare, Options } from "seyfert";
+import { ListCommand } from "./byod/list";
+import { SearchCommand } from "./byod/search";
+import { UnsetCommand } from "./byod/unset";
 
 @Declare({
-  name: 'byod',
-  description: 'Manage BYOD',
-  integrationTypes: ['GuildInstall', 'UserInstall'],
-  contexts: ['Guild', 'BotDM', 'PrivateChannel'],
+	name: "byod",
+	description: "Manage BYOD",
+	integrationTypes: ["GuildInstall", "UserInstall"],
+	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
-@Options([ListCommand, UnsetCommand])
-export default class BYODCommand extends Command {}
+@Options([ListCommand, UnsetCommand, SearchCommand])
+export default class BYODCommand extends Command { }
