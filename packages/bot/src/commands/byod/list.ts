@@ -9,7 +9,6 @@ import {
 	Declare,
 	Embed,
 	Options,
-	SubCommand,
 	type WebhookMessage,
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
@@ -18,6 +17,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@/utils/info-embeds";
+import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {
 	service: createStringOption({
@@ -30,7 +30,7 @@ const options = {
 					{
 						method: "GET",
 						headers: {
-							"x-api-key": process.env.API_KEY!,
+							"x-api-key": process.env.API_KEY || "your-api-key-here",
 							"Content-Type": "application/json",
 						},
 					},
@@ -74,8 +74,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class ListCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+export class ListCommand extends BYODSubCommand {
+	async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;

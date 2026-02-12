@@ -4,16 +4,16 @@
 
 import {
 	type CommandContext,
+	createStringOption,
 	Declare,
 	Options,
-	SubCommand,
-	createStringOption,
 } from "seyfert";
 import { t } from "try";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@/utils/info-embeds";
+import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {
 	host: createStringOption({
@@ -26,7 +26,7 @@ const options = {
 					{
 						method: "GET",
 						headers: {
-							"x-api-key": process.env.API_KEY!,
+							"x-api-key": process.env.API_KEY || "your-api-key-here",
 							"Content-Type": "application/json",
 						},
 					}
@@ -70,8 +70,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class UnsetCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+export class UnsetCommand extends BYODSubCommand {
+	async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;

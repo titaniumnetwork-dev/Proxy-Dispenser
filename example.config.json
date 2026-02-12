@@ -1,0 +1,7 @@
+{
+	"byod": {
+		"allowedUserIds": [],
+		"disallowedUserIds": [],
+		"allowedRoleIds": []
+	}
+}

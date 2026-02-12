@@ -9,7 +9,6 @@ import {
 	Declare,
 	Embed,
 	Options,
-	SubCommand,
 	type WebhookMessage,
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
@@ -18,6 +17,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@/utils/info-embeds";
+import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {
 	query: createStringOption({
@@ -33,8 +33,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class SearchCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+export class SearchCommand extends BYODSubCommand {
+	async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
