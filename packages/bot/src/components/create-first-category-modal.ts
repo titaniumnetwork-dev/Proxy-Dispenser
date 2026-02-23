@@ -5,12 +5,6 @@
  */
 
 import { db, schema } from "@dispenser/db";
-import {
-	createErrorEmbed,
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
-import { LinkAdder } from "@utils/link-adder";
 import { type Logger, ModalCommand, type ModalContext } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
@@ -18,7 +12,13 @@ import { DISCORD_ID_PARTS } from "@/consts";
 import {
 	createLinkResponse,
 	LinkResponseType,
-} from "@/utils/create-add-link-response";
+} from "@/utils/createAddLinkResponse";
+import {
+	createErrorEmbed,
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
+import { LinkAdder } from "@/utils/linkAdder";
 
 /**
  * Parts of the custom ID for the category select.
@@ -88,12 +88,10 @@ export default class CreateFirstCategoryModal extends ModalCommand {
 		const linkWord = links.length === 1 ? "link" : "links";
 
 		const [, categoryError] = await t(
-			Promise.resolve(
-				db.insert(schema.categories).values({
-					guildId: ctx.guildId,
-					categoryId,
-				}),
-			),
+			db.insert(schema.categories).values({
+				guildId: ctx.guildId,
+				categoryId,
+			}),
 		);
 		if (categoryError) {
 			ctx.client.logger.error(`Failed to create category: ${categoryError}`);

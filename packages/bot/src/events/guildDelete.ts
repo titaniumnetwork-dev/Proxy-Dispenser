@@ -1,6 +1,7 @@
 import { db, schema } from "@dispenser/db";
 import { eq } from "drizzle-orm";
 import { createEvent } from "seyfert";
+import { t } from "try";
 
 export default createEvent({
 	data: { name: "guildDelete" },
@@ -11,8 +12,15 @@ export default createEvent({
 
 		client.logger.info(`I was removed from: ${unguild.id}`);
 
-		await db.delete(schema.guild).where(eq(schema.guild.guildId, unguild.id));
-
-		client.logger.info(`Cleaned up data for former guild: ${unguild.id}`);
+		const [_, removeGuildError] = await t(
+			db.delete(schema.guild).where(eq(schema.guild.guildId, unguild.id)),
+		);
+		if (removeGuildError) {
+			client.logger.error(
+				`Failed to remove guild (${unguild.id}) from database: ${removeGuildError}`,
+			);
+			return;
+		}
+		client.logger.debug(`Removed guild (${unguild.id}) from database`);
 	},
 });

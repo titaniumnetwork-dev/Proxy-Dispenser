@@ -5,7 +5,7 @@ import {
 	createLinksLabel,
 	createSelectCustomID,
 } from "@/components/batch-add-form-links-modal";
-import { createUnexpectedErrorEmbed } from "@/utils/info-embeds";
+import { createUnexpectedErrorEmbed } from "@/utils/infoEmbeds";
 
 export default class AddFormCategorySelect extends ComponentCommand {
 	componentType = "StringSelect" as const;
@@ -17,7 +17,7 @@ export default class AddFormCategorySelect extends ComponentCommand {
 		);
 	}
 
-	override async run(ctx: ComponentContext<typeof this.componentType>) {
+	async run(ctx: ComponentContext<typeof this.componentType>) {
 		const categoryId = ctx.interaction.values[0] ?? "";
 		const parsedCustomId = BatchAddFormLinksModal.parseCustomId(
 			ctx.customId,

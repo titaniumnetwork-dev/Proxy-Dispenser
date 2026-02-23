@@ -6,7 +6,7 @@
  */
 
 import { type CommandContext, SubCommand } from "seyfert";
-import { createErrorEmbed } from "@/utils/info-embeds";
+import { createErrorEmbed } from "@/utils/infoEmbeds";
 import config from "../../../../config.json";
 
 export abstract class BYODSubCommand extends SubCommand {
@@ -20,7 +20,9 @@ export abstract class BYODSubCommand extends SubCommand {
 
 		if (disallowedUserIds.includes(userId)) {
 			await ctx.editOrReply({
-				embeds: [createErrorEmbed("You are not authorized to manage BYOD hosts.")],
+				embeds: [
+					createErrorEmbed("You are not authorized to manage BYOD hosts."),
+				],
 			});
 			return;
 		}
@@ -42,7 +44,9 @@ export abstract class BYODSubCommand extends SubCommand {
 		}
 
 		await ctx.editOrReply({
-			embeds: [createErrorEmbed("You are not authorized to manage BYOD hosts.")],
+			embeds: [
+				createErrorEmbed("You are not authorized to manage BYOD hosts."),
+			],
 		});
 	}
 

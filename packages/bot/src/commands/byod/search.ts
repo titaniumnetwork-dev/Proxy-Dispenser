@@ -16,7 +16,7 @@ import { t } from "try";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
-} from "@/utils/info-embeds";
+} from "@/utils/infoEmbeds";
 import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {

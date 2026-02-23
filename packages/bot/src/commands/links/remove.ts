@@ -4,25 +4,26 @@
 
 import { db, schema } from "@dispenser/db";
 import { categoryAutocomplete, linkAutocomplete } from "@utils/autocomplete";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
 import { and, eq } from "drizzle-orm";
 import {
 	type CommandContext,
+	createBooleanOption,
 	createStringOption,
 	Declare,
 	Options,
 	SubCommand,
 } from "seyfert";
-import { ButtonStyle } from "seyfert/lib/types";
+import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 import { IDLE_TIMEOUT } from "@/consts";
 import {
 	ButtonPaginator,
 	PaginatorButtonId,
-} from "@/utils/embed-button-paginator";
+} from "@/utils/embedButtonPaginator";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
 
 const options = {
 	link: createStringOption({
@@ -35,6 +36,10 @@ const options = {
 			"The category of the link. Use this if the link exists in multiple categories.",
 		required: false,
 		autocomplete: categoryAutocomplete,
+	}),
+	ephemeral: createBooleanOption({
+		description: "Whether to respond ephemerally",
+		required: false,
 	}),
 };
 
@@ -53,49 +58,51 @@ export default class RemoveCommand extends SubCommand {
 		}
 
 		// We need to yield some time for DB operations
-		await ctx.deferReply();
+		const ephemeral = ctx.options.ephemeral ?? false;
+		await ctx.deferReply(ephemeral);
+		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const guildId = ctx.guildId;
 		const link = ctx.options.link;
 		const category = ctx.options.category;
 
 		const [, error, matchingLinks] = await t(
-			Promise.resolve(
-				db.query.links.findMany({
-					where: (links, { eq, and }) =>
-						and(eq(links.guildId, guildId), eq(links.link, link)),
-				}),
-			),
+			db.query.links.findMany({
+				where: (links, { eq, and }) =>
+					and(eq(links.guildId, guildId), eq(links.link, link)),
+			}),
 		);
-
-		if (error || !matchingLinks) {
+		if (error) {
 			ctx.client.logger.error(`Failed to find link: ${error}`);
+		}
+		if (!matchingLinks) {
+			ctx.client.logger.error(`Links query returned an unexpected null result`);
+		}
+		if (error || !matchingLinks) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`finding link \`${link}\``)],
+				flags,
 			});
 			return;
 		}
 
 		if (matchingLinks.length === 0) {
-			await ctx.editOrReply({ content: `Link \`${link}\` not found` });
+			await ctx.editOrReply({ content: `Link \`${link}\` not found`, flags });
 			return;
 		}
 
 		if (category) {
 			const [, error] = await t(
-				Promise.resolve(
-					db
-						.delete(schema.links)
-						.where(
-							and(
-								eq(schema.links.guildId, ctx.guildId),
-								eq(schema.links.link, link),
-								eq(schema.links.categoryId, category),
-							),
+				db
+					.delete(schema.links)
+					.where(
+						and(
+							eq(schema.links.guildId, ctx.guildId),
+							eq(schema.links.link, link),
+							eq(schema.links.categoryId, category),
 						),
-				),
+					),
 			);
-
 			if (error) {
 				ctx.client.logger.error(`Failed to remove link: ${error}`);
 				await ctx.editOrReply({
@@ -110,6 +117,7 @@ export default class RemoveCommand extends SubCommand {
 
 			await ctx.editOrReply({
 				content: `Removed link \`${link}\` from category **${category}**`,
+				flags,
 			});
 			return;
 		}
@@ -117,35 +125,38 @@ export default class RemoveCommand extends SubCommand {
 		if (matchingLinks.length === 1) {
 			const firstLink = matchingLinks[0];
 			if (!firstLink) {
+				ctx.client.logger.error(
+					`Link entry is unexpectedly null after matching`,
+				);
 				await ctx.editOrReply({
 					embeds: [
 						createUnexpectedErrorEmbed(
 							`removing link \`${link}\` from category **${category}**`,
 						),
 					],
+					flags,
 				});
 				return;
 			}
 			const [, error] = await t(
-				Promise.resolve(
-					db.delete(schema.links).where(eq(schema.links.id, firstLink.id)),
-				),
+				db.delete(schema.links).where(eq(schema.links.id, firstLink.id)),
 			);
-
 			if (error) {
 				ctx.client.logger.error(`Failed to remove link: ${error}`);
 				await ctx.editOrReply({
 					embeds: [
 						createUnexpectedErrorEmbed(
-							`removing link \`${link}\` from category **${firstLink.categoryId}**`,
+							`removing link \`${link}\` from category **${category}**`,
 						),
 					],
+					flags,
 				});
 				return;
 			}
 
 			await ctx.editOrReply({
 				content: `Removed link \`${link}\` from category **${firstLink.categoryId}**`,
+				flags,
 			});
 			return;
 		}
@@ -164,6 +175,7 @@ export default class RemoveCommand extends SubCommand {
 			{
 				content: `Link \`${link}\` exists in ${matchingLinks.length} categories\n\nWhich one do you want to remove?`,
 				components: paginator.getPage(currentPage),
+				flags,
 			},
 			true,
 		);
@@ -220,11 +232,8 @@ export default class RemoveCommand extends SubCommand {
 		for (const match of matchingLinks) {
 			collector.run(`remove-link:${match.id}`, async (interaction) => {
 				const [, error] = await t(
-					Promise.resolve(
-						db.delete(schema.links).where(eq(schema.links.id, match.id)),
-					),
+					db.delete(schema.links).where(eq(schema.links.id, match.id)),
 				);
-
 				if (error) {
 					ctx.client.logger.error(`Failed to remove link: ${error}`);
 					await interaction.update({
@@ -235,7 +244,7 @@ export default class RemoveCommand extends SubCommand {
 				}
 
 				await interaction.update({
-					content: `Removed link \`${link}\` from category **${match.categoryId}**.`,
+					content: `Removed link \`${link}\` from category **${match.categoryId}**`,
 					components: [],
 				});
 			});

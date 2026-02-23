@@ -3,12 +3,12 @@
  * @module utils/link-response-builder
  */
 
-import type { LinkAdderResult } from "@utils/link-adder";
+import type { LinkAdderResult } from "@/utils/linkAdder";
 import {
 	calculateTemplateSpace,
 	LIST_PLACEHOLDER,
 	truncateList,
-} from "@utils/message-templating";
+} from "@/utils/messageTemplating";
 
 export interface LinkResponseOptions {
 	/**

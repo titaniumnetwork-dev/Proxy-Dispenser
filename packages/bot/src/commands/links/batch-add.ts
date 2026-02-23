@@ -6,10 +6,6 @@
 import { db } from "@dispenser/db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
-import {
 	ActionRow,
 	type CommandContext,
 	createBooleanOption,
@@ -31,6 +27,10 @@ import {
 	createSelectCustomID,
 } from "@/components/batch-add-form-links-modal";
 import { DISCORD_ID_PARTS } from "@/consts";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
 
 const options = {
 	category: createStringOption({
@@ -72,16 +72,20 @@ export default class AddFormCommand extends SubCommand {
 		}
 
 		const [, error, categories] = await t(
-			Promise.resolve(
-				db.query.categories.findMany({
-					where: (categories, { eq }) => eq(categories.guildId, guildId),
-					columns: { categoryId: true },
-				}),
-			),
+			db.query.categories.findMany({
+				where: (categories, { eq }) => eq(categories.guildId, guildId),
+				columns: { categoryId: true },
+			}),
 		);
-
-		if (error || !categories) {
+		if (error) {
 			ctx.client.logger.error(`Failed to fetch categories: ${error}`);
+		}
+		if (!categories) {
+			ctx.client.logger.error(
+				`Categories query returned an unexpected null result`,
+			);
+		}
+		if (error || !categories) {
 			await ctx.write({
 				embeds: [createUnexpectedErrorEmbed("fetching categories")],
 				flags,

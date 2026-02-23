@@ -1,22 +1,26 @@
 /**
  * @fileoverview A slash command to list all BYOD hosts.
  */
+
 import {
 	ActionRow,
+	AttachmentBuilder,
 	Button,
 	type CommandContext,
+	createBooleanOption,
 	createStringOption,
 	Declare,
 	Embed,
 	Options,
 	type WebhookMessage,
 } from "seyfert";
-import { ButtonStyle } from "seyfert/lib/types";
+import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
+import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@/consts";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
-} from "@/utils/info-embeds";
+} from "@/utils/infoEmbeds";
 import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {
@@ -65,6 +69,18 @@ const options = {
 			}
 		},
 	}),
+	format: createStringOption({
+		description: "Optionally, display the list as a JSON export",
+		required: false,
+		choices: [
+			{ name: "JSON Embed", value: "JSON_EMBED" },
+			{ name: "JSON Dump", value: "JSON_DUMP" },
+		],
+	}),
+	ephemeral: createBooleanOption({
+		description: "Whether to respond ephemerally",
+		required: false,
+	}),
 };
 
 @Declare({
@@ -82,7 +98,9 @@ export class ListCommand extends BYODSubCommand {
 		}
 
 		// We need to yield some time for fetching from the BYOD API
-		await ctx.deferReply();
+		const ephemeral = ctx.options.ephemeral ?? false;
+		await ctx.deferReply(ephemeral);
+		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const [, error, response] = await t(
 			fetch(
@@ -96,11 +114,16 @@ export class ListCommand extends BYODSubCommand {
 				},
 			),
 		);
-
-		if (error || !response) {
+		if (error) {
 			ctx.client.logger.error(`Failed to fetch hosts: ${error}`);
+		}
+		if (!response) {
+			ctx.client.logger.error(`Hosts API returned a null response`);
+		}
+		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching hosts")],
+				flags,
 			});
 			return;
 		}
@@ -120,35 +143,82 @@ export class ListCommand extends BYODSubCommand {
 				content: serviceFilter
 					? `No hosts found for service: ${serviceFilter}`
 					: "No hosts found",
+				flags,
 			});
 			return;
+		}
+
+		const format = ctx.options.format;
+		const data = JSON.stringify(hosts, null, 2);
+
+		const byodBaseEmbed = new Embed()
+			.setTitle(serviceFilter ? `BYOD Hosts - ${serviceFilter}` : "BYOD Hosts")
+			.setColor("#5865F2"); // blurple
+
+		const byodHostsJsonFileAttachment = new AttachmentBuilder()
+			.setName("byod-hosts.json")
+			.setFile("buffer", Buffer.from(data));
+
+		switch (format) {
+			case "JSON_DUMP": {
+				const jsonDumpEmbed = byodBaseEmbed.setDescription(
+					"Attached the JSON export of BYOD hosts as a file",
+				);
+
+				await ctx.editOrReply({
+					files: [byodHostsJsonFileAttachment],
+					embeds: [jsonDumpEmbed],
+					flags,
+				});
+				return;
+			}
+			case "JSON_EMBED": {
+				const codeBlock = `\`\`\`json\n${data}\n\`\`\``;
+
+				if (codeBlock.length > DISCORD_EMBED_DESCRIPTION_LIMIT) {
+					const jsonCodeBlockEmbed = byodBaseEmbed.setDescription(
+						"The output is too large for a codeblock\nAttached the JSON export of BYOD hosts as a file",
+					);
+
+					await ctx.editOrReply({
+						embeds: [jsonCodeBlockEmbed],
+						files: [byodHostsJsonFileAttachment],
+						flags,
+					});
+				} else {
+					const jsonCodeBlockEmbed = byodBaseEmbed.setDescription(codeBlock);
+
+					await ctx.editOrReply({
+						embeds: [jsonCodeBlockEmbed],
+						flags,
+					});
+				}
+				return;
+			}
 		}
 
 		const items = 10;
 		const totalPages = Math.ceil(hosts.length / items);
 		let currentPage = 0;
 
-		const embed = (page: number) => {
+		const createEmbed = (page: number) => {
 			const start = page * items;
 			const end = start + items;
 			const slicedHosts = hosts.slice(start, end);
 
-			const embed = new Embed()
-				.setTitle(
-					serviceFilter ? `BYOD Hosts - ${serviceFilter}` : "BYOD Hosts",
-				)
-				.setColor("#5865F2") // blurple
-				.setFooter({ text: `Page ${page + 1} of ${totalPages}` });
+			const pageEmbed = byodBaseEmbed.setFooter({
+				text: `Page ${page + 1} of ${totalPages}`,
+			});
 
 			slicedHosts.forEach((host) => {
-				embed.addFields({
+				pageEmbed.addFields({
 					name: host.service,
 					value: `<https://${host.hostname}>`,
 					inline: false,
 				});
 			});
 
-			return embed;
+			return pageEmbed;
 		};
 
 		const backBtn = new Button()
@@ -166,8 +236,9 @@ export class ListCommand extends BYODSubCommand {
 		const row = new ActionRow<Button>().setComponents([backBtn, nextBtn]);
 
 		const message = (await ctx.editOrReply({
-			embeds: [embed(currentPage)],
+			embeds: [createEmbed(currentPage)],
 			components: [row],
+			flags,
 		})) as WebhookMessage;
 
 		const collector = message.createComponentCollector();
@@ -180,7 +251,7 @@ export class ListCommand extends BYODSubCommand {
 				nextBtn.setDisabled(currentPage === totalPages - 1);
 
 				return i.update({
-					embeds: [embed(currentPage)],
+					embeds: [createEmbed(currentPage)],
 					components: [
 						new ActionRow<Button>().setComponents([backBtn, nextBtn]),
 					],
@@ -196,7 +267,7 @@ export class ListCommand extends BYODSubCommand {
 				nextBtn.setDisabled(currentPage === totalPages - 1);
 
 				return i.update({
-					embeds: [embed(currentPage)],
+					embeds: [createEmbed(currentPage)],
 					components: [
 						new ActionRow<Button>().setComponents([backBtn, nextBtn]),
 					],

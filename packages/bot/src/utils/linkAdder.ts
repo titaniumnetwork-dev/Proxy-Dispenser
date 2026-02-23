@@ -164,18 +164,15 @@ export class LinkAdder {
 		}
 
 		const [, categoryError, categoryResult] = await t(
-			Promise.resolve(
-				db
-					.insert(schema.categories)
-					.values({
-						guildId: this.guildId,
-						categoryId: this.categoryId,
-					})
-					.onConflictDoNothing()
-					.returning({ categoryId: schema.categories.categoryId }),
-			),
+			db
+				.insert(schema.categories)
+				.values({
+					guildId: this.guildId,
+					categoryId: this.categoryId,
+				})
+				.onConflictDoNothing()
+				.returning({ categoryId: schema.categories.categoryId }),
 		);
-
 		if (categoryError) {
 			this.logger.error(
 				`Failed to ensure category ${this.categoryId} exists: ${categoryError}`,
@@ -193,19 +190,16 @@ export class LinkAdder {
 		const newCategory = (categoryResult?.length ?? 0) > 0;
 
 		const [, existingLinkError, existingLinks] = await t(
-			Promise.resolve(
-				db.query.links.findMany({
-					where: (links, { eq, and, inArray }) =>
-						and(
-							eq(links.guildId, this.guildId),
-							eq(links.categoryId, this.categoryId),
-							inArray(links.link, validLinks),
-						),
-					columns: { link: true },
-				}),
-			),
+			db.query.links.findMany({
+				where: (links, { eq, and, inArray }) =>
+					and(
+						eq(links.guildId, this.guildId),
+						eq(links.categoryId, this.categoryId),
+						inArray(links.link, validLinks),
+					),
+				columns: { link: true },
+			}),
 		);
-
 		if (existingLinkError) {
 			this.logger.error(
 				`Failed to check for existing links: ${existingLinkError}`,
@@ -243,17 +237,14 @@ export class LinkAdder {
 		}
 
 		const [, insertError] = await t(
-			Promise.resolve(
-				db.insert(schema.links).values(
-					newLinks.map((link) => ({
-						guildId: this.guildId,
-						categoryId: this.categoryId,
-						link,
-					})),
-				),
+			db.insert(schema.links).values(
+				newLinks.map((link) => ({
+					guildId: this.guildId,
+					categoryId: this.categoryId,
+					link,
+				})),
 			),
 		);
-
 		if (insertError) {
 			this.logger.error(
 				`Failed to add links to category ${this.categoryId}: ${insertError}`,

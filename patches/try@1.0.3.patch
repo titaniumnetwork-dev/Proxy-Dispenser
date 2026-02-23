@@ -1,0 +1,30 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 7c4e74fd1c6e0f2e710e7e2f06b23e0a7e6a8c3b..a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -42,7 +42,7 @@
+ 	static try(result, ...args) {
+ 		try {
+ 			if (typeof result === "function") result = result.apply(void 0, args);
+-			if (result instanceof Promise) return result.then(Result.ok, Result.error);
++			if (result != null && typeof result.then === "function") return Promise.resolve(result).then(Result.ok, Result.error);
+ 			return Result.ok(result);
+ 		} catch (error$1) {
+ 			return Result.error(error$1);
+diff --git a/lib/index.js b/lib/index.js
+index 33a6e0c80c9af12c98d7447055592ba7e1b7b191..cf47208b1ce4ace9c1c664be3882e64229a6c59b 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -58,9 +58,9 @@ export class Result {
+         result = result.apply(undefined, args);
+       }
+ 
+-      // Promises must return a valid Promise<Result<T>>
+-      if (result instanceof Promise) {
+-        return result.then(Result.ok, Result.error);
++      // Promises and thenables must return a valid Promise<Result<T>>
++      if (result != null && typeof result.then === 'function') {
++        return Promise.resolve(result).then(Result.ok, Result.error);
+       }
+ 
+       // If the result is not a function or a Promise, we can be sure its a success

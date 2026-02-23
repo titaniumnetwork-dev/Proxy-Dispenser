@@ -5,9 +5,9 @@ import { UnsetCommand } from "./byod/unset";
 
 @Declare({
 	name: "byod",
-	description: "Manage BYOD",
+	description: "Manage BYOD (link admins only)",
 	integrationTypes: ["GuildInstall", "UserInstall"],
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options([ListCommand, UnsetCommand, SearchCommand])
-export default class BYODCommand extends Command { }
+export default class BYODCommand extends Command {}

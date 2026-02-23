@@ -1,10 +1,5 @@
 import { db, schema } from "@dispenser/db";
 import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
-import { LinkAdder } from "@utils/link-adder";
-import {
 	Label,
 	type Logger,
 	ModalCommand,
@@ -17,7 +12,12 @@ import { DISCORD_ID_PARTS } from "@/consts";
 import {
 	createLinkResponse,
 	LinkResponseType,
-} from "@/utils/create-add-link-response";
+} from "@/utils/createAddLinkResponse";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
+import { LinkAdder } from "@/utils/linkAdder";
 
 /**
  * Parts of the custom ID for the category select.
@@ -104,7 +104,7 @@ export default class AddLinksModal extends ModalCommand {
 		);
 	}
 
-	override async run(ctx: ModalContext) {
+	async run(ctx: ModalContext) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
@@ -146,14 +146,11 @@ export default class AddLinksModal extends ModalCommand {
 			}
 
 			const [, categoryError] = await t(
-				Promise.resolve(
-					db.insert(schema.categories).values({
-						guildId: ctx.guildId,
-						categoryId: categoryName,
-					}),
-				),
+				db.insert(schema.categories).values({
+					guildId: ctx.guildId,
+					categoryId: categoryName,
+				}),
 			);
-
 			if (categoryError) {
 				ctx.client.logger.error(`Failed to create category: ${categoryError}`);
 				return ctx.editOrReply({

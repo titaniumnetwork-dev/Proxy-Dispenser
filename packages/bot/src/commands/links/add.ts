@@ -1,13 +1,7 @@
 /**
  * @fileoverview A slash subcommand to add a link to a guild.
- * @module commands/links/add
  */
 import { categoryAutocomplete } from "@utils/autocomplete";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
-import { LinkAdder } from "@utils/link-adder";
 import {
 	type CommandContext,
 	createBooleanOption,
@@ -20,7 +14,12 @@ import { MessageFlags } from "seyfert/lib/types";
 import {
 	createLinkResponse,
 	LinkResponseType,
-} from "@/utils/create-add-link-response";
+} from "@/utils/createAddLinkResponse";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
+import { LinkAdder } from "@/utils/linkAdder";
 
 const options = {
 	link: createStringOption({

@@ -32,5 +32,8 @@
 	"dependencies": {
 		"@typescript/native-preview": "^7.0.0-dev.20260207.1",
 		"drizzle-kit": "^0.31.8"
+	},
+	"patchedDependencies": {
+		"try@1.0.3": "patches/try@1.0.3.patch"
 	}
 }

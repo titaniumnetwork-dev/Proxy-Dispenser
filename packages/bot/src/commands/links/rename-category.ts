@@ -3,10 +3,6 @@
  */
 import { db, schema } from "@dispenser/db";
 import { categoryAutocomplete } from "@utils/autocomplete";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
 import { and, eq } from "drizzle-orm";
 import {
 	type CommandContext,
@@ -18,6 +14,10 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
 
 const options = {
 	category: createStringOption({
@@ -30,7 +30,7 @@ const options = {
 		required: true,
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether the response should be ephemeral",
+		description: "Whether to respond ephemerally",
 		required: false,
 	}),
 };
@@ -50,28 +50,26 @@ export default class RenameCategoryCommand extends SubCommand {
 			return;
 		}
 
-		const ephemeral = ctx.options.ephemeral ?? true;
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		const ephemeral = ctx.options.ephemeral ?? false;
 		// We need to yield some time for DB operations
 		await ctx.deferReply(ephemeral);
+		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const [, error] = await t(
-			Promise.resolve(
-				db
-					.update(schema.categories)
-					.set({
-						categoryId: ctx.options["new-category"],
-					})
-					.where(
-						and(
-							eq(schema.categories.guildId, ctx.guildId),
-							eq(schema.categories.categoryId, ctx.options.category),
-						),
+			db
+				.update(schema.categories)
+				.set({
+					categoryId: ctx.options["new-category"],
+				})
+				.where(
+					and(
+						eq(schema.categories.guildId, ctx.guildId),
+						eq(schema.categories.categoryId, ctx.options.category),
 					),
-			),
+				),
 		);
-
 		if (error) {
+			ctx.client.logger.error(`Failed to rename category: ${error}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
@@ -80,7 +78,6 @@ export default class RenameCategoryCommand extends SubCommand {
 				],
 				flags,
 			});
-			ctx.client.logger.error(`Failed to rename category: ${error}`);
 			return;
 		}
 

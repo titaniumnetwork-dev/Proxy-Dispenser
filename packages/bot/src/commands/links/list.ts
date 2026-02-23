@@ -4,10 +4,6 @@
 
 import { db, schema } from "@dispenser/db";
 import { categoryAutocomplete } from "@utils/autocomplete";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@utils/info-embeds";
 import { sql } from "drizzle-orm";
 import {
 	AttachmentBuilder,
@@ -20,7 +16,11 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { LinkListPaginator } from "@/utils/link-list-paginator";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@/utils/infoEmbeds";
+import { LinkListPaginator } from "@/utils/linkListPaginator";
 
 const options = {
 	category: createStringOption({
@@ -60,26 +60,27 @@ export default class ListCommand extends SubCommand {
 		const ephemeral = ctx.options.ephemeral ?? true;
 		// We need to yield some time for DB operations
 		await ctx.deferReply(ephemeral);
-
 		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const guildId = ctx.guildId;
 		const [, error, links] = await t(
-			Promise.resolve(
-				db.query.links.findMany({
-					where: (links, { eq, and }) =>
-						ctx.options.category
-							? and(
-									eq(links.guildId, guildId),
-									eq(links.categoryId, ctx.options.category),
-								)
-							: eq(links.guildId, guildId),
-				}),
-			),
+			db.query.links.findMany({
+				where: (links, { eq, and }) =>
+					ctx.options.category
+						? and(
+								eq(links.guildId, guildId),
+								eq(links.categoryId, ctx.options.category),
+							)
+						: eq(links.guildId, guildId),
+			}),
 		);
-
-		if (error || !links) {
+		if (error) {
 			ctx.client.logger.error(`Failed to list links: ${error}`);
+		}
+		if (!links) {
+			ctx.client.logger.error(`Links query returned an unexpected null result`);
+		}
+		if (error || !links) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("listing links")],
 				flags,
@@ -121,27 +122,24 @@ export default class ListCommand extends SubCommand {
 		if (links.length !== 0) {
 			if (ctx.options["display-user-stats"]) {
 				const [, statsError, stats] = await t(
-					Promise.resolve(
-						db
-							.select({
-								link: schema.links.link,
-								userCount: sql<number>`(
-								SELECT COUNT(DISTINCT ${schema.users.userId})
-								FROM ${schema.users}, json_each(${schema.users.receivedLinks})
-								WHERE ${schema.users.guildId} = ${schema.links.guildId}
+					db
+						.select({
+							link: schema.links.link,
+							userCount: sql<number>`(
+								SELECT COUNT(DISTINCT ${schema.guildUsers.userId})
+								FROM ${schema.guildUsers}, json_each(${schema.guildUsers.receivedLinks})
+								WHERE ${schema.guildUsers.guildId} = ${schema.links.guildId}
 								AND json_each.value = ${schema.links.link}
 							)`.as("user_count"),
-							})
-							.from(schema.links)
-							.where(
-								ctx.options.category
-									? sql`${schema.links.guildId} = ${guildId} AND ${schema.links.categoryId} = ${ctx.options.category}`
-									: sql`${schema.links.guildId} = ${guildId}`,
-							)
-							.groupBy(schema.links.link),
-					),
+						})
+						.from(schema.links)
+						.where(
+							ctx.options.category
+								? sql`${schema.links.guildId} = ${guildId} AND ${schema.links.categoryId} = ${ctx.options.category}`
+								: sql`${schema.links.guildId} = ${guildId}`,
+						)
+						.groupBy(schema.links.link),
 				);
-
 				if (!statsError && stats) {
 					linkUserCounts = new Map(stats.map((s) => [s.link, s.userCount]));
 				}

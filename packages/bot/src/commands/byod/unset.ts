@@ -4,15 +4,17 @@
 
 import {
 	type CommandContext,
+	createBooleanOption,
 	createStringOption,
 	Declare,
 	Options,
 } from "seyfert";
+import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
-} from "@/utils/info-embeds";
+} from "@/utils/infoEmbeds";
 import { BYODSubCommand } from "../../utils/byod-auth";
 
 const options = {
@@ -29,7 +31,7 @@ const options = {
 							"x-api-key": process.env.API_KEY || "your-api-key-here",
 							"Content-Type": "application/json",
 						},
-					}
+					},
 				);
 
 				if (!response.ok) {
@@ -61,6 +63,10 @@ const options = {
 			}
 		},
 	}),
+	ephemeral: createBooleanOption({
+		description: "Whether to respond ephemerally",
+		required: false,
+	}),
 };
 
 @Declare({
@@ -78,7 +84,9 @@ export class UnsetCommand extends BYODSubCommand {
 		}
 
 		// We need to yield some time for fetching from the BYOD API
-		await ctx.deferReply();
+		const ephemeral = ctx.options.ephemeral ?? false;
+		await ctx.deferReply(ephemeral);
+		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const host = ctx.options.host;
 
@@ -94,17 +102,23 @@ export class UnsetCommand extends BYODSubCommand {
 				},
 			),
 		);
-
-		if (error || !response) {
+		if (error) {
 			ctx.client.logger.error(`Failed to unset BYOD host: ${error}`);
+		}
+		if (!response) {
+			ctx.client.logger.error(`BYOD host API returned a null response`);
+		}
+		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("unset BYOD host")],
+				flags,
 			});
 			return;
 		}
 
 		await ctx.editOrReply({
 			content: `Unset BYOD host: ${host}`,
+			flags,
 		});
 	}
 }
