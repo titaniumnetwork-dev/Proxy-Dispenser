@@ -1,13 +1,34 @@
 {
 	"compilerOptions": {
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 		"lib": ["ESNext"],
 		"target": "ESNext",
 		"module": "Preserve",
 		"moduleDetection": "force",
+		"jsx": "react-jsx",
+		"allowJs": true,
 		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noEmit": true,
 		"strict": true,
-		"skipLibCheck": true
+		"types": ["node", "bun"],
+		"skipLibCheck": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+
+		"paths": {
+			"@/*": ["./src/*"],
+			"@utils/*": ["./src/utils/*"]
+		}
 	},
-	"files": [],
-	"references": [{ "path": "./packages/bot" }, { "path": "./packages/db" }]
+	"include": [
+		"src/**/*.ts",
+		"types.d.ts",
+		"seyfert.config.ts",
+		"drizzle.config.ts"
+	],
+	"exclude": ["node_modules", "dist", "drizzle"]
 }

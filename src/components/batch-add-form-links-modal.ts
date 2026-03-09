@@ -1,4 +1,3 @@
-import { db, schema } from "@dispenser/db";
 import {
 	Label,
 	type Logger,
@@ -9,6 +8,7 @@ import {
 import { MessageFlags, TextInputStyle } from "seyfert/lib/types";
 import { t } from "try";
 import { DISCORD_ID_PARTS } from "@/consts";
+import { db, schema } from "@/db";
 import {
 	createLinkResponse,
 	LinkResponseType,

@@ -3,11 +3,11 @@
  * @module utils/autocomplete
  */
 
-import { db, schema } from "@dispenser/db";
 import { and, desc, eq, like, sql } from "drizzle-orm";
 import type { AutocompleteInteraction } from "seyfert";
 import { t } from "try";
 import { DISCORD_MAX_CHOICES } from "@/consts";
+import { db, schema } from "@/db";
 
 /**
  * Autocomplete handler for categories.
@@ -106,9 +106,9 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 				.select({
 					link: schema.links.link,
 					popularity: sql<number>`(
-						SELECT COUNT(DISTINCT ${schema.users.userId})
-						FROM ${schema.users}, json_each(${schema.users.receivedLinks})
-						WHERE ${schema.users.guildId} = ${schema.links.guildId}
+						SELECT COUNT(DISTINCT ${schema.guildUsers.userId})
+						FROM ${schema.guildUsers}, json_each(${schema.guildUsers.receivedLinks})
+						WHERE ${schema.guildUsers.guildId} = ${schema.links.guildId}
 						AND json_each.value = ${schema.links.link}
 					)`.as("popularity"),
 				})
@@ -118,9 +118,9 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 				.orderBy(
 					desc(
 						sql`(
-							SELECT COUNT(DISTINCT ${schema.users.userId})
-							FROM ${schema.users}, json_each(${schema.users.receivedLinks})
-							WHERE ${schema.users.guildId} = ${schema.links.guildId}
+							SELECT COUNT(DISTINCT ${schema.guildUsers.userId})
+							FROM ${schema.guildUsers}, json_each(${schema.guildUsers.receivedLinks})
+							WHERE ${schema.guildUsers.guildId} = ${schema.links.guildId}
 							AND json_each.value = ${schema.links.link}
 						)`,
 					),

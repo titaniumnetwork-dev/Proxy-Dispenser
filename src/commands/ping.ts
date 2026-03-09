@@ -12,7 +12,7 @@ import { Command, type CommandContext, Declare } from "seyfert";
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 export default class PingCommand extends Command {
-	async run(ctx: CommandContext) {
+	override async run(ctx: CommandContext) {
 		const ping = ctx.client.gateway.latency;
 		await ctx.write({
 			content: `Pong!\n\nLatency: \`${ping}ms\``,

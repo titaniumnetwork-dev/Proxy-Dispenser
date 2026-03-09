@@ -2,7 +2,6 @@
  * @fileoverview A slash subcommand to remove a link from a guild.
  */
 
-import { db, schema } from "@dispenser/db";
 import { categoryAutocomplete, linkAutocomplete } from "@utils/autocomplete";
 import { and, eq } from "drizzle-orm";
 import {
@@ -16,6 +15,7 @@ import {
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 import { IDLE_TIMEOUT } from "@/consts";
+import { db, schema } from "@/db";
 import {
 	ButtonPaginator,
 	PaginatorButtonId,

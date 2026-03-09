@@ -3,7 +3,6 @@
  * @module commands/links/batch-add
  */
 
-import { db } from "@dispenser/db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import {
 	ActionRow,
@@ -27,6 +26,7 @@ import {
 	createSelectCustomID,
 } from "@/components/batch-add-form-links-modal";
 import { DISCORD_ID_PARTS } from "@/consts";
+import { db } from "@/db";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,

@@ -1,4 +1,4 @@
-import type { ParseClient, Client, HttpClient, WorkerClient } from "seyfert";
+import type { Client, HttpClient, ParseClient, WorkerClient } from "seyfert";
 
 declare module "seyfert" {
 	interface UsingClient extends ParseClient<Client<true>> {}

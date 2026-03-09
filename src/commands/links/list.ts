@@ -2,7 +2,6 @@
  * @fileoverview A slash subcommand to list links in a guild
  */
 
-import { db, schema } from "@dispenser/db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import { sql } from "drizzle-orm";
 import {
@@ -16,6 +15,7 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
+import { db, schema } from "@/db";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,

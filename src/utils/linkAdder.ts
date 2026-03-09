@@ -3,9 +3,9 @@
  * @module utils/link-adder
  */
 
-import { db, schema } from "@dispenser/db";
 import type { Logger } from "seyfert";
 import { t } from "try";
+import { db, schema } from "@/db";
 
 export interface LinkAdderResult {
 	/**

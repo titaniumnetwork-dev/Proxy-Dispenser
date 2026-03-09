@@ -1,9 +1,7 @@
 {
 	"recommendations": [
-		"rvest.vs-code-prettier-eslint",
+		"biomejs.biome",
 		"oven.bun-vscode",
-		"yoavbls.pretty-ts-errors",
-		"christian-kohler.path-intellisense",
-		"idered.npm"
+		"yoavbls.pretty-ts-errors"
 	]
 }

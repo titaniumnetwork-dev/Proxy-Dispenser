@@ -2,10 +2,8 @@ FROM oven/bun:alpine
 
 WORKDIR /app
 
-RUN apk add build-base curl wget
-
-COPY package.json /app/package.json
-COPY bun.lock /app/bun.lock
+COPY package.json bun.lock ./
+COPY patches ./patches
 
 RUN bun install
 

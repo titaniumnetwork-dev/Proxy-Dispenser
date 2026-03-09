@@ -1,6 +1,6 @@
-import { db, schema } from "@dispenser/db";
 import { createEvent, Embed } from "seyfert";
 import { t } from "try";
+import { db, schema } from "@/db";
 
 export default createEvent({
 	data: { name: "guildCreate" },

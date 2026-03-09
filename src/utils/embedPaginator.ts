@@ -5,7 +5,7 @@
 
 import { ActionRow, Button, type CommandContext, type Embed } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
-import { IDLE_TIMEOUT } from "@/consts.ts";
+import { IDLE_TIMEOUT } from "@/consts";
 
 /**
  * Button custom IDs for the paginator.

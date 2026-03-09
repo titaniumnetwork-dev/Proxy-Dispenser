@@ -30,11 +30,11 @@ const options = {
 		autocomplete: async (interaction) => {
 			try {
 				const response = await fetch(
-					`http://${process.env.API_IP}:${process.env.API_PORT || 3000}/hosts`,
+					`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts`,
 					{
 						method: "GET",
 						headers: {
-							"x-api-key": process.env.API_KEY || "your-api-key-here",
+							"x-api-key": process.env.BYOD_API_KEY || "your-api-key-here",
 							"Content-Type": "application/json",
 						},
 					},
@@ -104,11 +104,11 @@ export class ListCommand extends BYODSubCommand {
 
 		const [, error, response] = await t(
 			fetch(
-				`http://${process.env.API_IP}:${process.env.API_PORT || 3000}/hosts`,
+				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts`,
 				{
 					method: "GET",
 					headers: {
-						"x-api-key": process.env.API_KEY || "your-api-key-here",
+						"x-api-key": process.env.BYOD_API_KEY || "your-api-key-here",
 						"Content-Type": "application/json",
 					},
 				},

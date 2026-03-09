@@ -1,7 +1,7 @@
 /**
  * @fileoverview A slash subcommand to rename a category in a guild.
  */
-import { db, schema } from "@dispenser/db";
+
 import { categoryAutocomplete } from "@utils/autocomplete";
 import { and, eq } from "drizzle-orm";
 import {
@@ -14,6 +14,7 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
+import { db, schema } from "@/db";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
