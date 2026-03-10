@@ -50,11 +50,11 @@ export const guild = sqliteTable("guild", {
 	logChannelBlockedLinkReports: snowflake("log_channel_blocked_link_reports"),
 	logChannelCohortApprovals: snowflake("log_channel_cohort_approvals"),
 	monthlyCycle: text("monthly_cycle", {
-		enum: ["first_of_month", "relative_to_user"],
+		enum: ["first", "relative"],
 	})
 		.notNull()
-		.default("relative_to_user"),
-	isBanned: integer("is_banned").notNull().default(0),
+		.default("first"),
+	isBlacklisted: integer("is_blacklisted").notNull().default(0),
 	customByodHost: text("custom_byod_host"),
 	customByodHostAPIKey: text("custom_byod_host_api_key"),
 	dispenseMode: text("dispense_mode", {
@@ -66,6 +66,10 @@ export const guild = sqliteTable("guild", {
 	// It will check daily, but there will be a "Report Blocked" button when DMing or responding to the user's command/panel
 	// This report blocked button will trigger for everyone in the cohort to have their links checked, and if it is blocked, give the user a new one
 	automaticDispense: integer("automatic_dispense").notNull().default(0),
+	/** Docs URL shown by the /docs command. */
+	docsUrl: text("docs_url"),
+	/** Channel where reports about broken links are sent. */
+	reportsChannelId: snowflake("reports_channel_id"),
 });
 
 export const guildCohorts = sqliteTable("guild_cohorts", {
@@ -88,13 +92,13 @@ export const guildConfigHistory = sqliteTable(
 			.notNull()
 			.default(sql`(unixepoch() * 1000)`),
 	},
-	(t) => [
-		foreignKey({
+	(t) => ({
+		configHistoryGuildFk: foreignKey({
 			columns: [t.guildId],
 			foreignColumns: [guild.guildId],
 			name: "config_history_guild_fk",
 		}).onDelete("cascade"),
-	],
+	}),
 );
 
 export const guildUsers = sqliteTable(
@@ -113,7 +117,7 @@ export const guildUsers = sqliteTable(
 		firstTimeUserCycleTimestamp: integer("first_time_user_cycle_timestamp", {
 			mode: "timestamp_ms",
 		}),
-		isBanned: integer("is_banned").notNull().default(0),
+		isBlacklisted: integer("is_blacklisted").notNull().default(0),
 	},
 	(t) => [
 		primaryKey({ columns: [t.guildId, t.userId] }),
@@ -136,7 +140,7 @@ export const globalUsers = sqliteTable("global_users", {
 	userId: snowflake("user_id").notNull().primaryKey(),
 	// For known link leakers
 	// TODO: Will be implemented later during bot-owner commands
-	isBanned: integer("is_banned").notNull().default(0),
+	isBlacklisted: integer("is_blacklisted").notNull().default(0),
 	// TODO: Update all references to use it on the global users table
 	// TODO: Use an enum for the chosen filters
 	// Maybe? profile id?
@@ -163,6 +167,7 @@ export const categories = sqliteTable(
 		guildId: snowflake("guild_id").notNull(),
 		// This must be able to be put as a Custom ID https://discord.com/developers/docs/components/reference#anatomy-of-a-component-custom-id, since it will be added and then prefixed
 		categoryId: text("category_id").notNull(),
+		emojiId: text("emoji_id").notNull().default(""),
 	},
 	(t) => [
 		primaryKey({ columns: [t.guildId, t.categoryId] }),

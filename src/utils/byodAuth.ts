@@ -1,12 +1,5 @@
-/**
- * @fileoverview A command containing various subcommands to manage BYOD hosts.
- * @param {string[]} allowedRoleIds - An allowlist for roles who are authorized to manage BYOD.
- * @param {string[]} allowedUserIds - An allowlist for users who are authorized to manage BYOD.
- * @param {string[]} disallowedUserIds - An explicit blacklist for users who are not authorized to manage BYOD. Overrides allowedUserIds and allowedRoleIds.
- */
-
+import { createErrorEmbed } from "@utils/infoEmbeds";
 import { type CommandContext, SubCommand } from "seyfert";
-import { createErrorEmbed } from "@/utils/infoEmbeds";
 import config from "../../config.json";
 
 export abstract class BYODSubCommand extends SubCommand {

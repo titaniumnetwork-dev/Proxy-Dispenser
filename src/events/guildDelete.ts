@@ -1,7 +1,7 @@
+import { db, schema } from "@db";
 import { eq } from "drizzle-orm";
 import { createEvent } from "seyfert";
 import { t } from "try";
-import { db, schema } from "@/db";
 
 export default createEvent({
 	data: { name: "guildDelete" },

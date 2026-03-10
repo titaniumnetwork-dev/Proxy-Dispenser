@@ -3,7 +3,7 @@
  * @module utils/message-templating
  */
 
-import { DISCORD_MESSAGE_LIMIT } from "@/consts";
+import { DISCORD_MESSAGE_LIMIT } from "@consts";
 
 /**
  * Separator to use between list items.

@@ -1,8 +1,9 @@
-/**
- * @fileoverview A slash subcommand to rename a category in a guild.
- */
-
+import { db, schema } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
 import { and, eq } from "drizzle-orm";
 import {
 	type CommandContext,
@@ -14,11 +15,6 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { db, schema } from "@/db";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
 
 const options = {
 	category: createStringOption({
@@ -26,41 +22,39 @@ const options = {
 		required: true,
 		autocomplete: categoryAutocomplete,
 	}),
-	"new-category": createStringOption({
+	"new-name": createStringOption({
 		description: "The new category name",
 		required: true,
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether to respond ephemerally",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
 
 @Declare({
-	name: "rename-category",
-	aliases: ["rcat", "rcategory"],
-	description: "Renames a category",
+	name: "rename",
+	description: "Rename a category",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
 @Options(options)
 export default class RenameCategoryCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		const ephemeral = ctx.options.ephemeral ?? false;
-		// We need to yield some time for DB operations
-		await ctx.deferReply(ephemeral);
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		await ctx.deferReply(ctx.options.ephemeral ?? true);
+
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const [, error] = await t(
 			db
 				.update(schema.categories)
 				.set({
-					categoryId: ctx.options["new-category"],
+					categoryId: ctx.options["new-name"],
 				})
 				.where(
 					and(
@@ -74,7 +68,7 @@ export default class RenameCategoryCommand extends SubCommand {
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
-						`renaming category **${ctx.options.category}** to **${ctx.options["new-category"]}**`,
+						`renaming category **${ctx.options.category}** to **${ctx.options["new-name"]}**`,
 					),
 				],
 				flags,
@@ -83,7 +77,7 @@ export default class RenameCategoryCommand extends SubCommand {
 		}
 
 		await ctx.editOrReply({
-			content: `Renamed category **${ctx.options.category}** to **${ctx.options["new-category"]}**`,
+			content: `Renamed category **${ctx.options.category}** to **${ctx.options["new-name"]}**`,
 			flags,
 		});
 	}

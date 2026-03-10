@@ -3,9 +3,9 @@
  * @module utils/embed-paginator
  */
 
+import { IDLE_TIMEOUT } from "@consts";
 import { ActionRow, Button, type CommandContext, type Embed } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
-import { IDLE_TIMEOUT } from "@/consts";
 
 /**
  * Button custom IDs for the paginator.
@@ -51,6 +51,7 @@ export class EmbedPaginator {
 				components: [],
 				flags: this.ephemeral ? MessageFlags.Ephemeral : undefined,
 			});
+			return;
 		}
 
 		const firstEmbed = this.embeds[0];

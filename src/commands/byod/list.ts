@@ -2,6 +2,11 @@
  * @fileoverview A slash command to list all BYOD hosts.
  */
 
+import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
 import {
 	ActionRow,
 	AttachmentBuilder,
@@ -16,12 +21,7 @@ import {
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@/consts";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
-import { BYODSubCommand } from "../../utils/byod-auth";
+import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	service: createStringOption({
@@ -78,7 +78,7 @@ const options = {
 		],
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether to respond ephemerally",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
@@ -91,16 +91,15 @@ const options = {
 })
 @Options(options)
 export class ListCommand extends BYODSubCommand {
-	async execute(ctx: CommandContext<typeof options>) {
+	override async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		// We need to yield some time for fetching from the BYOD API
-		const ephemeral = ctx.options.ephemeral ?? false;
+		const ephemeral = ctx.options.ephemeral ?? true;
 		await ctx.deferReply(ephemeral);
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const [, error, response] = await t(
 			fetch(

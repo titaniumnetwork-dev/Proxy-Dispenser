@@ -3,12 +3,12 @@
  * @module utils/link-response-builder
  */
 
-import type { LinkAdderResult } from "@/utils/linkAdder";
+import type { LinkAdderResult } from "@utils/linkAdder";
 import {
 	calculateTemplateSpace,
 	LIST_PLACEHOLDER,
 	truncateList,
-} from "@/utils/messageTemplating";
+} from "@utils/messageTemplating";
 
 export interface LinkResponseOptions {
 	/**
@@ -19,10 +19,6 @@ export interface LinkResponseOptions {
 	 * Category ID for context in messages.
 	 */
 	categoryId: string;
-	/**
-	 * Whether this is a new category.
-	 */
-	isNewCategory?: boolean;
 	/**
 	 * Optionally, a prefix message to include at the start of the response.
 	 */
@@ -50,20 +46,12 @@ export function createLinkResponse(
 	| { type: LinkResponseType.AllDuplicates }
 	| { type: LinkResponseType.AllInvalid }
 	| { type: LinkResponseType.NoValidLinks } {
-	const {
-		linkAddResult: result,
-		categoryId,
-		isNewCategory,
-		prefixMessage,
-	} = options;
+	const { linkAddResult: result, categoryId, prefixMessage } = options;
 	const responseParts: string[] = [];
 
 	if (prefixMessage) {
 		responseParts.push(prefixMessage);
 	}
-
-	const newCategoryIndicator =
-		result.newCategory || isNewCategory ? "new " : "";
 
 	const addedLinkWord = result.insertedCount === 1 ? "link" : "links";
 	const duplicateLinkWord =
@@ -72,7 +60,7 @@ export function createLinkResponse(
 
 	if (result.insertedCount > 0) {
 		responseParts.push(
-			`Added **${result.insertedCount}** ${addedLinkWord} to ${newCategoryIndicator}category **${categoryId}**`,
+			`Added **${result.insertedCount}** ${addedLinkWord} to category **${categoryId}**`,
 		);
 	}
 

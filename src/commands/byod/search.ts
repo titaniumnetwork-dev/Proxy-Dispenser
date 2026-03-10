@@ -1,28 +1,34 @@
 /**
  * @fileoverview A slash command to search BYOD hosts by hostname.
  */
+
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
 import {
 	ActionRow,
 	Button,
 	type CommandContext,
+	createBooleanOption,
 	createStringOption,
 	Declare,
 	Embed,
 	Options,
 	type WebhookMessage,
 } from "seyfert";
-import { ButtonStyle } from "seyfert/lib/types";
+import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
-import { BYODSubCommand } from "../../utils/byod-auth";
+import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	query: createStringOption({
 		description: "Search query for hostname",
 		required: true,
+	}),
+	ephemeral: createBooleanOption({
+		description: "Whether or not only you can see this",
+		required: false,
 	}),
 };
 
@@ -34,16 +40,17 @@ const options = {
 })
 @Options(options)
 export class SearchCommand extends BYODSubCommand {
-	async execute(ctx: CommandContext<typeof options>) {
+	override async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		const query = ctx.options.query.toLowerCase();
+		const ephemeral = ctx.options.ephemeral ?? true;
+		await ctx.deferReply(ephemeral);
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
-		// We need to yield some time for fetching from the BYOD API
-		await ctx.deferReply();
+		const query = ctx.options.query.toLowerCase();
 
 		const [, error, response] = await t(
 			fetch(
@@ -58,10 +65,16 @@ export class SearchCommand extends BYODSubCommand {
 			),
 		);
 
-		if (error || !response) {
+		if (error) {
 			ctx.client.logger.error(`Failed to fetch hosts: ${error}`);
+		}
+		if (!response) {
+			ctx.client.logger.error(`Hosts API returned a null response`);
+		}
+		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching hosts")],
+				flags,
 			});
 			return;
 		}
@@ -83,6 +96,7 @@ export class SearchCommand extends BYODSubCommand {
 
 			await ctx.editOrReply({
 				embeds: [noResultsEmbed],
+				flags,
 			});
 			return;
 		}
@@ -130,6 +144,7 @@ export class SearchCommand extends BYODSubCommand {
 		const message = (await ctx.editOrReply({
 			embeds: [embed(currentPage)],
 			components: [row],
+			flags,
 		})) as WebhookMessage;
 
 		const collector = message.createComponentCollector();

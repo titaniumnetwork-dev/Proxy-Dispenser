@@ -1,7 +1,11 @@
 /**
- * @fileoverview A slash command to remove a BYOD host.
+ * @fileoverview A slash command to unset a BYOD host.
  */
 
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
 import {
 	type CommandContext,
 	createBooleanOption,
@@ -11,11 +15,7 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
-import { BYODSubCommand } from "../../utils/byod-auth";
+import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	host: createStringOption({
@@ -64,7 +64,7 @@ const options = {
 		},
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether to respond ephemerally",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
@@ -77,16 +77,15 @@ const options = {
 })
 @Options(options)
 export class UnsetCommand extends BYODSubCommand {
-	async execute(ctx: CommandContext<typeof options>) {
+	override async execute(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		// We need to yield some time for fetching from the BYOD API
-		const ephemeral = ctx.options.ephemeral ?? false;
+		const ephemeral = ctx.options.ephemeral ?? true;
 		await ctx.deferReply(ephemeral);
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
 		const host = ctx.options.host;
 

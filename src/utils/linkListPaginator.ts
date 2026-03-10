@@ -2,10 +2,10 @@
  * @fileoverview A utility class for paginating link lists using Discord Components V2. This is used by the `/links list`, and it will be used by by the `/link-history` command.
  * @module utils/link-list-paginator
  */
+import { DISCORD_TEXT_DISPLAY_LIMIT, IDLE_TIMEOUT } from "@consts";
 import type { CommandContext } from "seyfert";
 import { ActionRow, Button, Container, TextDisplay } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
-import { DISCORD_TEXT_DISPLAY_LIMIT, IDLE_TIMEOUT } from "@/consts";
 
 /**
  * Button custom IDs for the link list paginator.

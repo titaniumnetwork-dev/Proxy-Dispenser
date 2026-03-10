@@ -1,11 +1,6 @@
-/**
- * @fileoverview A utility class for inserting links to the DB across `/add` and `/batch-add`.
- * @module utils/link-adder
- */
-
+import { db, schema } from "@db";
 import type { Logger } from "seyfert";
 import { t } from "try";
-import { db, schema } from "@/db";
 
 export interface LinkAdderResult {
 	/**
@@ -22,10 +17,6 @@ export interface LinkAdderResult {
 	 * Number of links that were inserted into the database.
 	 */
 	readonly insertedCount: number;
-	/**
-	 * Whether a new category was created for the links.
-	 */
-	readonly newCategory: boolean;
 	/**
 	 * Links that were invalid.
 	 */
@@ -134,7 +125,6 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks: [],
 				duplicateLinks: [],
-				newCategory: false,
 			};
 		}
 
@@ -159,23 +149,22 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks,
 				duplicateLinks: [],
-				newCategory: false,
 			};
 		}
 
 		const [, categoryError, categoryResult] = await t(
-			db
-				.insert(schema.categories)
-				.values({
-					guildId: this.guildId,
-					categoryId: this.categoryId,
-				})
-				.onConflictDoNothing()
-				.returning({ categoryId: schema.categories.categoryId }),
+			db.query.categories.findFirst({
+				where: (categories, { eq, and }) =>
+					and(
+						eq(categories.guildId, this.guildId),
+						eq(categories.categoryId, this.categoryId),
+					),
+				columns: { categoryId: true },
+			}),
 		);
 		if (categoryError) {
 			this.logger.error(
-				`Failed to ensure category ${this.categoryId} exists: ${categoryError}`,
+				`Failed to check category ${this.categoryId} exists: ${categoryError}`,
 			);
 			return {
 				dbSuccess: false,
@@ -183,11 +172,21 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks,
 				duplicateLinks: [],
-				newCategory: false,
 			};
 		}
 
-		const newCategory = (categoryResult?.length ?? 0) > 0;
+		if (!categoryResult) {
+			this.logger.warn(
+				`Category ${this.categoryId} does not exist in guild ${this.guildId}`,
+			);
+			return {
+				dbSuccess: false,
+				dbError: `Category **${this.categoryId}** does not exist. Use \`/category create\` first.`,
+				insertedCount: 0,
+				invalidLinks,
+				duplicateLinks: [],
+			};
+		}
 
 		const [, existingLinkError, existingLinks] = await t(
 			db.query.links.findMany({
@@ -210,7 +209,6 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks,
 				duplicateLinks: [],
-				newCategory,
 			};
 		}
 
@@ -232,7 +230,6 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks,
 				duplicateLinks,
-				newCategory,
 			};
 		}
 
@@ -255,7 +252,6 @@ export class LinkAdder {
 				insertedCount: 0,
 				invalidLinks,
 				duplicateLinks,
-				newCategory,
 			};
 		}
 
@@ -267,7 +263,6 @@ export class LinkAdder {
 			insertedCount: newLinks.length,
 			invalidLinks,
 			duplicateLinks,
-			newCategory,
 		};
 	}
 }

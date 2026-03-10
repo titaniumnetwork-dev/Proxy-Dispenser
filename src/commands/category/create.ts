@@ -1,0 +1,95 @@
+import { db, schema } from "@db";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
+import {
+	type CommandContext,
+	createBooleanOption,
+	createStringOption,
+	Declare,
+	Options,
+	SubCommand,
+} from "seyfert";
+import { MessageFlags } from "seyfert/lib/types";
+import { t } from "try";
+
+const options = {
+	name: createStringOption({
+		description: "The name of the category to create",
+		required: true,
+	}),
+	emoji: createStringOption({
+		description: "An emoji to associate with this category (optional)",
+		required: false,
+	}),
+	ephemeral: createBooleanOption({
+		description: "Whether or not only you can see this",
+		required: false,
+	}),
+};
+
+@Declare({
+	name: "create",
+	description: "Create a new category",
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
+})
+@Options(options)
+export default class CreateCategoryCommand extends SubCommand {
+	override async run(ctx: CommandContext<typeof options>) {
+		if (!ctx.guildId) {
+			await createSlashCommandErrorEmbed(ctx);
+			return;
+		}
+
+		await ctx.deferReply(ctx.options.ephemeral ?? true);
+
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
+		const name = ctx.options.name.trim();
+
+		if (!name) {
+			await ctx.editOrReply({
+				content: "Category name can't be empty",
+				flags,
+			});
+			return;
+		}
+
+		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
+
+		const [, error, result] = await t(
+			db
+				.insert(schema.categories)
+				.values({
+					guildId: ctx.guildId,
+					categoryId: name,
+					emojiId: emoji,
+				})
+				.onConflictDoNothing()
+				.returning({ categoryId: schema.categories.categoryId }),
+		);
+		if (error) {
+			ctx.client.logger.error(`Failed to create category: ${error}`);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed(`creating category **${name}**`)],
+				flags,
+			});
+			return;
+		}
+
+		if (!result || result.length === 0) {
+			await ctx.editOrReply({
+				content: `Category **${name}** already exists`,
+				flags,
+			});
+			return;
+		}
+
+		const emojiDisplay = emoji ? ` with emoji ${emoji}` : "";
+		await ctx.editOrReply({
+			content: `Created category **${name}**${emojiDisplay}`,
+			flags,
+		});
+	}
+}

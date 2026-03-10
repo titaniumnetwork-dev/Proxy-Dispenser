@@ -1,0 +1,21 @@
+import { Command, Declare, Options } from "seyfert";
+import CreateCategoryCommand from "./category/create";
+import DeleteCategoryCommand from "./category/delete";
+import ListCategoriesCommand from "./category/list";
+import RenameCategoryCommand from "./category/rename";
+import SetEmojiCommand from "./category/setEmoji";
+
+@Declare({
+	name: "category",
+	description: "Manage categories",
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
+})
+@Options([
+	CreateCategoryCommand,
+	RenameCategoryCommand,
+	DeleteCategoryCommand,
+	SetEmojiCommand,
+	ListCategoriesCommand,
+])
+export default class CategoryCommand extends Command {}

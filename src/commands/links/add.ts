@@ -3,6 +3,12 @@
  */
 import { categoryAutocomplete } from "@utils/autocomplete";
 import {
+	createLinkResponse,
+	LinkResponseType,
+} from "@utils/createAddLinkResponse";
+import { createSlashCommandErrorEmbed } from "@utils/infoEmbeds";
+import { LinkAdder } from "@utils/linkAdder";
+import {
 	type CommandContext,
 	createBooleanOption,
 	createStringOption,
@@ -11,15 +17,6 @@ import {
 	SubCommand,
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
-import {
-	createLinkResponse,
-	LinkResponseType,
-} from "@/utils/createAddLinkResponse";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
-import { LinkAdder } from "@/utils/linkAdder";
 
 const options = {
 	link: createStringOption({
@@ -32,7 +29,7 @@ const options = {
 		autocomplete: categoryAutocomplete,
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether to make the response visible only to you",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
@@ -45,18 +42,15 @@ const options = {
 })
 @Options(options)
 export default class AddCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		const ephemeral = ctx.options.ephemeral ?? false;
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		await ctx.deferReply(ctx.options.ephemeral ?? true);
 
-		// We need to yield some time for DB operations
-		await ctx.deferReply(ephemeral);
-
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const link = ctx.options.link as string;
 		const categoryId = ctx.options.category as string;
 		const links = LinkAdder.parseLinks(link);
@@ -75,11 +69,9 @@ export default class AddCommand extends SubCommand {
 				`Failed to add links to category ${categoryId}: ${linkAdderResult.dbError}`,
 			);
 			await ctx.editOrReply({
-				embeds: [
-					createUnexpectedErrorEmbed(
-						`adding links to ${linkAdderResult.newCategory ? "new " : ""}category **${categoryId}**`,
-					),
-				],
+				content:
+					linkAdderResult.dbError ??
+					`An unexpected error occurred while adding links to category **${categoryId}**`,
 				flags,
 			});
 			return;

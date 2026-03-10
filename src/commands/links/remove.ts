@@ -2,7 +2,17 @@
  * @fileoverview A slash subcommand to remove a link from a guild.
  */
 
+import { IDLE_TIMEOUT } from "@consts";
+import { db, schema } from "@db";
 import { categoryAutocomplete, linkAutocomplete } from "@utils/autocomplete";
+import {
+	ButtonPaginator,
+	PaginatorButtonId,
+} from "@utils/embedButtonPaginator";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
 import { and, eq } from "drizzle-orm";
 import {
 	type CommandContext,
@@ -14,16 +24,6 @@ import {
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { IDLE_TIMEOUT } from "@/consts";
-import { db, schema } from "@/db";
-import {
-	ButtonPaginator,
-	PaginatorButtonId,
-} from "@/utils/embedButtonPaginator";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
 
 const options = {
 	link: createStringOption({
@@ -38,7 +38,7 @@ const options = {
 		autocomplete: categoryAutocomplete,
 	}),
 	ephemeral: createBooleanOption({
-		description: "Whether to respond ephemerally",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
@@ -51,17 +51,15 @@ const options = {
 })
 @Options(options)
 export default class RemoveCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		// We need to yield some time for DB operations
-		const ephemeral = ctx.options.ephemeral ?? false;
-		await ctx.deferReply(ephemeral);
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		await ctx.deferReply(ctx.options.ephemeral ?? true);
 
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 		const link = ctx.options.link;
 		const category = ctx.options.category;
@@ -111,6 +109,7 @@ export default class RemoveCommand extends SubCommand {
 							`removing link \`${link}\` from category **${category}**`,
 						),
 					],
+					flags,
 				});
 				return;
 			}

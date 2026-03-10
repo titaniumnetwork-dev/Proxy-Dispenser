@@ -4,10 +4,10 @@
 
 import { Command, Declare, Options } from "seyfert";
 import AddCommand from "./links/add";
-import AddFormCommand from "./links/batch-add";
+import AddFormCommand from "./links/batchAdd";
 import ListCommand from "./links/list";
 import RemoveCommand from "./links/remove";
-import RenameCategoryCommand from "./links/rename-category";
+import RemoveAllCommand from "./links/removeAll";
 
 @Declare({
 	name: "links",
@@ -19,7 +19,7 @@ import RenameCategoryCommand from "./links/rename-category";
 	AddCommand,
 	AddFormCommand,
 	RemoveCommand,
-	RenameCategoryCommand,
+	RemoveAllCommand,
 	ListCommand,
 ])
 export default class LinksCommand extends Command {}

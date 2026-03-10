@@ -2,7 +2,13 @@
  * @fileoverview A slash subcommand to list links in a guild
  */
 
+import { db, schema } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
+import {
+	createSlashCommandErrorEmbed,
+	createUnexpectedErrorEmbed,
+} from "@utils/infoEmbeds";
+import { LinkListPaginator } from "@utils/linkListPaginator";
 import { sql } from "drizzle-orm";
 import {
 	AttachmentBuilder,
@@ -15,12 +21,6 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { db, schema } from "@/db";
-import {
-	createSlashCommandErrorEmbed,
-	createUnexpectedErrorEmbed,
-} from "@/utils/infoEmbeds";
-import { LinkListPaginator } from "@/utils/linkListPaginator";
 
 const options = {
 	category: createStringOption({
@@ -38,7 +38,7 @@ const options = {
 		required: false,
 	}),
 	ephemeral: createBooleanOption({
-		description: "Respond empherally (default: true)",
+		description: "Whether or not only you can see this",
 		required: false,
 	}),
 };
@@ -51,18 +51,17 @@ const options = {
 })
 @Options(options)
 export default class ListCommand extends SubCommand {
-	async run(ctx: CommandContext<typeof options>) {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
 
-		const ephemeral = ctx.options.ephemeral ?? true;
-		// We need to yield some time for DB operations
-		await ctx.deferReply(ephemeral);
-		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		await ctx.deferReply(ctx.options.ephemeral ?? true);
 
+		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
+
 		const [, error, links] = await t(
 			db.query.links.findMany({
 				where: (links, { eq, and }) =>
@@ -161,7 +160,7 @@ export default class ListCommand extends SubCommand {
 			linkUserCounts: ctx.options["display-user-stats"]
 				? linkUserCounts
 				: undefined,
-			ephemeral,
+			ephemeral: ctx.options.ephemeral,
 		});
 	}
 }

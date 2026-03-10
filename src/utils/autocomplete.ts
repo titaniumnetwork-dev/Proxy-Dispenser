@@ -3,25 +3,16 @@
  * @module utils/autocomplete
  */
 
+import { DISCORD_MAX_CHOICES } from "@consts";
+import { db, schema } from "@db";
 import { and, desc, eq, like, sql } from "drizzle-orm";
 import type { AutocompleteInteraction } from "seyfert";
 import { t } from "try";
-import { DISCORD_MAX_CHOICES } from "@/consts";
-import { db, schema } from "@/db";
 
-/**
- * Autocomplete handler for categories.
- * Meant to be used on string options in Seyfert slash commands.
- * @param interaction Seyfert autocomplete interaction.
- * @returns Seyfert autocomplete response.
- */
 export async function categoryAutocomplete(
 	interaction: AutocompleteInteraction,
 ) {
 	if (!interaction.guildId) {
-		console.warn(
-			"Category autocomplete utility used outside of a guild context",
-		);
 		return interaction.respond([]);
 	}
 
@@ -75,8 +66,6 @@ export async function categoryAutocomplete(
 		}))
 		.slice(0, DISCORD_MAX_CHOICES);
 
-	console.debug("Category autocomplete choices:", choices);
-
 	return interaction.respond(choices);
 }
 
@@ -88,7 +77,6 @@ export async function categoryAutocomplete(
  */
 export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 	if (!interaction.guildId) {
-		console.warn("Link autocomplete utility used outside of a guild context");
 		return interaction.respond([]);
 	}
 
@@ -130,7 +118,6 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 	);
 
 	if (error || !linkRows) {
-		console.error("Failed to fetch links for autocomplete:", error);
 		return interaction.respond([]);
 	}
 
@@ -140,8 +127,6 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 			value: row.link,
 		}))
 		.slice(0, DISCORD_MAX_CHOICES);
-
-	console.debug("Link autocomplete choices:", choices);
 
 	return interaction.respond(choices);
 }

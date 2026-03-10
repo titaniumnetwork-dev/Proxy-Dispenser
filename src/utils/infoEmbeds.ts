@@ -3,9 +3,9 @@
  * @module utils/info-embeds
  */
 
+import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
 import { type CommandContext, Embed, type ModalContext } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
-import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@/consts";
 
 /**
  * Creates an embed for a warning.
