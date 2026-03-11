@@ -1,3 +1,5 @@
+import { CATEGORY_SELECT_PREFIX } from "@components/batchAddFormLinksModal";
+import { DISCORD_ID_PARTS } from "@consts";
 import { db } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import {
@@ -6,15 +8,16 @@ import {
 } from "@utils/infoEmbeds";
 import {
 	ActionRow,
-	Button,
 	type CommandContext,
 	createStringOption,
 	Declare,
 	Embed,
 	Options,
-	SubCommand,
+	StringSelectMenu,
+	StringSelectOption,
+	SubCommand
 } from "seyfert";
-import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
+import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 
 const options = {
@@ -84,31 +87,26 @@ export default class PanelCommand extends SubCommand {
 			.setDescription(
 				"Choose a proxy below to receive a new link! Use /history to view previously requested links.",
 			);
+			
+		const categoryMenu = new StringSelectMenu()
+			.setCustomId(`${CATEGORY_SELECT_PREFIX}${DISCORD_ID_PARTS.separator}`)
+			.setPlaceholder("Select a proxy");
 
-		const rows: ActionRow<Button>[] = [];
-		for (let n = 0; n < categories.length; n += 5) {
-			const batch = categories.slice(n, n + 5);
-			const row = new ActionRow<Button>();
-			const buttons: Button[] = [];
-
-			for (const category of batch) {
-				const button = new Button()
-					.setCustomId(`dispense:${category.categoryId}`)
-					.setLabel(category.categoryId)
-					.setStyle(ButtonStyle.Secondary);
-				if (category.emojiId) {
-					button.setEmoji(category.emojiId);
-				}
-				buttons.push(button);
+		for (const category of categories) {
+			const dropdown = new StringSelectOption()
+				.setLabel(category.categoryId)
+				.setValue(category.categoryId)
+			if (category.emojiId) {
+				dropdown.setEmoji(category.emojiId);
 			}
-
-			row.setComponents(buttons);
-			rows.push(row);
+			categoryMenu.addOption(dropdown);
 		}
+
+		const row = new ActionRow<StringSelectMenu>().setComponents([categoryMenu]);
 
 		await ctx.editOrReply({
 			embeds: [embed],
-			components: rows,
+			components: [row],
 		});
 	}
 }
