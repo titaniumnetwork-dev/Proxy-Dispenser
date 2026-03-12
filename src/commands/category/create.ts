@@ -59,7 +59,7 @@ export default class CreateCategoryCommand extends SubCommand {
 			});
 			return;
 		}
-		
+
 		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
 
 		const [, error, result] = await t(

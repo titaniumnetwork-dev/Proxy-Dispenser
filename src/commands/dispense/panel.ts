@@ -14,7 +14,7 @@ import {
 	Options,
 	StringSelectMenu,
 	StringSelectOption,
-	SubCommand
+	SubCommand,
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
@@ -86,7 +86,7 @@ export default class PanelCommand extends SubCommand {
 			.setDescription(
 				"Choose a proxy below to receive a new link! Use /history to view previously requested links.",
 			);
-			
+
 		const categoryMenu = new StringSelectMenu()
 			.setCustomId(`dispense:${DISCORD_ID_PARTS.separator}`)
 			.setPlaceholder("Select a proxy");
@@ -94,7 +94,7 @@ export default class PanelCommand extends SubCommand {
 		for (const category of categories) {
 			const dropdown = new StringSelectOption()
 				.setLabel(category.categoryId)
-				.setValue(category.categoryId)
+				.setValue(category.categoryId);
 			if (category.emojiId) {
 				dropdown.setEmoji(category.emojiId);
 			}

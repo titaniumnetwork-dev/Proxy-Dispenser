@@ -11,7 +11,8 @@
 		"check": "biome check --write",
 		"typecheck": "tsgo",
 		"db:generate": "bunx drizzle-kit generate",
-		"db:migrate": "bun src/db/migrate.ts"
+		"db:migrate": "bun src/db/migrate.ts",
+		"db:full": "bun run db:generate && bun run db:migrate"
 	},
 	"dependencies": {
 		"@types/node": "^25.3.5",

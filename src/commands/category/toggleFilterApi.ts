@@ -69,7 +69,9 @@ export default class ToggleFilterApiCommand extends SubCommand {
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
 		if (error) {
-			ctx.client.logger.error(`Failed to set filter API status for category: ${error}`);
+			ctx.client.logger.error(
+				`Failed to set filter API status for category: ${error}`,
+			);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(

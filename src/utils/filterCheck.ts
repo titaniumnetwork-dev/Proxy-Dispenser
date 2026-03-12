@@ -1,4 +1,3 @@
-
 export interface Link {
 	readonly blocked: string[];
 	readonly unblocked: string[];
@@ -17,23 +16,23 @@ async function getUnblocked(url: string): Promise<string[]> {
 
 async function checkLink(url: string): Promise<Link> {
 	const response = await fetch(
-			`${process.env.FC_URL}${encodeURIComponent(url)}`,
-			{
-				method: "GET",
-				headers: {
-					"x-api-key": process.env.FC_API_KEY || "your-api-key-here",
-					"Content-Type": "application/json",
-				},
+		`${process.env.FC_URL}${encodeURIComponent(url)}`,
+		{
+			method: "GET",
+			headers: {
+				"x-api-key": process.env.FC_API_KEY || "your-api-key-here",
+				"Content-Type": "application/json",
 			},
-		);
+		},
+	);
 
-		if (!response.ok) {
-			return {
-				blocked: [],
-				unblocked: [],
-				unknown: [],
-			};
-		}
+	if (!response.ok) {
+		return {
+			blocked: [],
+			unblocked: [],
+			unknown: [],
+		};
+	}
 
 	const result = (await response.json()) as {
 		blocked: string[];
@@ -49,4 +48,3 @@ async function checkLink(url: string): Promise<Link> {
 }
 
 export { checkLink, getBlocked, getUnblocked };
-

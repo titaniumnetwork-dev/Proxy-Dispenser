@@ -161,9 +161,7 @@ export default class ListCommand extends SubCommand {
 					}
 				}
 				const list = linksByCategory[link.categoryId] ?? [];
-				list.push(
-					`${link.link} ${ubf ? `- ${ubf.slice(0, -2)}` : ""}`,
-				);
+				list.push(`${link.link} ${ubf ? `- ${ubf.slice(0, -2)}` : ""}`);
 				linksByCategory[link.categoryId] = list;
 			}
 		}
