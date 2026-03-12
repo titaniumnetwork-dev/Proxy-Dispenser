@@ -70,12 +70,10 @@ export async function categoryAutocomplete(
 	return interaction.respond(choices);
 }
 
-export async function filterAutocomplete(interaction: AutocompleteInteraction) {
-	if (!interaction.guildId) {
-		return interaction.respond([]);
-	}
-	return filters;
-}
+export const filterOptions = Object.entries(filters).map(([value, name]) => ({
+	name,
+	value,
+}));
 
 /**
  * Autocomplete handler for links.

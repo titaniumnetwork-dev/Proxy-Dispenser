@@ -1,4 +1,5 @@
 import { db, schema } from "@db";
+import { filterOptions } from "@utils/autocomplete";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -7,8 +8,8 @@ import { eq } from "drizzle-orm";
 import {
 	type CommandContext,
 	createBooleanOption,
+	createRoleOption,
 	createStringOption,
-	createUserOption,
 	Declare,
 	Options,
 	SubCommand,
@@ -17,17 +18,14 @@ import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 
 const options = {
-	user: createUserOption({
-		description: "The user to add or remove as an admin",
+	filter: createStringOption({
+		description: "The filter to set the role for",
 		required: true,
+		choices: filterOptions,
 	}),
-	action: createStringOption({
-		description: "Whether to add or remove the user",
+	role: createRoleOption({
+		description: "The role to associate with the filter",
 		required: true,
-		choices: [
-			{ name: "Add", value: "add" },
-			{ name: "Remove", value: "remove" },
-		],
 	}),
 	ephemeral: createBooleanOption({
 		description: "Whether or not only you can see this",
@@ -36,14 +34,13 @@ const options = {
 };
 
 @Declare({
-	name: "set-admin-users",
-	description: "Add or remove an admin user for the bot",
+	name: "set-role",
+	description: "Set or update the role for a filter",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
-export default class SetAdminUsersCommand extends SubCommand {
+export default class SetRoleCommand extends SubCommand {
 	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
@@ -54,13 +51,13 @@ export default class SetAdminUsersCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
-		const user = ctx.options.user;
-		const action = ctx.options.action as "add" | "remove";
+		const filter = ctx.options.filter;
+		const role = ctx.options.role;
 
 		const [, fetchError, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
-				columns: { adminUserIds: true },
+				columns: { filterRoleIds: true },
 			}),
 		);
 		if (fetchError) {
@@ -76,9 +73,7 @@ export default class SetAdminUsersCommand extends SubCommand {
 				db.insert(schema.guild).values({ guildId }).onConflictDoNothing(),
 			);
 			if (insertError) {
-				ctx.client.logger.error(
-					`Failed to create guild config: ${insertError}`,
-				);
+				ctx.client.logger.error(`Failed to create guild config: ${insertError}`);
 				await ctx.editOrReply({
 					embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
 					flags: MessageFlags.Ephemeral,
@@ -87,47 +82,38 @@ export default class SetAdminUsersCommand extends SubCommand {
 			}
 		}
 
-		const adminUserIds = [...(guildRow?.adminUserIds ?? [])];
-
-		if (action === "add") {
-			if (adminUserIds.includes(user.id)) {
-				await ctx.editOrReply({
-					content: `<@${user.id}> is already an admin user.`,
-					flags,
-				});
-				return;
-			}
-			adminUserIds.push(user.id);
+		const filterRoleIds = { ...(guildRow?.filterRoleIds ?? {}) };
+		if (role) {
+			filterRoleIds[filter] = role.id;
 		} else {
-			const index = adminUserIds.indexOf(user.id);
-			if (index === -1) {
-				await ctx.editOrReply({
-					content: `<@${user.id}> is not an admin user.`,
-					flags,
-				});
-				return;
-			}
-			adminUserIds.splice(index, 1);
+			delete filterRoleIds[filter];
 		}
 
 		const [, error] = await t(
 			db
 				.update(schema.guild)
-				.set({ adminUserIds })
+				.set({ filterRoleIds })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
 		if (error) {
-			ctx.client.logger.error(`Failed to update admin users: ${error}`);
+			ctx.client.logger.error(`Failed to set role for filter: ${error}`);
 			await ctx.editOrReply({
-				embeds: [createUnexpectedErrorEmbed("editing admin users")],
+				embeds: [createUnexpectedErrorEmbed(`setting role for filter **${filter}**`)],
 				flags: MessageFlags.Ephemeral,
 			});
 			return;
 		}
 
-		await ctx.editOrReply({
-			content: `<@${user.id}> has been ${action}${action === "add" ? "e" : ""}d as an admin user.`,
-			flags,
-		});
+		if (role) {
+			await ctx.editOrReply({
+				content: `Set role for filter **${filter}** to <@&${role.id}>.`,
+				flags,
+			});
+		} else {
+			await ctx.editOrReply({
+				content: `Removed role mapping for filter **${filter}**.`,
+				flags,
+			});
+		}
 	}
 }

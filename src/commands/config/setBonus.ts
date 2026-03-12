@@ -61,7 +61,7 @@ export default class SetBonusCommand extends SubCommand {
 				columns: { premiumLimits: true },
 			}),
 		);
-		if (fetchError || !guildRow) {
+		if (fetchError) {
 			ctx.client.logger.error(`Failed to fetch guild config: ${fetchError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
@@ -69,8 +69,23 @@ export default class SetBonusCommand extends SubCommand {
 			});
 			return;
 		}
+		if (!guildRow) {
+			const [, insertError] = await t(
+				db.insert(schema.guild).values({ guildId }).onConflictDoNothing(),
+			);
+			if (insertError) {
+				ctx.client.logger.error(
+					`Failed to create guild config: ${insertError}`,
+				);
+				await ctx.editOrReply({
+					embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
+					flags: MessageFlags.Ephemeral,
+				});
+				return;
+			}
+		}
 
-		const premiumLimits = { ...(guildRow.premiumLimits ?? {}) };
+		const premiumLimits = { ...(guildRow?.premiumLimits ?? {}) };
 
 		if (limit === 0) {
 			delete premiumLimits[role.id];

@@ -29,6 +29,10 @@ export const guild = sqliteTable("guild", {
 		.$type<Record<string, number>>()
 		.notNull()
 		.default(sql`(json_object())`),
+	filterRoleIds: text("filter_role_ids", { mode: "json" })
+		.$type<Record<string, string>>()
+		.notNull()
+		.default(sql`(json_object())`),
 	adminRoleIds: text("admin_role_ids", { mode: "json" })
 		.$type<string[]>()
 		.notNull()
