@@ -2,6 +2,7 @@
  * @fileoverview A slash command to unset a BYOD host.
  */
 
+import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -15,7 +16,6 @@ import {
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	host: createStringOption({

@@ -1,4 +1,5 @@
 import { dispense } from "@utils/dispenser";
+import { getUnblocked } from "@utils/filterCheck";
 import {
 	ActionRow,
 	Button,
@@ -10,8 +11,8 @@ import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 
 const dispensePrefix = "dispense:";
 
-export default class DispenseButton extends ComponentCommand {
-	componentType = "Button" as const;
+export default class DispenseSelect extends ComponentCommand {
+	componentType = "StringSelect" as const;
 
 	override filter(ctx: ComponentContext<typeof this.componentType>) {
 		return ctx.customId.startsWith(dispensePrefix);
@@ -26,7 +27,7 @@ export default class DispenseButton extends ComponentCommand {
 			return;
 		}
 
-		const categoryId = ctx.customId.slice(dispensePrefix.length);
+		const categoryId = ctx.interaction.values[0] as string;
 		const guildId = ctx.guildId;
 		const userId = ctx.author.id;
 
@@ -47,6 +48,8 @@ export default class DispenseButton extends ComponentCommand {
 			return;
 		}
 
+		const unblocked = await getUnblocked(result.link);
+
 		const embed = new Embed()
 			.setColor("#5865F2")
 			.setTitle("Proxy Delivery")
@@ -54,11 +57,8 @@ export default class DispenseButton extends ComponentCommand {
 			.addFields(
 				{ name: "Type", value: categoryId, inline: true },
 				{ name: "Link", value: result.link, inline: false },
-				{
-					name: "Remaining",
-					value: String(result.remaining),
-					inline: true,
-				},
+				{ name: "Unblocked On", value: unblocked.join(", "), inline: false },
+				{ name: "Remaining", value: String(result.remaining), inline: true },
 			);
 
 		const row = new ActionRow<Button>();

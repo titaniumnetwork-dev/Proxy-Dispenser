@@ -2,6 +2,7 @@
  * @fileoverview A slash subcommand to list links in a guild
  */
 
+import { filters } from "@../config.json";
 import { db, schema } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import {
@@ -145,8 +146,24 @@ export default class ListCommand extends SubCommand {
 			}
 
 			for (const link of links) {
+				let ubf: string = "";
+				if (!link.blockedFilters) {
+					ubf = "N/A, ";
+				} else {
+					for (const filter of Object.keys(filters)) {
+						if (!filter) continue;
+						if (!link.blockedFilters.includes(filter)) {
+							ubf += `${filters[filter as keyof typeof filters]}, `;
+						}
+					}
+					if (ubf === "") {
+						ubf = "All filters block this link., ";
+					}
+				}
 				const list = linksByCategory[link.categoryId] ?? [];
-				list.push(link.link);
+				list.push(
+					`${link.link} ${ubf ? `- ${ubf.slice(0, -2)}` : ""}`,
+				);
 				linksByCategory[link.categoryId] = list;
 			}
 		}

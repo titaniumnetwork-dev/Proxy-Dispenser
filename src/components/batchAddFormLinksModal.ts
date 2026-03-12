@@ -42,7 +42,7 @@ export function createLinksLabel() {
 
 export default class AddLinksModal extends ModalCommand {
 	override filter(ctx: ModalContext) {
-		return AddLinksModal.parseCustomId(ctx.customId) !== null;
+		return ctx.customId.startsWith("add-form-category:");
 	}
 
 	async run(ctx: ModalContext) {

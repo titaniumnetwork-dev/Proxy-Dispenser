@@ -4,6 +4,7 @@ import DeleteCategoryCommand from "./category/delete";
 import ListCategoriesCommand from "./category/list";
 import RenameCategoryCommand from "./category/rename";
 import SetEmojiCommand from "./category/setEmoji";
+import ToggleFilterApiCommand from "./category/toggleFilterApi";
 
 @Declare({
 	name: "category",
@@ -17,5 +18,6 @@ import SetEmojiCommand from "./category/setEmoji";
 	DeleteCategoryCommand,
 	SetEmojiCommand,
 	ListCategoriesCommand,
+	ToggleFilterApiCommand,
 ])
 export default class CategoryCommand extends Command {}

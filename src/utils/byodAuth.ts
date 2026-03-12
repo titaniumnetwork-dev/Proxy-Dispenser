@@ -1,6 +1,6 @@
+import config from "@../config.json";
 import { createErrorEmbed } from "@utils/infoEmbeds";
 import { type CommandContext, SubCommand } from "seyfert";
-import config from "../../config.json";
 
 export abstract class BYODSubCommand extends SubCommand {
 	async run(ctx: CommandContext) {

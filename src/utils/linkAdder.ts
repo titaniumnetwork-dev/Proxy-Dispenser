@@ -1,4 +1,6 @@
 import { db, schema } from "@db";
+import { getBlocked } from "@utils/filterCheck";
+import { sql } from "drizzle-orm";
 import type { Logger } from "seyfert";
 import { t } from "try";
 
@@ -233,13 +235,17 @@ export class LinkAdder {
 			};
 		}
 
-		const [, insertError] = await t(
-			db.insert(schema.links).values(
-				newLinks.map((link) => ({
-					guildId: this.guildId,
-					categoryId: this.categoryId,
-					link,
-				})),
+		const [, insertError] = await Promise.all(
+			newLinks.map((link) =>
+				t(async () => {
+					return db.insert(schema.links).values({
+						guildId: this.guildId,
+						categoryId: this.categoryId,
+						link,
+						blockedFilters: await getBlocked(link),
+						lastBlockCheckTimestamp: sql`${Date.now()}`,
+					});
+				}),
 			),
 		);
 		if (insertError) {

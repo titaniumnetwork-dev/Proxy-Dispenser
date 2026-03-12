@@ -1,4 +1,3 @@
-import { CATEGORY_SELECT_PREFIX } from "@components/batchAddFormLinksModal";
 import { DISCORD_ID_PARTS } from "@consts";
 import { db } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
@@ -89,7 +88,7 @@ export default class PanelCommand extends SubCommand {
 			);
 			
 		const categoryMenu = new StringSelectMenu()
-			.setCustomId(`${CATEGORY_SELECT_PREFIX}${DISCORD_ID_PARTS.separator}`)
+			.setCustomId(`dispense:${DISCORD_ID_PARTS.separator}`)
 			.setPlaceholder("Select a proxy");
 
 		for (const category of categories) {

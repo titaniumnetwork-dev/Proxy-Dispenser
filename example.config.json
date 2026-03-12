@@ -3,5 +3,23 @@
 		"allowedUserIds": [],
 		"disallowedUserIds": [],
 		"allowedRoleIds": []
+	},
+	"filters": {
+		"aristotlek12": "Aristotle K12",
+		"blocksi": "Blocksi",
+		"blocksi-ai": "Blocksi AI",
+		"cisco": "Cisco",
+		"content-keeper": "Content Keeper",
+		"deldao": "Deldao",
+		"fortiguard": "FortiGuard",
+		"gaggle": "Gaggle",
+		"goguardian": "GoGuardian",
+		"iboss": "IBoss",
+		"lanschool": "LanSchool",
+		"linewize": "LineWize",
+		"palo": "Palo",
+		"securly": "Securly",
+		"sensocloud": "Sensocloud",
+		"sophos": "Sophos"
 	}
 }

@@ -3,6 +3,7 @@
  * @module utils/autocomplete
  */
 
+import { filters } from "@../config.json";
 import { DISCORD_MAX_CHOICES } from "@consts";
 import { db, schema } from "@db";
 import { and, desc, eq, like, sql } from "drizzle-orm";
@@ -67,6 +68,13 @@ export async function categoryAutocomplete(
 		.slice(0, DISCORD_MAX_CHOICES);
 
 	return interaction.respond(choices);
+}
+
+export async function filterAutocomplete(interaction: AutocompleteInteraction) {
+	if (!interaction.guildId) {
+		return interaction.respond([]);
+	}
+	return filters;
 }
 
 /**

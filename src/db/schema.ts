@@ -20,14 +20,6 @@ export const filters: Filters = {
 	},
 };
 
-const filtersEnum = (name: string) =>
-	text(name, {
-		enum: Object.entries(filters).map(([_, value]) => value.id) as [
-			string,
-			...string[],
-		],
-	});
-
 const snowflake = (name: string) => text(name);
 
 export const guild = sqliteTable("guild", {
@@ -45,7 +37,6 @@ export const guild = sqliteTable("guild", {
 		.$type<string[]>()
 		.notNull()
 		.default(sql`(json_array())`),
-	// This is a generic log channel for the bot to send messages to. These are where the logs will be sent if there is no custom log channel set up for a specific category.
 	logChannelId: snowflake("log_channel_id"),
 	logChannelBlockedLinkReports: snowflake("log_channel_blocked_link_reports"),
 	logChannelCohortApprovals: snowflake("log_channel_cohort_approvals"),
@@ -62,18 +53,12 @@ export const guild = sqliteTable("guild", {
 	})
 		.notNull()
 		.default("cohort"),
-	// Automatically dispense links to the user when a link gets blocked
-	// It will check daily, but there will be a "Report Blocked" button when DMing or responding to the user's command/panel
-	// This report blocked button will trigger for everyone in the cohort to have their links checked, and if it is blocked, give the user a new one
 	automaticDispense: integer("automatic_dispense").notNull().default(0),
-	/** Docs URL shown by the /docs command. */
 	docsUrl: text("docs_url"),
-	/** Channel where reports about broken links are sent. */
 	reportsChannelId: snowflake("reports_channel_id"),
 });
 
 export const guildCohorts = sqliteTable("guild_cohorts", {
-	// The primary key is either `custom_enterprise_policy_domain` or `filters`
 	customEnterprisePolicyDomain: text("custom_enterprise_policy_domain"),
 	filters: text("filters", { mode: "json" })
 		.$type<string[]>()
@@ -92,17 +77,16 @@ export const guildConfigHistory = sqliteTable(
 			.notNull()
 			.default(sql`(unixepoch() * 1000)`),
 	},
-	(t) => ({
-		configHistoryGuildFk: foreignKey({
+	(t) => [
+		foreignKey({
 			columns: [t.guildId],
 			foreignColumns: [guild.guildId],
 			name: "config_history_guild_fk",
 		}).onDelete("cascade"),
-	}),
+	],
 );
 
 export const guildUsers = sqliteTable(
-	// Excuse the verbosity, I plan to also have a "global_users" table for the planned global features
 	"guild_users",
 	{
 		guildId: snowflake("guild_id").notNull(),
@@ -111,7 +95,6 @@ export const guildUsers = sqliteTable(
 			.$type<string[]>()
 			.notNull()
 			.default(sql`(json_array())`),
-		// We should still track all the cycles in case the server decides to change the monthly cycle type
 		timesMonthlyCycle: integer("times_monthly_cycle").notNull().default(0),
 		timesUserCycle: integer("times_user_cycle").notNull().default(0),
 		firstTimeUserCycleTimestamp: integer("first_time_user_cycle_timestamp", {
@@ -138,12 +121,7 @@ export const globalConfig = sqliteTable("global_config", {
 
 export const globalUsers = sqliteTable("global_users", {
 	userId: snowflake("user_id").notNull().primaryKey(),
-	// For known link leakers
-	// TODO: Will be implemented later during bot-owner commands
 	isBlacklisted: integer("is_blacklisted").notNull().default(0),
-	// TODO: Update all references to use it on the global users table
-	// TODO: Use an enum for the chosen filters
-	// Maybe? profile id?
 	customEnterprisePolicyDomain: text("custom_enterprise_policy_domain"),
 	chosenFilters: text("filters", { mode: "json" })
 		.$type<string[]>()
@@ -152,22 +130,16 @@ export const globalUsers = sqliteTable("global_users", {
 	subscribedGuilds: text("subscribed_guilds", { mode: "json" })
 		.$type<string[]>()
 		.notNull()
-		// Array of guild ids
 		.default(sql`(json_array())`),
-	/**
-	 * From the chrome policy (chrome://policy)
-	 * This can be from:
-	 * status.user.domain, status.user.enterpriseDomainManager
-	 */
 });
 
 export const categories = sqliteTable(
 	"categories",
 	{
 		guildId: snowflake("guild_id").notNull(),
-		// This must be able to be put as a Custom ID https://discord.com/developers/docs/components/reference#anatomy-of-a-component-custom-id, since it will be added and then prefixed
 		categoryId: text("category_id").notNull(),
 		emojiId: text("emoji_id").notNull().default(""),
+		filterApiEnabled: integer("filter_api_enabled").notNull().default(1),
 	},
 	(t) => [
 		primaryKey({ columns: [t.guildId, t.categoryId] }),
@@ -186,7 +158,10 @@ export const links = sqliteTable(
 		guildId: snowflake("guild_id").notNull(),
 		categoryId: text("category_id").notNull(),
 		link: text("link").notNull(),
-		blockedFilters: filtersEnum("blocked_filters"),
+		blockedFilters: text("blocked_filters", { mode: "json" })
+			.$type<string[]>()
+			.notNull()
+			.default(sql`(json_array())`),
 		lastBlockCheckTimestamp: integer("last_blocked_check_timestamp", {
 			mode: "timestamp_ms",
 		}),
@@ -205,7 +180,6 @@ export const links = sqliteTable(
 	],
 );
 
-// Relations
 export const usersRelations = relations(guildUsers, ({ one }) => ({
 	guild: one(guild, {
 		fields: [guildUsers.guildId],
@@ -249,7 +223,6 @@ export const linksRelations = relations(links, ({ one }) => ({
 	}),
 }));
 
-// Types
 export type InsertGuild = typeof guild.$inferInsert;
 export type SelectGuild = typeof guild.$inferSelect;
 

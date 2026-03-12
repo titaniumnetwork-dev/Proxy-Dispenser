@@ -1,10 +1,10 @@
-import SetAdminRolesCommand from "@commands/config/set-admin-roles";
-import SetAdminUsersCommand from "@commands/config/set-admin-users";
-import SetBonusCommand from "@commands/config/set-bonus";
-import SetCycleCommand from "@commands/config/set-cycle";
-import SetDocsCommand from "@commands/config/set-docs";
-import SetLimitCommand from "@commands/config/set-limit";
-import SetLogChannelCommand from "@commands/config/set-log-channel";
+import SetAdminRolesCommand from "@commands/config/setAdminRoles";
+import SetAdminUsersCommand from "@commands/config/setAdminUsers";
+import SetBonusCommand from "@commands/config/setBonus";
+import SetCycleCommand from "@commands/config/setCycles";
+import SetDocsCommand from "@commands/config/setDocs";
+import SetLimitCommand from "@commands/config/setLimit";
+import SetLogChannelCommand from "@commands/config/setLogChannel";
 import ViewCommand from "@commands/config/view";
 import { Command, Declare, Options } from "seyfert";
 

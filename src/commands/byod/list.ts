@@ -3,6 +3,7 @@
  */
 
 import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
+import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -21,7 +22,6 @@ import {
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	service: createStringOption({

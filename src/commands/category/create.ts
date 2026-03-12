@@ -19,6 +19,10 @@ const options = {
 		description: "The name of the category to create",
 		required: true,
 	}),
+	filterapi: createBooleanOption({
+		description: "Enable filter API checking on this category",
+		required: true,
+	}),
 	emoji: createStringOption({
 		description: "An emoji to associate with this category (optional)",
 		required: false,
@@ -55,7 +59,7 @@ export default class CreateCategoryCommand extends SubCommand {
 			});
 			return;
 		}
-
+		
 		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
 
 		const [, error, result] = await t(
@@ -65,6 +69,7 @@ export default class CreateCategoryCommand extends SubCommand {
 					guildId: ctx.guildId,
 					categoryId: name,
 					emojiId: emoji,
+					filterApiEnabled: ctx.options.filterapi ? 1 : 0,
 				})
 				.onConflictDoNothing()
 				.returning({ categoryId: schema.categories.categoryId }),

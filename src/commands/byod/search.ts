@@ -2,6 +2,7 @@
  * @fileoverview A slash command to search BYOD hosts by hostname.
  */
 
+import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -19,7 +20,6 @@ import {
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
-import { BYODSubCommand } from "../../utils/byodAuth";
 
 const options = {
 	query: createStringOption({
