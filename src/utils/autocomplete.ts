@@ -20,39 +20,19 @@ export async function categoryAutocomplete(
 	const guildId = interaction.guildId;
 	const input = interaction.getInput();
 
-	const [, error, categories] = await t(
-		Promise.resolve(
-			(async () => {
-				const whereConditions = [eq(schema.categories.guildId, guildId)];
-				if (input) {
-					whereConditions.push(
-						like(schema.categories.categoryId, `%${input}%`),
-					);
-				}
+	const whereConditions = [eq(schema.categories.guildId, guildId)];
+	if (input) {
+		whereConditions.push(like(schema.categories.categoryId, `%${input}%`));
+	}
 
-				return db
-					.select({
-						categoryId: schema.categories.categoryId,
-						linkCount: sql<number>`(
-							SELECT COUNT(*) FROM ${schema.links}
-							WHERE ${schema.links.guildId} = ${schema.categories.guildId}
-							AND ${schema.links.categoryId} = ${schema.categories.categoryId}
-						)`.as("link_count"),
-					})
-					.from(schema.categories)
-					.where(and(...whereConditions))
-					.orderBy(
-						desc(
-							sql`(
-						SELECT COUNT(*) FROM ${schema.links}
-						WHERE ${schema.links.guildId} = ${schema.categories.guildId}
-						AND ${schema.links.categoryId} = ${schema.categories.categoryId}
-					)`,
-						),
-					)
-					.limit(DISCORD_MAX_CHOICES);
-			})(),
-		),
+	const [, error, categories] = await t(
+		db
+			.select({
+				categoryId: schema.categories.categoryId,
+			})
+			.from(schema.categories)
+			.where(and(...whereConditions))
+			.limit(DISCORD_MAX_CHOICES),
 	);
 
 	if (error || !categories) {

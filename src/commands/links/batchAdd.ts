@@ -52,11 +52,14 @@ export default class AddFormCommand extends SubCommand {
 			return;
 		}
 
+		const ephemeral =
+			(ctx.options.ephemeral ?? true) ? MessageFlags.Ephemeral : undefined;
+
 		const guildId = ctx.guildId;
 		const categoryId = ctx.options.category as string | undefined;
 
 		if (categoryId) {
-			const modal = this.createLinksModal(categoryId, false);
+			const modal = this.createLinksModal(categoryId, ephemeral !== undefined);
 			await ctx.interaction.modal(modal);
 			return;
 		}
@@ -78,7 +81,7 @@ export default class AddFormCommand extends SubCommand {
 		if (error || !categories) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching categories")],
-				flags: MessageFlags.Ephemeral,
+				flags: ephemeral,
 			});
 			return;
 		}
@@ -87,7 +90,7 @@ export default class AddFormCommand extends SubCommand {
 			await ctx.editOrReply({
 				content:
 					"No categories exist yet.\n\nUse `/category create` to create your first category.",
-				flags: MessageFlags.Ephemeral,
+				flags: ephemeral,
 			});
 			return;
 		}
@@ -109,7 +112,7 @@ export default class AddFormCommand extends SubCommand {
 		await ctx.editOrReply({
 			content: "Select a category to add links to:",
 			components: [row],
-			flags: MessageFlags.Ephemeral,
+			flags: ephemeral,
 		});
 	}
 

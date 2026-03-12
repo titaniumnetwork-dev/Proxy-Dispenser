@@ -20,8 +20,11 @@ interface SelectCustomIDOptions {
 	ephemeral: boolean;
 }
 
-export function createSelectCustomID({ categoryId }: SelectCustomIDOptions) {
-	return `${CATEGORY_SELECT_CUSTOM_ID}${categoryId}${DISCORD_ID_SEPARATOR}`;
+export function createSelectCustomID({
+	categoryId,
+	ephemeral,
+}: SelectCustomIDOptions) {
+	return `${CATEGORY_SELECT_CUSTOM_ID}${categoryId}${DISCORD_ID_SEPARATOR}${ephemeral ? "true" : "false"}${DISCORD_ID_SEPARATOR}`;
 }
 
 export function createLinksLabel() {
@@ -42,7 +45,7 @@ export function createLinksLabel() {
 
 export default class AddLinksModal extends ModalCommand {
 	override filter(ctx: ModalContext) {
-		return ctx.customId.startsWith("add-form-category:");
+		return ctx.customId.startsWith(CATEGORY_SELECT_PREFIX);
 	}
 
 	async run(ctx: ModalContext) {
@@ -62,10 +65,20 @@ export default class AddLinksModal extends ModalCommand {
 			});
 		}
 
-		const categoryId = parsedCustomId;
+		const categoryId = parsedCustomId.categoryId;
+		const ephemeral = parsedCustomId.ephemeral === "true";
+
+		if (!categoryId) {
+			ctx.client.logger.error(
+				`No category ID found in custom ID: ${ctx.customId}`,
+			);
+			return;
+		}
 
 		const linksRaw = ctx.interaction.getInputValue("links", true) as string;
 		const links = LinkAdder.parseLinks(linksRaw);
+
+		await ctx.deferReply(ephemeral);
 
 		const linkAdder = new LinkAdder({
 			guildId: ctx.guildId,
@@ -87,20 +100,21 @@ export default class AddLinksModal extends ModalCommand {
 		const listResponse = createLinkResponse({
 			linkAddResult,
 			categoryId,
+			ephemeral,
 		});
 
 		switch (listResponse.type) {
 			case LinkResponseType.AllDuplicates: {
 				await ctx.editOrReply({
 					content: "All links are duplicates",
-					flags: MessageFlags.Ephemeral,
+					flags: listResponse.ephemeral ? MessageFlags.Ephemeral : undefined,
 				});
 				return;
 			}
 			case LinkResponseType.AllInvalid: {
 				await ctx.editOrReply({
 					content: "All links are invalid",
-					flags: MessageFlags.Ephemeral,
+					flags: listResponse.ephemeral ? MessageFlags.Ephemeral : undefined,
 				});
 				return;
 			}
@@ -108,14 +122,14 @@ export default class AddLinksModal extends ModalCommand {
 				await ctx.editOrReply({
 					content:
 						"No valid links provided. Please enter at least one valid URL.",
-					flags: MessageFlags.Ephemeral,
+					flags: listResponse.ephemeral ? MessageFlags.Ephemeral : undefined,
 				});
 				return;
 			}
 			case LinkResponseType.Success: {
 				await ctx.editOrReply({
 					content: listResponse.content,
-					flags: MessageFlags.Ephemeral,
+					flags: listResponse.ephemeral ? MessageFlags.Ephemeral : undefined,
 				});
 				return;
 			}
@@ -123,7 +137,7 @@ export default class AddLinksModal extends ModalCommand {
 	}
 
 	public static parseCustomId(customId: string) {
-		const [, categoryId] = customId.split(":");
-		return categoryId;
+		const [, categoryId, ephemeral] = customId.split(":");
+		return { categoryId, ephemeral };
 	}
 }

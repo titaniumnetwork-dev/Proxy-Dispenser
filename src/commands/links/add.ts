@@ -80,6 +80,7 @@ export default class AddCommand extends SubCommand {
 		const linkResponse = createLinkResponse({
 			linkAddResult: linkAdderResult,
 			categoryId,
+			ephemeral: ctx.options.ephemeral ?? true,
 		});
 
 		switch (linkResponse.type) {

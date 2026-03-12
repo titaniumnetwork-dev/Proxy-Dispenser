@@ -96,6 +96,7 @@ export async function dispense(options: Options): Promise<Result> {
 				isBlacklisted: true,
 				logChannelId: true,
 				monthlyCycle: true,
+				filterRoleIds: true,
 			},
 		}),
 	);
@@ -157,7 +158,7 @@ export async function dispense(options: Options): Promise<Result> {
 		db.query.links.findMany({
 			where: (l, { eq, and }) =>
 				and(eq(l.guildId, guildId), eq(l.categoryId, categoryId)),
-			columns: { id: true, link: true },
+			columns: { id: true, link: true, blockedFilters: true },
 		}),
 	);
 	if (linksError || !allLinks) {
@@ -186,8 +187,53 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const randomIndex = Math.floor(Math.random() * available.length);
-	const selectedLink = available[randomIndex];
+	const [, catError, catRow] = await t(
+		db.query.categories.findFirst({
+			where: (c, { eq, and }) =>
+				and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
+			columns: { filterApiEnabled: true },
+		}),
+	);
+	if (catError) {
+		logger.error(`Failed to fetch category settings: ${catError}`);
+	}
+
+	const priorityEnabled = !catError && Boolean(catRow?.filterApiEnabled);
+
+	const filterRoleIds = guildRow?.filterRoleIds ?? {};
+	const memberRoleIds = member?.roles.keys ?? [];
+	const filters = Object.entries(filterRoleIds)
+		.filter(([, roleId]) => memberRoleIds.includes(roleId))
+		.map(([filterId]) => filterId);
+
+	const prioritized =
+		priorityEnabled && filters.length > 0
+			? (() => {
+					const scored = available.map((link) => {
+						const blocked = new Set(link.blockedFilters ?? []);
+						const unblockedCount = filters.reduce(
+							(count, filterId) => count + (blocked.has(filterId) ? 0 : 1),
+							0,
+						);
+						return { link, unblockedCount };
+					});
+
+					const maxUnblocked = Math.max(
+						...scored.map((item) => item.unblockedCount),
+					);
+					if (maxUnblocked <= 0) {
+						return [];
+					}
+
+					return scored
+						.filter((item) => item.unblockedCount === maxUnblocked)
+						.map((item) => item.link);
+				})()
+			: [];
+
+	const sortedAvailable = prioritized.length > 0 ? prioritized : available;
+	const randomIndex = Math.floor(Math.random() * sortedAvailable.length);
+	const selectedLink = sortedAvailable[randomIndex];
 	if (!selectedLink) {
 		return {
 			success: false,
@@ -254,6 +300,6 @@ export async function dispense(options: Options): Promise<Result> {
 		success: true,
 		link: selectedLink.link,
 		remaining: maxLinks - (used + 1),
-		hasMore: available.length > 1,
+		hasMore: sortedAvailable.length > 1,
 	};
 }

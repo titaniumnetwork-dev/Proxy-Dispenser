@@ -23,6 +23,7 @@ export interface LinkResponseOptions {
 	 * Optionally, a prefix message to include at the start of the response.
 	 */
 	prefixMessage?: string;
+	ephemeral: boolean;
 }
 
 /**
@@ -42,11 +43,16 @@ export enum LinkResponseType {
 export function createLinkResponse(
 	options: LinkResponseOptions,
 ):
-	| { type: LinkResponseType.Success; content: string }
-	| { type: LinkResponseType.AllDuplicates }
-	| { type: LinkResponseType.AllInvalid }
-	| { type: LinkResponseType.NoValidLinks } {
-	const { linkAddResult: result, categoryId, prefixMessage } = options;
+	| { type: LinkResponseType.Success; content: string; ephemeral: boolean }
+	| { type: LinkResponseType.AllDuplicates; ephemeral: boolean }
+	| { type: LinkResponseType.AllInvalid; ephemeral: boolean }
+	| { type: LinkResponseType.NoValidLinks; ephemeral: boolean } {
+	const {
+		linkAddResult: result,
+		categoryId,
+		prefixMessage,
+		ephemeral,
+	} = options;
 	const responseParts: string[] = [];
 
 	if (prefixMessage) {
@@ -66,13 +72,13 @@ export function createLinkResponse(
 
 	if (result.duplicateLinks.length > 0) {
 		if (result.invalidLinks.length === 0 && result.insertedCount === 0) {
-			return { type: LinkResponseType.AllDuplicates };
+			return { type: LinkResponseType.AllDuplicates, ephemeral: ephemeral };
 		}
 	}
 
 	if (result.invalidLinks.length > 0) {
 		if (result.duplicateLinks.length === 0 && result.insertedCount === 0) {
-			return { type: LinkResponseType.AllInvalid };
+			return { type: LinkResponseType.AllInvalid, ephemeral: ephemeral };
 		}
 	}
 
@@ -121,8 +127,12 @@ export function createLinkResponse(
 	}
 
 	if (responseParts.length === 0) {
-		return { type: LinkResponseType.NoValidLinks };
+		return { type: LinkResponseType.NoValidLinks, ephemeral: ephemeral };
 	}
 
-	return { type: LinkResponseType.Success, content: responseParts.join("\n") };
+	return {
+		type: LinkResponseType.Success,
+		content: responseParts.join("\n"),
+		ephemeral: ephemeral,
+	};
 }

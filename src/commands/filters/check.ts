@@ -1,10 +1,10 @@
 import { checkLink } from "@utils/filterCheck";
 import {
-	Command,
 	type CommandContext,
 	createStringOption,
 	Declare,
 	Options,
+	SubCommand,
 } from "seyfert";
 
 const options = {
@@ -17,12 +17,9 @@ const options = {
 @Options(options)
 @Declare({
 	name: "check",
-	aliases: ["filter", "fcheck"],
 	description: "Check a URL against the filter checker",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
-export default class CheckCommand extends Command {
+export default class CheckCommand extends SubCommand {
 	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.options.query) {
 			await ctx.write({
