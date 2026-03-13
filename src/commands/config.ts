@@ -11,7 +11,7 @@ import { Command, Declare, Options } from "seyfert";
 	description: "Configure guild settings",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: 0n,
 })
 @Options([
 	ViewCommand,

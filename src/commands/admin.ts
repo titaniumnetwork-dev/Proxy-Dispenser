@@ -9,7 +9,7 @@ import { Command, Declare, Options } from "seyfert";
 	description: "Moderation and user management",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: 0n,
 })
 @Options([BlacklistCommand, UnblacklistCommand, ResetCommand, ResetUserCommand])
 export default class AdminCommand extends Command {}

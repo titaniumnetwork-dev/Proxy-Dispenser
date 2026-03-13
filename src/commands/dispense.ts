@@ -6,7 +6,7 @@ import { Command, Declare, Options } from "seyfert";
 	description: "Dispense proxy links",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: 0n,
 })
 @Options([PanelCommand])
 export default class DispenseCommand extends Command {}

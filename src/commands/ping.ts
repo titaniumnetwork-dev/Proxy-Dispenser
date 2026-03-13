@@ -10,7 +10,7 @@ import { Command, type CommandContext, Declare } from "seyfert";
 	description: "Show latency with Discord",
 	integrationTypes: ["GuildInstall", "UserInstall"],
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: 0n,
 })
 export default class PingCommand extends Command {
 	override async run(ctx: CommandContext) {
