@@ -11,6 +11,7 @@ import ToggleFilterApiCommand from "./category/toggleFilterApi";
 	description: "Manage categories",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
+	defaultMemberPermissions: ["Administrator"],
 })
 @Options([
 	CreateCategoryCommand,

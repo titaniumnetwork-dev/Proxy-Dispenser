@@ -38,7 +38,6 @@ const options = {
 	description: "Set a bonus link limit for a role",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class SetBonusCommand extends SubCommand {

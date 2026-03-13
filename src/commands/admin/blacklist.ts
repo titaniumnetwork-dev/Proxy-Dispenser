@@ -30,7 +30,6 @@ const options = {
 	description: "Blacklist a user from using the bot",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class BlacklistCommand extends SubCommand {

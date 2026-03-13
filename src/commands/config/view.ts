@@ -26,7 +26,6 @@ const options = {
 	description: "View the current guild configuration",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class ViewCommand extends SubCommand {
@@ -61,13 +60,6 @@ export default class ViewCommand extends SubCommand {
 		);
 		const premiumLimitDisplay =
 			premiumLines.length > 0 ? premiumLines.join("\n") : "None";
-
-		const adminRoles = (guildRow.adminRoleIds ?? [])
-			.map((id) => `<@&${id}>`)
-			.join(", ");
-		const adminUsers = (guildRow.adminUserIds ?? [])
-			.map((id) => `<@${id}>`)
-			.join(", ");
 
 		const embed = new Embed()
 			.setColor("#5865F2")
@@ -111,16 +103,6 @@ export default class ViewCommand extends SubCommand {
 					name: "Bonus Role Limits",
 					value: premiumLimitDisplay,
 					inline: false,
-				},
-				{
-					name: "Admin Roles",
-					value: adminRoles || "None",
-					inline: true,
-				},
-				{
-					name: "Admin Users",
-					value: adminUsers || "None",
-					inline: true,
 				},
 				{
 					name: "Auto Dispense",

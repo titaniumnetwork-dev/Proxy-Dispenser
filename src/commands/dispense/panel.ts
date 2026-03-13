@@ -32,7 +32,6 @@ const options = {
 	description: "Display the proxy dispenser panel",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class PanelCommand extends SubCommand {

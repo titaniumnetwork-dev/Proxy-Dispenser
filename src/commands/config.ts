@@ -1,5 +1,3 @@
-import SetAdminRolesCommand from "@commands/config/setAdminRoles";
-import SetAdminUsersCommand from "@commands/config/setAdminUsers";
 import SetBonusCommand from "@commands/config/setBonus";
 import SetCycleCommand from "@commands/config/setCycles";
 import SetDocsCommand from "@commands/config/setDocs";
@@ -13,14 +11,13 @@ import { Command, Declare, Options } from "seyfert";
 	description: "Configure guild settings",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
+	defaultMemberPermissions: ["Administrator"],
 })
 @Options([
 	ViewCommand,
 	SetLimitCommand,
 	SetBonusCommand,
 	SetLogChannelCommand,
-	SetAdminRolesCommand,
-	SetAdminUsersCommand,
 	SetCycleCommand,
 	SetDocsCommand,
 ])

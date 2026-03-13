@@ -3,7 +3,6 @@
  */
 
 import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
-import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -18,6 +17,7 @@ import {
 	Declare,
 	Embed,
 	Options,
+	SubCommand,
 	type WebhookMessage,
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
@@ -90,8 +90,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class ListCommand extends BYODSubCommand {
-	override async execute(ctx: CommandContext<typeof options>) {
+export class ListCommand extends SubCommand {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;

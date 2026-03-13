@@ -33,7 +33,6 @@ const options = {
 	description: "Set the monthly link limit for all users",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class SetLimitCommand extends SubCommand {

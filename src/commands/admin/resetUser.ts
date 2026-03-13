@@ -31,7 +31,6 @@ const options = {
 	description: "Reset the monthly link count for a user",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class ResetUserCommand extends SubCommand {

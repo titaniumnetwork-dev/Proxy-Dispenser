@@ -1,9 +1,4 @@
 {
-	"byod": {
-		"allowedUserIds": [],
-		"disallowedUserIds": [],
-		"allowedRoleIds": []
-	},
 	"filters": {
 		"aristotlek12": "Aristotle K12",
 		"blocksi": "Blocksi",

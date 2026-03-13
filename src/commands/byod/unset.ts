@@ -2,7 +2,6 @@
  * @fileoverview A slash command to unset a BYOD host.
  */
 
-import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -13,6 +12,7 @@ import {
 	createStringOption,
 	Declare,
 	Options,
+	SubCommand,
 } from "seyfert";
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
@@ -76,8 +76,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class UnsetCommand extends BYODSubCommand {
-	override async execute(ctx: CommandContext<typeof options>) {
+export class UnsetCommand extends SubCommand {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;

@@ -41,7 +41,6 @@ const options = {
 	description: "Set the monthly cycle mode",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class SetCycleCommand extends SubCommand {

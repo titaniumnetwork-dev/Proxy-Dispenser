@@ -2,7 +2,6 @@
  * @fileoverview A slash command to search BYOD hosts by hostname.
  */
 
-import { BYODSubCommand } from "@utils/byodAuth";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -16,6 +15,7 @@ import {
 	Declare,
 	Embed,
 	Options,
+	SubCommand,
 	type WebhookMessage,
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
@@ -39,8 +39,8 @@ const options = {
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 })
 @Options(options)
-export class SearchCommand extends BYODSubCommand {
-	override async execute(ctx: CommandContext<typeof options>) {
+export class SearchCommand extends SubCommand {
+	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
 			return;

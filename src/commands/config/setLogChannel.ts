@@ -33,7 +33,6 @@ const options = {
 	description: "Set the channel for dispenser logs",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class SetLogChannelCommand extends SubCommand {

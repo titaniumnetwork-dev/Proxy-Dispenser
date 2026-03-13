@@ -33,14 +33,6 @@ export const guild = sqliteTable("guild", {
 		.$type<Record<string, string>>()
 		.notNull()
 		.default(sql`(json_object())`),
-	adminRoleIds: text("admin_role_ids", { mode: "json" })
-		.$type<string[]>()
-		.notNull()
-		.default(sql`(json_array())`),
-	adminUserIds: text("admin_user_ids", { mode: "json" })
-		.$type<string[]>()
-		.notNull()
-		.default(sql`(json_array())`),
 	logChannelId: snowflake("log_channel_id"),
 	logChannelBlockedLinkReports: snowflake("log_channel_blocked_link_reports"),
 	logChannelCohortApprovals: snowflake("log_channel_cohort_approvals"),

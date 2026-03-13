@@ -31,7 +31,6 @@ const options = {
 	description: "Set the docs URL for /docs",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
 })
 @Options(options)
 export default class SetDocsCommand extends SubCommand {
