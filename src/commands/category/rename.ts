@@ -50,25 +50,35 @@ export default class RenameCategoryCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
-		const [, error] = await t(
+		const newName = ctx.options["new-name"].trim();
+		if (newName.length === 0) {
+			await ctx.editOrReply({
+				content: "Category name cannot be empty.",
+				flags,
+			});
+			return;
+		}
+
+		const [, error, result] = await t(
 			db
 				.update(schema.categories)
 				.set({
-					categoryId: ctx.options["new-name"],
+					categoryId: newName,
 				})
 				.where(
 					and(
 						eq(schema.categories.guildId, ctx.guildId),
 						eq(schema.categories.categoryId, ctx.options.category),
 					),
-				),
+				)
+				.returning({ categoryId: schema.categories.categoryId }),
 		);
 		if (error) {
 			ctx.client.logger.error(`Failed to rename category: ${error}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
-						`renaming category **${ctx.options.category}** to **${ctx.options["new-name"]}**`,
+						`renaming category **${ctx.options.category}** to **${newName}**`,
 					),
 				],
 				flags,
@@ -76,8 +86,16 @@ export default class RenameCategoryCommand extends SubCommand {
 			return;
 		}
 
+		if (!result || result.length === 0) {
+			await ctx.editOrReply({
+				content: `Category **${ctx.options.category}** not found.`,
+				flags,
+			});
+			return;
+		}
+
 		await ctx.editOrReply({
-			content: `Renamed category **${ctx.options.category}** to **${ctx.options["new-name"]}**`,
+			content: `Renamed category **${ctx.options.category}** to **${newName}**`,
 			flags,
 		});
 	}

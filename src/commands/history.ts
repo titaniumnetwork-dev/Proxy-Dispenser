@@ -42,7 +42,7 @@ export default class HistoryCommand extends Command {
 
 		const guildId = ctx.guildId;
 		const userId = ctx.author.id;
-		const categoryFilter = ctx.options.category as string;
+		const categoryFilter = ctx.options.category as string | undefined;
 
 		const [, error, userRow] = await t(
 			db.query.guildUsers.findFirst({

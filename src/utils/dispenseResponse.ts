@@ -41,7 +41,11 @@ export async function handleDispense(
 		.addFields(
 			{ name: "Type", value: categoryId, inline: true },
 			{ name: "Link", value: result.link, inline: false },
-			{ name: "Unblocked On", value: unblocked.join(", "), inline: false },
+			{
+				name: "Unblocked On",
+				value: unblocked.length > 0 ? unblocked.join(", ") : "Unknown",
+				inline: false,
+			},
 			{ name: "Remaining", value: String(result.remaining), inline: true },
 		);
 
@@ -60,8 +64,9 @@ export async function handleDispense(
 		row.addComponents(requestAnother);
 	}
 
+	const reportCustomId = `report:${categoryId}:${result.link}`;
 	const reportButton = new Button()
-		.setCustomId(`report:${categoryId}:${result.link}`)
+		.setCustomId(reportCustomId.slice(0, 100))
 		.setStyle(ButtonStyle.Danger)
 		.setLabel("Report");
 	row.addComponents(reportButton);

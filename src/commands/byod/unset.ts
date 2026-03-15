@@ -52,8 +52,11 @@ const options = {
 				});
 
 				const choices = filtered.slice(0, 25).map((host) => ({
-					name: `(${host.service})        ${" ".repeat(30 - host.service.length)}https://${host.hostname}`,
-					value: host.hostname,
+					name: `(${host.service})${" ".repeat(Math.max(0, 30 - host.service.length))}https://${host.hostname}`.slice(
+						0,
+						100,
+					),
+					value: host.hostname.slice(0, 100),
 				}));
 
 				return interaction.respond(choices);
@@ -91,7 +94,7 @@ export class UnsetCommand extends SubCommand {
 
 		const [, error, response] = await t(
 			fetch(
-				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts/${host}`,
+				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts/${encodeURIComponent(host)}`,
 				{
 					method: "DELETE",
 					headers: {
@@ -110,6 +113,17 @@ export class UnsetCommand extends SubCommand {
 		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("unset BYOD host")],
+				flags,
+			});
+			return;
+		}
+
+		if (!response.ok) {
+			ctx.client.logger.error(
+				`BYOD API returned ${response.status} when unsetting host: ${host}`,
+			);
+			await ctx.editOrReply({
+				content: `Failed to unset BYOD host: ${host} (API returned ${response.status})`,
 				flags,
 			});
 			return;

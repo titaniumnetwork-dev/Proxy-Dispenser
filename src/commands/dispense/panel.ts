@@ -19,6 +19,8 @@ import {
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 
+const MAX_CATEGORIES = 25 * 4; // 25 is the limit for dropdowns
+
 const options = {
 	category: createStringOption({
 		description: "Only show a specific category on the panel (Optional)",
@@ -79,6 +81,8 @@ export default class PanelCommand extends SubCommand {
 			return;
 		}
 
+		const visibleCategories = categories.slice(0, MAX_CATEGORIES);
+
 		const embed = new Embed()
 			.setColor("#5865F2")
 			.setTitle("Proxy Dispenser")
@@ -86,25 +90,35 @@ export default class PanelCommand extends SubCommand {
 				"Choose a proxy below to receive a new link! Use /history to view previously requested links.",
 			);
 
-		const categoryMenu = new StringSelectMenu()
-			.setCustomId(`dispense:${DISCORD_ID_PARTS.separator}`)
-			.setPlaceholder("Select a proxy");
+		const rows: ActionRow<StringSelectMenu>[] = [];
+		for (let i = 0; i < visibleCategories.length; i += 25) {
+			const chunk = visibleCategories.slice(i, i + 25);
+			const menuIndex = Math.floor(i / 25);
 
-		for (const category of categories) {
-			const dropdown = new StringSelectOption()
-				.setLabel(category.categoryId)
-				.setValue(category.categoryId);
-			if (category.emojiId) {
-				dropdown.setEmoji(category.emojiId);
+			const menu = new StringSelectMenu()
+				.setCustomId(`dispense:${DISCORD_ID_PARTS.separator}:${menuIndex}`)
+				.setPlaceholder(
+					rows.length === 0
+						? "Select a proxy"
+						: `More proxies (${chunk.length})`,
+				);
+
+			for (const category of chunk) {
+				const option = new StringSelectOption()
+					.setLabel(category.categoryId)
+					.setValue(category.categoryId);
+				if (category.emojiId) {
+					option.setEmoji(category.emojiId);
+				}
+				menu.addOption(option);
 			}
-			categoryMenu.addOption(dropdown);
-		}
 
-		const row = new ActionRow<StringSelectMenu>().setComponents([categoryMenu]);
+			rows.push(new ActionRow<StringSelectMenu>().setComponents([menu]));
+		}
 
 		await ctx.editOrReply({
 			embeds: [embed],
-			components: [row],
+			components: rows,
 		});
 	}
 }

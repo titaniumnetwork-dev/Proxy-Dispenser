@@ -27,19 +27,28 @@ export default class CheckCommand extends SubCommand {
 			});
 			return;
 		}
-		const check = await checkLink(ctx.options.query);
 		await ctx.write({
 			content: "```Fetching...```",
 		});
+		let check: Awaited<ReturnType<typeof checkLink>>;
+		try {
+			check = await checkLink(ctx.options.query);
+		} catch (e) {
+			await ctx.editResponse({
+				content: `\`\`\`Failed to check the URL against the filter checker.
+				Error: ${e}\`\`\``,
+			});
+			return;
+		}
 		let message: string = `\`\`\`json\n{\n`;
-		message += `\turl: ${ctx.options.query}${check.blocked || check.unblocked || check.unknown ? ",\n" : "\n"}`;
-		if (check.blocked) {
-			message += `\tblocked: [\n\t\t${check.blocked.join(",\n\t\t")}\n\t]${check.unblocked || check.unknown ? ",\n" : "\n"}`;
+		message += `\turl: ${ctx.options.query}${check.blocked.length > 0 || check.unblocked.length > 0 || check.unknown.length > 0 ? ",\n" : "\n"}`;
+		if (check.blocked.length > 0) {
+			message += `\tblocked: [\n\t\t${check.blocked.join(",\n\t\t")}\n\t]${check.unblocked.length > 0 || check.unknown.length > 0 ? ",\n" : "\n"}`;
 		}
-		if (check.unblocked) {
-			message += `\tunblocked: [\n\t\t${check.unblocked.join(",\n\t\t")}\n\t]${check.unknown ? ",\n" : "\n"}`;
+		if (check.unblocked.length > 0) {
+			message += `\tunblocked: [\n\t\t${check.unblocked.join(",\n\t\t")}\n\t]${check.unknown.length > 0 ? ",\n" : "\n"}`;
 		}
-		if (check.unknown) {
+		if (check.unknown.length > 0) {
 			message += `\tunknown: [\n\t\t${check.unknown.join(",\n\t\t")}\n\t]\n`;
 		}
 		message += `}\n\`\`\``;

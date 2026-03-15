@@ -12,6 +12,33 @@ export default class ReportCloseButton extends ComponentCommand {
 	}
 
 	async run(ctx: ComponentContext<typeof this.componentType>) {
+		if (!ctx.guildId) {
+			await ctx.interaction.editOrReply({
+				content: "This can only be used in a server.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
+		const member = ctx.interaction.member;
+		if (!member) {
+			await ctx.interaction.editOrReply({
+				content: "Error obtaining user permissions.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
+		const hasPermission = member.permissions?.has(["ManageMessages"]);
+		if (!hasPermission) {
+			await ctx.interaction.editOrReply({
+				content:
+					"You need the **Manage Messages** permission to close reports.",
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		const originalMessage = ctx.interaction.message;
 		if (!originalMessage) {
 			await ctx.interaction.editOrReply({

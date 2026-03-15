@@ -96,9 +96,11 @@ export function calculateTemplateSpace(options: TemplateSpaceOptions): number {
 		placeholder = LIST_PLACEHOLDER,
 	} = options;
 
+	if (placeholderCount === 0) return maxLength;
+
 	const fixedLength = template.length - placeholder.length * placeholderCount;
 	const availableSpace = maxLength - fixedLength;
-	return Math.floor(availableSpace / placeholderCount);
+	return Math.max(0, Math.floor(availableSpace / placeholderCount));
 }
 
 /**

@@ -145,7 +145,7 @@ export default class RemoveCommand extends SubCommand {
 				await ctx.editOrReply({
 					embeds: [
 						createUnexpectedErrorEmbed(
-							`removing link \`${link}\` from category **${category}**`,
+							`removing link \`${link}\` from category **${firstLink.categoryId}**`,
 						),
 					],
 					flags,

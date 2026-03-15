@@ -2,6 +2,7 @@
  * @fileoverview A slash command to search BYOD hosts by hostname.
  */
 
+import { IDLE_TIMEOUT } from "@consts";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -79,10 +80,20 @@ export class SearchCommand extends SubCommand {
 			return;
 		}
 
-		const all = (await response.json()) as Array<{
-			service: string;
-			hostname: string;
-		}>;
+		let all: Array<{ service: string; hostname: string }>;
+		try {
+			all = (await response.json()) as Array<{
+				service: string;
+				hostname: string;
+			}>;
+		} catch (jsonError) {
+			ctx.client.logger.error(`Failed to parse hosts response: ${jsonError}`);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("parsing hosts response")],
+				flags,
+			});
+			return;
+		}
 
 		const hosts = all.filter((host) =>
 			host.hostname.toLowerCase().includes(query),
@@ -147,11 +158,29 @@ export class SearchCommand extends SubCommand {
 			flags,
 		})) as WebhookMessage;
 
-		const collector = message.createComponentCollector();
+		const collector = message.createComponentCollector({
+			filter: (interaction) =>
+				interaction.user.id === ctx.author.id && interaction.isButton(),
+			idle: IDLE_TIMEOUT,
+			onStop: async () => {
+				try {
+					await message.edit({
+						components: [
+							new ActionRow<Button>().setComponents([
+								backBtn.setDisabled(true),
+								nextBtn.setDisabled(true),
+							]),
+						],
+					});
+				} catch {}
+			},
+		});
 
 		collector.run("byod:search:next", async (i) => {
 			if (i.isButton()) {
-				currentPage++;
+				if (currentPage < totalPages - 1) {
+					currentPage++;
+				}
 
 				backBtn.setDisabled(currentPage === 0);
 				nextBtn.setDisabled(currentPage === totalPages - 1);
@@ -167,7 +196,9 @@ export class SearchCommand extends SubCommand {
 
 		collector.run("byod:search:previous", async (i) => {
 			if (i.isButton()) {
-				currentPage--;
+				if (currentPage > 0) {
+					currentPage--;
+				}
 
 				backBtn.setDisabled(currentPage === 0);
 				nextBtn.setDisabled(currentPage === totalPages - 1);

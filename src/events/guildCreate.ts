@@ -29,18 +29,33 @@ export default createEvent({
 			);
 			return;
 		}
-		const systemChannel = await client.channels.fetch(guild.systemChannelId);
 
-		client.messages.write(systemChannel.id, {
-			embeds: [
-				new Embed().setTitle("Welcome to Dispenser!").setDescription(
-					`
+		const [, channelError, systemChannel] = await t(
+			client.channels.fetch(guild.systemChannelId),
+		);
+		if (channelError || !systemChannel) {
+			client.logger.error(
+				`Failed to fetch system channel for guild (${guild.id}): ${channelError}`,
+			);
+			return;
+		}
+
+		const [, messageError] = await t(
+			client.messages.write(systemChannel.id, {
+				embeds: [
+					new Embed().setTitle("Welcome to Dispenser!").setDescription(
+						`
 						Dispenser is a link management utility that protects proxy links on your Discord server. It is intelligent and prevents your service from burning through links through advanced distribution systems. To get started, you can add your first link with \`/links add\` if you have a link list ready, configure options such as the log channel, monthly cycle, or monthly limit, and finally create a panel channel with \`/dispense create-panel\`. You may also forgo a panel and instruct your users to run \`/dispense get-link\` to receive a link.
 						
-						Server Managers and Administrators - Configure authorized roles for the bot, and add overrides as needed (Recommended: Make \`/links\` and \`/category\` available to link deployers). \`/docs\` and \`/history\` are available to all users.
-						`,
-				),
-			],
-		});
+						Server Managers and Administrators - Configure authorized roles for the bot, and add overrides as needed (Recommended: Make \`/links\` and \`/category\` available to link deployers). \`/docs\` and \`/history\` are available to all users.`,
+					),
+				],
+			}),
+		);
+		if (messageError) {
+			client.logger.error(
+				`Failed to send welcome message to guild (${guild.id}): ${messageError}`,
+			);
+		}
 	},
 });

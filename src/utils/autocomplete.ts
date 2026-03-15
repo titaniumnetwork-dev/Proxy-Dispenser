@@ -10,6 +10,10 @@ import { and, desc, eq, like, sql } from "drizzle-orm";
 import type { AutocompleteInteraction } from "seyfert";
 import { t } from "try";
 
+function escapeLikePattern(input: string): string {
+	return input.replace(/[%_\\]/g, "\\$&");
+}
+
 export async function categoryAutocomplete(
 	interaction: AutocompleteInteraction,
 ) {
@@ -22,7 +26,9 @@ export async function categoryAutocomplete(
 
 	const whereConditions = [eq(schema.categories.guildId, guildId)];
 	if (input) {
-		whereConditions.push(like(schema.categories.categoryId, `%${input}%`));
+		whereConditions.push(
+			like(schema.categories.categoryId, `%${escapeLikePattern(input)}%`),
+		);
 	}
 
 	const [, error, categories] = await t(
@@ -42,8 +48,8 @@ export async function categoryAutocomplete(
 
 	const choices = categories
 		.map((category) => ({
-			name: category.categoryId,
-			value: category.categoryId,
+			name: category.categoryId.slice(0, 100),
+			value: category.categoryId.slice(0, 100),
 		}))
 		.slice(0, DISCORD_MAX_CHOICES);
 
@@ -71,7 +77,9 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 
 	const whereConditions = [eq(schema.links.guildId, guildId)];
 	if (input) {
-		whereConditions.push(like(schema.links.link, `%${input}%`));
+		whereConditions.push(
+			like(schema.links.link, `%${escapeLikePattern(input)}%`),
+		);
 	}
 
 	const [, error, linkRows] = await t(
@@ -109,8 +117,8 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 
 	const choices = linkRows
 		.map((row) => ({
-			name: row.link,
-			value: row.link,
+			name: row.link.slice(0, 100),
+			value: row.link.slice(0, 100),
 		}))
 		.slice(0, DISCORD_MAX_CHOICES);
 

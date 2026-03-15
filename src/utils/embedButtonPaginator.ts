@@ -100,7 +100,7 @@ export class ButtonPaginator<T extends ButtonConfig> {
 		this.buttons = buttons;
 		this.opts = { ...DEFAULTS, ...options };
 		const contentRows = this.opts.maxRows - 1;
-		this.perPage = this.opts.buttonsPerRow * contentRows;
+		this.perPage = Math.max(1, this.opts.buttonsPerRow * contentRows);
 	}
 
 	/**
@@ -108,6 +108,7 @@ export class ButtonPaginator<T extends ButtonConfig> {
 	 * @returns Total number of pages.
 	 */
 	get totalPages(): number {
+		if (this.buttons.length === 0) return 1;
 		return Math.ceil(this.buttons.length / this.perPage);
 	}
 

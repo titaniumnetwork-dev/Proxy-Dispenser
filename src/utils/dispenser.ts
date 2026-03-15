@@ -85,7 +85,7 @@ export async function dispense(options: Options): Promise<Result> {
 	if (blacklisted) {
 		return {
 			success: false,
-			error: "You are blacklisted from recieving proxy links.",
+			error: "You are blacklisted from receiving proxy links.",
 		};
 	}
 
@@ -103,7 +103,7 @@ export async function dispense(options: Options): Promise<Result> {
 	if (guildRow?.isBlacklisted) {
 		return {
 			success: false,
-			error: "This server has been blacklisted from recieving proxy links.",
+			error: "This server has been blacklisted from receiving proxy links.",
 		};
 	}
 

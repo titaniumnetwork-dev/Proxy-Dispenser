@@ -47,9 +47,17 @@ export default class SetDocsCommand extends SubCommand {
 		const url = (ctx.options.url as string | undefined) ?? null;
 
 		if (url) {
+			let parsedUrl: URL;
 			try {
-				new URL(url);
+				parsedUrl = new URL(url);
 			} catch {
+				await ctx.editOrReply({
+					content: "Invalid URL.",
+					flags: MessageFlags.Ephemeral,
+				});
+				return;
+			}
+			if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
 				await ctx.editOrReply({
 					content: "Invalid URL.",
 					flags: MessageFlags.Ephemeral,

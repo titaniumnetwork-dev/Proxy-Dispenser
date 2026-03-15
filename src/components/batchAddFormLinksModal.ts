@@ -136,8 +136,13 @@ export default class AddLinksModal extends ModalCommand {
 		}
 	}
 
-	public static parseCustomId(customId: string) {
-		const [, categoryId, ephemeral] = customId.split(":");
+	public static parseCustomId(
+		customId: string,
+	): { categoryId: string; ephemeral: string } | null {
+		const parts = customId.split(":");
+		const categoryId = parts[1];
+		const ephemeral = parts[2];
+		if (!categoryId || ephemeral === undefined) return null;
 		return { categoryId, ephemeral };
 	}
 }

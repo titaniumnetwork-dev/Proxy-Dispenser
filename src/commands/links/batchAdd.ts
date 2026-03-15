@@ -25,6 +25,8 @@ import {
 import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 
+const MAX_CATEGORIES = 25 * 4; // 25 is the limit for dropdowns
+
 const options = {
 	category: createStringOption({
 		description: "The category to add the links to",
@@ -95,23 +97,37 @@ export default class AddFormCommand extends SubCommand {
 			return;
 		}
 
-		const categoryMenu = new StringSelectMenu()
-			.setCustomId(`${CATEGORY_SELECT_PREFIX}${DISCORD_ID_PARTS.separator}`)
-			.setPlaceholder("Select a category");
+		const visibleCategories = categories.slice(0, MAX_CATEGORIES);
 
-		for (const category of categories) {
-			categoryMenu.addOption(
-				new StringSelectOption()
-					.setLabel(category.categoryId)
-					.setValue(category.categoryId),
-			);
+		const rows: ActionRow<StringSelectMenu>[] = [];
+		for (let i = 0; i < visibleCategories.length; i += 25) {
+			const chunk = visibleCategories.slice(i, i + 25);
+			const menuIndex = Math.floor(i / 25);
+
+			const menu = new StringSelectMenu()
+				.setCustomId(
+					`${CATEGORY_SELECT_PREFIX}${DISCORD_ID_PARTS.separator}${menuIndex}`,
+				)
+				.setPlaceholder(
+					rows.length === 0
+						? "Select a category"
+						: `More categories (${chunk.length})`,
+				);
+
+			for (const category of chunk) {
+				menu.addOption(
+					new StringSelectOption()
+						.setLabel(category.categoryId)
+						.setValue(category.categoryId),
+				);
+			}
+
+			rows.push(new ActionRow<StringSelectMenu>().setComponents([menu]));
 		}
-
-		const row = new ActionRow<StringSelectMenu>().setComponents([categoryMenu]);
 
 		await ctx.editOrReply({
 			content: "Select a category to add links to:",
-			components: [row],
+			components: rows,
 			flags: ephemeral,
 		});
 	}

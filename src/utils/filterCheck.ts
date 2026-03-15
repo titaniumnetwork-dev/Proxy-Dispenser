@@ -4,6 +4,12 @@ export interface Link {
 	readonly unknown: string[];
 }
 
+const EMPTY_RESULT: Link = Object.freeze({
+	blocked: [],
+	unblocked: [],
+	unknown: [],
+});
+
 async function getBlocked(url: string): Promise<string[]> {
 	const result = await checkLink(url);
 	return result.blocked;
@@ -15,36 +21,44 @@ async function getUnblocked(url: string): Promise<string[]> {
 }
 
 async function checkLink(url: string): Promise<Link> {
-	const response = await fetch(
-		`${process.env.FC_URL}${encodeURIComponent(url)}`,
-		{
-			method: "GET",
-			headers: {
-				"x-api-key": process.env.FC_API_KEY || "your-api-key-here",
-				"Content-Type": "application/json",
-			},
-		},
-	);
-
-	if (!response.ok) {
-		return {
-			blocked: [],
-			unblocked: [],
-			unknown: [],
-		};
+	if (!process.env.FC_URL || !process.env.FC_API_KEY) {
+		console.error(
+			"Filter check API is not configured (missing FC_URL or FC_API_KEY)",
+		);
+		return EMPTY_RESULT;
 	}
 
-	const result = (await response.json()) as {
-		blocked: string[];
-		unblocked: string[];
-		unknown: string[];
-	};
+	try {
+		const response = await fetch(
+			`${process.env.FC_URL}${encodeURIComponent(url)}`,
+			{
+				method: "GET",
+				headers: {
+					"x-api-key": process.env.FC_API_KEY,
+					"Content-Type": "application/json",
+				},
+			},
+		);
 
-	return {
-		blocked: result.blocked,
-		unblocked: result.unblocked,
-		unknown: result.unknown,
-	};
+		if (!response.ok) {
+			return EMPTY_RESULT;
+		}
+
+		const result = (await response.json()) as {
+			blocked?: string[];
+			unblocked?: string[];
+			unknown?: string[];
+		};
+
+		return {
+			blocked: Array.isArray(result?.blocked) ? result.blocked : [],
+			unblocked: Array.isArray(result?.unblocked) ? result.unblocked : [],
+			unknown: Array.isArray(result?.unknown) ? result.unknown : [],
+		};
+	} catch (error) {
+		console.error(`Filter check API error for ${url}:`, error);
+		return EMPTY_RESULT;
+	}
 }
 
 export { checkLink, getBlocked, getUnblocked };

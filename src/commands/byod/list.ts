@@ -3,14 +3,13 @@
  */
 
 import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
+import { EmbedPaginator } from "@utils/embedPaginator";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
 import {
-	ActionRow,
 	AttachmentBuilder,
-	Button,
 	type CommandContext,
 	createBooleanOption,
 	createStringOption,
@@ -18,9 +17,8 @@ import {
 	Embed,
 	Options,
 	SubCommand,
-	type WebhookMessage,
 } from "seyfert";
-import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
+import { MessageFlags } from "seyfert/lib/types";
 import { t } from "try";
 
 const options = {
@@ -127,10 +125,20 @@ export class ListCommand extends SubCommand {
 			return;
 		}
 
-		let hosts = (await response.json()) as Array<{
-			service: string;
-			hostname: string;
-		}>;
+		let hosts: Array<{ service: string; hostname: string }>;
+		try {
+			hosts = (await response.json()) as Array<{
+				service: string;
+				hostname: string;
+			}>;
+		} catch (jsonError) {
+			ctx.client.logger.error(`Failed to parse hosts response: ${jsonError}`);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("parsing hosts response")],
+				flags,
+			});
+			return;
+		}
 
 		const serviceFilter = ctx.options.service;
 		if (serviceFilter) {
@@ -198,80 +206,35 @@ export class ListCommand extends SubCommand {
 
 		const items = 10;
 		const totalPages = Math.ceil(hosts.length / items);
-		let currentPage = 0;
 
-		const createEmbed = (page: number) => {
+		const baseTitle = serviceFilter
+			? `BYOD Hosts - ${serviceFilter}`
+			: "BYOD Hosts";
+
+		const embeds: Embed[] = [];
+		for (let page = 0; page < totalPages; page++) {
 			const start = page * items;
-			const end = start + items;
-			const slicedHosts = hosts.slice(start, end);
+			const slicedHosts = hosts.slice(start, start + items);
 
-			const pageEmbed = byodBaseEmbed.setFooter({
-				text: `Page ${page + 1} of ${totalPages}`,
-			});
+			const pageEmbed = new Embed()
+				.setTitle(baseTitle)
+				.setColor("#5865F2")
+				.setFooter({
+					text: `Page ${page + 1} of ${totalPages}`,
+				});
 
-			slicedHosts.forEach((host) => {
+			for (const host of slicedHosts) {
 				pageEmbed.addFields({
 					name: host.service,
 					value: `<https://${host.hostname}>`,
 					inline: false,
 				});
-			});
-
-			return pageEmbed;
-		};
-
-		const backBtn = new Button()
-			.setCustomId("byod:previous")
-			.setLabel("Previous")
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(true);
-
-		const nextBtn = new Button()
-			.setCustomId("byod:next")
-			.setLabel("Next")
-			.setStyle(ButtonStyle.Primary)
-			.setDisabled(totalPages <= 1);
-
-		const row = new ActionRow<Button>().setComponents([backBtn, nextBtn]);
-
-		const message = (await ctx.editOrReply({
-			embeds: [createEmbed(currentPage)],
-			components: [row],
-			flags,
-		})) as WebhookMessage;
-
-		const collector = message.createComponentCollector();
-
-		collector.run("byod:next", async (i) => {
-			if (i.isButton()) {
-				currentPage++;
-
-				backBtn.setDisabled(currentPage === 0);
-				nextBtn.setDisabled(currentPage === totalPages - 1);
-
-				return i.update({
-					embeds: [createEmbed(currentPage)],
-					components: [
-						new ActionRow<Button>().setComponents([backBtn, nextBtn]),
-					],
-				});
 			}
-		});
 
-		collector.run("byod:previous", async (i) => {
-			if (i.isButton()) {
-				currentPage--;
+			embeds.push(pageEmbed);
+		}
 
-				backBtn.setDisabled(currentPage === 0);
-				nextBtn.setDisabled(currentPage === totalPages - 1);
-
-				return i.update({
-					embeds: [createEmbed(currentPage)],
-					components: [
-						new ActionRow<Button>().setComponents([backBtn, nextBtn]),
-					],
-				});
-			}
-		});
+		const paginator = new EmbedPaginator(ctx, embeds, ephemeral);
+		await paginator.start();
 	}
 }

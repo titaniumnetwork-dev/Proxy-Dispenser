@@ -6,6 +6,7 @@
 import { IDLE_TIMEOUT } from "@consts";
 import { ActionRow, Button, type CommandContext, type Embed } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
+import { t } from "try";
 
 /**
  * Button custom IDs for the paginator.
@@ -71,9 +72,16 @@ export class EmbedPaginator {
 			idle: IDLE_TIMEOUT,
 			onStop: async (reason) => {
 				if (reason === "idle") {
-					await message.edit({
-						components: [this.getNavigationRow(true)],
-					});
+					const [, editError] = await t(
+						message.edit({
+							components: [this.getNavigationRow(true)],
+						}),
+					);
+					if (editError) {
+						this.ctx.client.logger.error(
+							`Failed to disable paginator buttons: ${editError}`,
+						);
+					}
 				}
 			},
 		});

@@ -6,6 +6,7 @@ import { DISCORD_TEXT_DISPLAY_LIMIT, IDLE_TIMEOUT } from "@consts";
 import type { CommandContext } from "seyfert";
 import { ActionRow, Button, Container, TextDisplay } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
+import { t } from "try";
 
 /**
  * Button custom IDs for the link list paginator.
@@ -110,9 +111,16 @@ export class LinkListPaginator {
 			idle: IDLE_TIMEOUT,
 			onStop: async (reason) => {
 				if (reason === "idle") {
-					await message.edit({
-						components: this.getPageComponents(true),
-					});
+					const [, editError] = await t(
+						message.edit({
+							components: this.getPageComponents(true),
+						}),
+					);
+					if (editError) {
+						this.ctx.client.logger.error(
+							`Failed to disable paginator buttons: ${editError}`,
+						);
+					}
 				}
 			},
 		});
