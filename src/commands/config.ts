@@ -3,6 +3,7 @@ import SetCycleCommand from "@commands/config/setCycles";
 import SetDocsCommand from "@commands/config/setDocs";
 import SetLimitCommand from "@commands/config/setLimit";
 import SetLogChannelCommand from "@commands/config/setLogChannel";
+import SetupConfigCommand from "@commands/config/setup";
 import ViewCommand from "@commands/config/view";
 import { Command, Declare, Options } from "seyfert";
 
@@ -20,5 +21,6 @@ import { Command, Declare, Options } from "seyfert";
 	SetLogChannelCommand,
 	SetCycleCommand,
 	SetDocsCommand,
+	SetupConfigCommand,
 ])
 export default class ConfigCommand extends Command {}

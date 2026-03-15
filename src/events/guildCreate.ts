@@ -33,11 +33,13 @@ export default createEvent({
 
 		client.messages.write(systemChannel.id, {
 			embeds: [
-				new Embed()
-					.setTitle("Welcome to Dispenser!")
-					.setDescription(
-						"Dispenser is a link management utility that protects proxy links on your Discord server. It is intelligent and prevents your service from burning through links through advanced distribution systems. To get started, you can add your first link with `/links add` if you have a link list ready, configure options such as link admin users with `/config` (so users other than server admins can configure the bot), and finally create a panel channel with `/dispense create-panel`. You may also forgo a panel and instruct your users to run `/dispense get-link` to receive a link.",
-					),
+				new Embed().setTitle("Welcome to Dispenser!").setDescription(
+					`
+						Dispenser is a link management utility that protects proxy links on your Discord server. It is intelligent and prevents your service from burning through links through advanced distribution systems. To get started, you can add your first link with \`/links add\` if you have a link list ready, configure options such as the log channel, monthly cycle, or monthly limit, and finally create a panel channel with \`/dispense create-panel\`. You may also forgo a panel and instruct your users to run \`/dispense get-link\` to receive a link.
+						
+						Server Managers and Administrators - Configure authorized roles for the bot, and add overrides as needed (Recommended: Make \`/links\` and \`/category\` available to link deployers). \`/docs\` and \`/history\` are available to all users.
+						`,
+				),
 			],
 		});
 	},
