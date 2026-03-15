@@ -73,7 +73,9 @@ export default class SetRoleCommand extends SubCommand {
 				db.insert(schema.guild).values({ guildId }).onConflictDoNothing(),
 			);
 			if (insertError) {
-				ctx.client.logger.error(`Failed to create guild config: ${insertError}`);
+				ctx.client.logger.error(
+					`Failed to create guild config: ${insertError}`,
+				);
 				await ctx.editOrReply({
 					embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
 					flags: MessageFlags.Ephemeral,
@@ -98,7 +100,9 @@ export default class SetRoleCommand extends SubCommand {
 		if (error) {
 			ctx.client.logger.error(`Failed to set role for filter: ${error}`);
 			await ctx.editOrReply({
-				embeds: [createUnexpectedErrorEmbed(`setting role for filter **${filter}**`)],
+				embeds: [
+					createUnexpectedErrorEmbed(`setting role for filter **${filter}**`),
+				],
 				flags: MessageFlags.Ephemeral,
 			});
 			return;

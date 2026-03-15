@@ -57,8 +57,7 @@ export default class SetupConfigCommand extends SubCommand {
 
 		if (insertedGuild && insertedGuild.length > 0) {
 			await ctx.editOrReply({
-				content:
-					"Guild setup complete.",
+				content: "Guild setup complete.",
 				flags,
 			});
 			return;
