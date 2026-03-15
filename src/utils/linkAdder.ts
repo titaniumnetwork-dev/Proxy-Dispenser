@@ -235,7 +235,7 @@ export class LinkAdder {
 			};
 		}
 
-		const [, insertError] = await Promise.all(
+		const insertResults = await Promise.all(
 			newLinks.map((link) =>
 				t(async () => {
 					return db.insert(schema.links).values({
@@ -248,25 +248,31 @@ export class LinkAdder {
 				}),
 			),
 		);
-		if (insertError) {
+
+		const failedInserts = insertResults.filter((result) => !result.ok);
+		const insertedCount = insertResults.length - failedInserts.length;
+		const firstFailure = failedInserts[0];
+
+		if (firstFailure) {
+			const firstError = firstFailure.error;
 			this.logger.error(
-				`Failed to add links to category ${this.categoryId}: ${insertError}`,
+				`Failed to add ${failedInserts.length} link(s) to category ${this.categoryId}: ${firstError}`,
 			);
 			return {
 				dbSuccess: false,
-				dbError: String(insertError),
-				insertedCount: 0,
+				dbError: String(firstError),
+				insertedCount,
 				invalidLinks,
 				duplicateLinks,
 			};
 		}
 
 		this.logger.info(
-			`Added ${newLinks.length} ${newLinks.length === 1 ? "link" : "links"} to category ${this.categoryId}`,
+			`Added ${insertedCount} ${insertedCount === 1 ? "link" : "links"} to category ${this.categoryId}`,
 		);
 		return {
 			dbSuccess: true,
-			insertedCount: newLinks.length,
+			insertedCount,
 			invalidLinks,
 			duplicateLinks,
 		};
