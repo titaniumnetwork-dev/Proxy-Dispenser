@@ -17,6 +17,7 @@ export interface Success {
 	readonly link: string;
 	readonly remaining: number;
 	readonly hasMore: boolean;
+	readonly filterFallback: boolean;
 }
 
 export interface Failure {
@@ -231,6 +232,8 @@ export async function dispense(options: Options): Promise<Result> {
 				})()
 			: [];
 
+	const filterFallback =
+		priorityEnabled && filters.length > 0 && prioritized.length === 0;
 	const sortedAvailable = prioritized.length > 0 ? prioritized : available;
 	const randomIndex = Math.floor(Math.random() * sortedAvailable.length);
 	const selectedLink = sortedAvailable[randomIndex];
@@ -301,5 +304,6 @@ export async function dispense(options: Options): Promise<Result> {
 		link: selectedLink.link,
 		remaining: maxLinks - (used + 1),
 		hasMore: sortedAvailable.length > 1,
+		filterFallback,
 	};
 }

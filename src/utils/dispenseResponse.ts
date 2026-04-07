@@ -37,7 +37,11 @@ export async function handleDispense(
 	const embed = new Embed()
 		.setColor("#5865F2")
 		.setTitle("Proxy Delivery")
-		.setDescription("Enjoy your brand new proxy link!")
+		.setDescription(
+			result.filterFallback
+				? "No links matched your filter preferences. Here's a random link instead."
+				: "Enjoy your brand new proxy link!",
+		)
 		.addFields(
 			{ name: "Type", value: categoryId, inline: true },
 			{ name: "Link", value: result.link, inline: false },
