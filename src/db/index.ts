@@ -1,6 +1,7 @@
 import { Database } from "bun:sqlite";
 import { join } from "node:path";
 import { drizzle } from "drizzle-orm/bun-sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import * as schema from "./schema";
 
 const dbPath =
@@ -17,5 +18,7 @@ try {
 }
 
 const db = drizzle({ client: sqlite, schema });
+
+await migrate(db, { migrationsFolder: "./drizzle" });
 
 export { db, schema };

@@ -10,9 +10,10 @@
 		"lint": "biome lint --write",
 		"check": "biome check --write",
 		"typecheck": "tsgo",
-		"db:generate": "bunx drizzle-kit generate",
-		"db:migrate": "bun src/db/migrate.ts",
-		"db:full": "bun run db:generate && bun run db:migrate"
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"@types/node": "^25.3.5",
