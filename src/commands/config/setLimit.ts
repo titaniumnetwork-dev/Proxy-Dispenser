@@ -48,13 +48,13 @@ export default class SetLimitCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const limit = ctx.options.limit;
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			db
 				.update(schema.guild)
 				.set({ monthlyLimit: limit })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to set monthly limit: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting the monthly limit")],

@@ -33,16 +33,17 @@ async function getLimit(
 	guildId: string,
 	member?: GuildMember,
 ): Promise<number> {
-	const [, , guildRow] = await t(
+	const [guildOk, guildErr, guildRow] = await t(
 		db.query.guild.findFirst({
 			where: (g, { eq }) => eq(g.guildId, guildId),
 			columns: { monthlyLimit: true, premiumLimits: true },
 		}),
 	);
 
-	const monthlyLimit = guildRow?.monthlyLimit ?? 3;
-	const premiumLimits = guildRow?.premiumLimits ?? {};
+	if (!guildOk || !guildRow) return 3;
 
+	const monthlyLimit = guildRow.monthlyLimit;
+	const premiumLimits = guildRow.premiumLimits;
 	if (!member) return monthlyLimit;
 
 	const limits = [monthlyLimit];
@@ -132,14 +133,14 @@ export async function dispense(options: Options): Promise<Result> {
 		);
 	}
 
-	const [, , user] = await t(
+	const [userOk, userErr, user] = await t(
 		db.query.guildUsers.findFirst({
 			where: (u, { eq, and }) =>
 				and(eq(u.guildId, guildId), eq(u.userId, userId)),
 		}),
 	);
 
-	if (!user) {
+	if (!userOk || !user) {
 		logger.error(`Failed to get or create record for ${userId}`);
 		return {
 			success: false,
@@ -157,14 +158,14 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const [, linksError, allLinks] = await t(
+	const [linksOk, linksError, allLinks] = await t(
 		db.query.links.findMany({
 			where: (l, { eq, and }) =>
 				and(eq(l.guildId, guildId), eq(l.categoryId, categoryId)),
 			columns: { id: true, link: true, blockedFilters: true },
 		}),
 	);
-	if (linksError || !allLinks) {
+	if (!linksOk || !allLinks) {
 		logger.error(`Failed to fetch links: ${linksError}`);
 		return {
 			success: false,
@@ -190,7 +191,7 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const [, catError, catRow] = await t(
+	const [catOk, catError, catRow] = await t(
 		db.query.categories.findFirst({
 			where: (c, { eq, and }) =>
 				and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
@@ -201,7 +202,7 @@ export async function dispense(options: Options): Promise<Result> {
 		logger.error(`Failed to fetch category settings: ${catError}`);
 	}
 
-	const priorityEnabled = !catError && Boolean(catRow?.filterApiEnabled);
+	const priorityEnabled = catOk && Boolean(catRow?.filterApiEnabled);
 
 	const filterRoleIds = guildRow?.filterRoleIds ?? {};
 	const memberRoleIds = member?.roles.keys ?? [];
@@ -260,7 +261,7 @@ export async function dispense(options: Options): Promise<Result> {
 	}
 
 	const newLinks = [...receivedLinks, selectedLink.link];
-	const [, updateError] = await t(
+	const [updateOk, updateError] = await t(
 		db
 			.update(schema.guildUsers)
 			.set({
@@ -274,7 +275,7 @@ export async function dispense(options: Options): Promise<Result> {
 				),
 			),
 	);
-	if (updateError) {
+	if (!updateOk) {
 		logger.error(`Failed to update user record: ${updateError}`);
 		return {
 			success: false,

@@ -54,13 +54,13 @@ export default class SetBonusCommand extends SubCommand {
 		const role = ctx.options.role;
 		const limit = ctx.options.limit;
 
-		const [, fetchError, guildRow] = await t(
+		const [fetchOk, fetchError, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 				columns: { premiumLimits: true },
 			}),
 		);
-		if (fetchError) {
+		if (!fetchOk) {
 			ctx.client.logger.error(`Failed to fetch guild config: ${fetchError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
@@ -69,10 +69,10 @@ export default class SetBonusCommand extends SubCommand {
 			return;
 		}
 		if (!guildRow) {
-			const [, insertError] = await t(
+			const [insertOk, insertError] = await t(
 				db.insert(schema.guild).values({ guildId }).onConflictDoNothing(),
 			);
-			if (insertError) {
+			if (!insertOk) {
 				ctx.client.logger.error(
 					`Failed to create guild config: ${insertError}`,
 				);
@@ -92,13 +92,13 @@ export default class SetBonusCommand extends SubCommand {
 			premiumLimits[role.id] = limit;
 		}
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			db
 				.update(schema.guild)
 				.set({ premiumLimits })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to set bonus limit: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting the bonus limit")],

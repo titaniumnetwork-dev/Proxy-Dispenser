@@ -154,7 +154,7 @@ export class LinkAdder {
 			};
 		}
 
-		const [, categoryError, categoryResult] = await t(
+		const [categoryOk, categoryError, categoryResult] = await t(
 			db.query.categories.findFirst({
 				where: (categories, { eq, and }) =>
 					and(
@@ -164,7 +164,7 @@ export class LinkAdder {
 				columns: { categoryId: true },
 			}),
 		);
-		if (categoryError) {
+		if (!categoryOk) {
 			this.logger.error(
 				`Failed to check category ${this.categoryId} exists: ${categoryError}`,
 			);
@@ -190,7 +190,7 @@ export class LinkAdder {
 			};
 		}
 
-		const [, existingLinkError, existingLinks] = await t(
+		const [existingLinksOk, existingLinkError, existingLinks] = await t(
 			db.query.links.findMany({
 				where: (links, { eq, and, inArray }) =>
 					and(
@@ -201,7 +201,7 @@ export class LinkAdder {
 				columns: { link: true },
 			}),
 		);
-		if (existingLinkError) {
+		if (!existingLinksOk) {
 			this.logger.error(
 				`Failed to check for existing links: ${existingLinkError}`,
 			);

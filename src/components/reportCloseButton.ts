@@ -67,13 +67,13 @@ export default class ReportCloseButton extends ComponentCommand {
 
 		closedEmbed.setTimestamp();
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			originalMessage.edit({
 				embeds: [closedEmbed],
 				components: [],
 			}),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to close report: ${error}`);
 			await ctx.interaction.editOrReply({
 				content: "Failed to close the report.",

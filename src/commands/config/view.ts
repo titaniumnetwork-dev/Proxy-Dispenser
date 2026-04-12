@@ -40,12 +40,12 @@ export default class ViewCommand extends SubCommand {
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 
-		const [, error, guildRow] = await t(
+		const [ok, error, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 			}),
 		);
-		if (error || !guildRow) {
+		if (!ok || !guildRow) {
 			ctx.client.logger.error(`Failed to fetch guild config: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],

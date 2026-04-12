@@ -67,7 +67,7 @@ export default class AddFormCommand extends SubCommand {
 			return;
 		}
 
-		const [, error, categories] = await t(
+		const [ok, error, categories] = await t(
 			db.query.categories.findMany({
 				where: (categories, { eq }) => eq(categories.guildId, guildId),
 				columns: { categoryId: true },
@@ -77,15 +77,8 @@ export default class AddFormCommand extends SubCommand {
 				],
 			}),
 		);
-		if (error) {
+		if (!ok || !categories) {
 			ctx.client.logger.error(`Failed to fetch categories: ${error}`);
-		}
-		if (!categories) {
-			ctx.client.logger.error(
-				`Categories query returned an unexpected null result`,
-			);
-		}
-		if (error || !categories) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching categories")],
 				flags: ephemeral,

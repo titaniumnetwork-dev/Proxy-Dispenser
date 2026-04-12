@@ -31,7 +31,7 @@ export async function categoryAutocomplete(
 		);
 	}
 
-	const [, error, categories] = await t(
+	const [categoriesOk, categoriesErr, categories] = await t(
 		db
 			.select({
 				categoryId: schema.categories.categoryId,
@@ -45,8 +45,11 @@ export async function categoryAutocomplete(
 			.limit(DISCORD_MAX_CHOICES),
 	);
 
-	if (error || !categories) {
-		console.error("Failed to fetch categories for autocomplete:", error);
+	if (!categoriesOk || !categories) {
+		console.error(
+			"Failed to fetch categories for autocomplete:",
+			categoriesErr,
+		);
 		return interaction.respond([]);
 	}
 
@@ -86,7 +89,7 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 		);
 	}
 
-	const [, error, linkRows] = await t(
+	const [linksOk, linksErr, linkRows] = await t(
 		Promise.resolve(
 			db
 				.select({
@@ -115,7 +118,8 @@ export async function linkAutocomplete(interaction: AutocompleteInteraction) {
 		),
 	);
 
-	if (error || !linkRows) {
+	if (!linksOk || !linkRows) {
+		console.error("Failed to fetch links for autocomplete:", linksErr);
 		return interaction.respond([]);
 	}
 

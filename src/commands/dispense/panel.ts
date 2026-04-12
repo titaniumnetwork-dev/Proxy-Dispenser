@@ -47,7 +47,7 @@ export default class PanelCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const categoryFilter = ctx.options.category as string | undefined;
 
-		const [, error, categories] = await t(
+		const [ok, error, categories] = await t(
 			db.query.categories.findMany({
 				where: (categories, { eq, and }) =>
 					categoryFilter
@@ -63,15 +63,8 @@ export default class PanelCommand extends SubCommand {
 				],
 			}),
 		);
-		if (error) {
+		if (!ok || !categories) {
 			ctx.client.logger.error(`Failed to fetch categories: ${error}`);
-		}
-		if (!categories) {
-			ctx.client.logger.error(
-				`Categories query returned an unexpected null result`,
-			);
-		}
-		if (error || !categories) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching categories")],
 			});

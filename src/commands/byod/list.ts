@@ -2,6 +2,7 @@
  * @fileoverview A slash command to list all BYOD hosts.
  */
 
+import ResetUserCommand from "@commands/admin/resetUser";
 import { DISCORD_EMBED_DESCRIPTION_LIMIT } from "@consts";
 import { EmbedPaginator } from "@utils/embedPaginator";
 import {
@@ -84,8 +85,8 @@ const options = {
 @Declare({
 	name: "list",
 	description: "List all BYOD hosts",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
 })
 @Options(options)
 export class ListCommand extends SubCommand {
@@ -99,7 +100,7 @@ export class ListCommand extends SubCommand {
 		await ctx.deferReply(ephemeral);
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
-		const [, error, response] = await t(
+		const [ok, error, response] = await t(
 			fetch(
 				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts`,
 				{
@@ -111,13 +112,8 @@ export class ListCommand extends SubCommand {
 				},
 			),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to fetch hosts: ${error}`);
-		}
-		if (!response) {
-			ctx.client.logger.error(`Hosts API returned a null response`);
-		}
-		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching hosts")],
 				flags,
@@ -125,14 +121,16 @@ export class ListCommand extends SubCommand {
 			return;
 		}
 
-		let hosts: Array<{ service: string; hostname: string }>;
-		try {
-			hosts = (await response.json()) as Array<{
-				service: string;
-				hostname: string;
-			}>;
-		} catch (jsonError) {
-			ctx.client.logger.error(`Failed to parse hosts response: ${jsonError}`);
+		const [hostsOk, hostsErr, hostsResp] = await t(
+			response.json() as Promise<
+				Array<{
+					service: string;
+					hostname: string;
+				}>
+			>,
+		);
+		if (!hostsOk) {
+			ctx.client.logger.error(`Failed to parse hosts response: ${hostsErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("parsing hosts response")],
 				flags,
@@ -140,6 +138,7 @@ export class ListCommand extends SubCommand {
 			return;
 		}
 
+		let hosts = hostsResp;
 		const serviceFilter = ctx.options.service;
 		if (serviceFilter) {
 			hosts = hosts.filter((host) => host.service === serviceFilter);
@@ -192,14 +191,14 @@ export class ListCommand extends SubCommand {
 						files: [byodHostsJsonFileAttachment],
 						flags,
 					});
-				} else {
-					const jsonCodeBlockEmbed = byodBaseEmbed.setDescription(codeBlock);
-
-					await ctx.editOrReply({
-						embeds: [jsonCodeBlockEmbed],
-						flags,
-					});
+					return;
 				}
+
+				const jsonCodeBlockEmbed = byodBaseEmbed.setDescription(codeBlock);
+				await ctx.editOrReply({
+					embeds: [jsonCodeBlockEmbed],
+					flags,
+				});
 				return;
 			}
 		}

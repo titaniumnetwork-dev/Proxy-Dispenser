@@ -61,7 +61,7 @@ export default class CreateCategoryCommand extends SubCommand {
 			return;
 		}
 
-		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
+		const emoji = ctx.options.emoji ? ctx.options.emoji.trim() : "";
 
 		const [, orderError, orderRow] = await t(
 			db
@@ -84,7 +84,7 @@ export default class CreateCategoryCommand extends SubCommand {
 
 		const nextOrder = (orderRow?.[0]?.sortOrder ?? -1) + 1;
 
-		const [, error, result] = await t(
+		const [ok, error, result] = await t(
 			db
 				.insert(schema.categories)
 				.values({
@@ -97,7 +97,7 @@ export default class CreateCategoryCommand extends SubCommand {
 				.onConflictDoNothing()
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to create category: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`creating category **${name}**`)],
@@ -106,7 +106,7 @@ export default class CreateCategoryCommand extends SubCommand {
 			return;
 		}
 
-		if (!result || result.length === 0) {
+		if (result.length === 0) {
 			await ctx.editOrReply({
 				content: `Category **${name}** already exists`,
 				flags,

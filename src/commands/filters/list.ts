@@ -40,14 +40,14 @@ export default class ListFiltersCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
-		const [, error, guildRow] = await t(
+		const [ok, error, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 				columns: { filterRoleIds: true },
 			}),
 		);
 
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to list filter role mappings: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("listing filter role mappings")],

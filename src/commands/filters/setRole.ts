@@ -54,13 +54,13 @@ export default class SetRoleCommand extends SubCommand {
 		const filter = ctx.options.filter;
 		const role = ctx.options.role;
 
-		const [, fetchError, guildRow] = await t(
+		const [fetchOk, fetchError, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 				columns: { filterRoleIds: true },
 			}),
 		);
-		if (fetchError) {
+		if (!fetchOk) {
 			ctx.client.logger.error(`Failed to fetch guild config: ${fetchError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching guild configuration")],
@@ -69,10 +69,10 @@ export default class SetRoleCommand extends SubCommand {
 			return;
 		}
 		if (!guildRow) {
-			const [, insertError] = await t(
+			const [insertOk, insertError] = await t(
 				db.insert(schema.guild).values({ guildId }).onConflictDoNothing(),
 			);
-			if (insertError) {
+			if (!insertOk) {
 				ctx.client.logger.error(
 					`Failed to create guild config: ${insertError}`,
 				);
@@ -91,14 +91,15 @@ export default class SetRoleCommand extends SubCommand {
 			delete filterRoleIds[filter];
 		}
 
-		const [, error] = await t(
+		const [updateOk, updateError] = await t(
 			db
 				.update(schema.guild)
 				.set({ filterRoleIds })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to set role for filter: ${error}`);
+
+		if (!updateOk) {
+			ctx.client.logger.error(`Failed to set role for filter: ${updateError}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(`setting role for filter **${filter}**`),
@@ -113,11 +114,12 @@ export default class SetRoleCommand extends SubCommand {
 				content: `Set role for filter **${filter}** to <@&${role.id}>.`,
 				flags,
 			});
-		} else {
-			await ctx.editOrReply({
-				content: `Removed role mapping for filter **${filter}**.`,
-				flags,
-			});
+			return;
 		}
+
+		await ctx.editOrReply({
+			content: `Removed role mapping for filter **${filter}**.`,
+			flags,
+		});
 	}
 }

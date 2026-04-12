@@ -72,12 +72,12 @@ export class EmbedPaginator {
 			idle: IDLE_TIMEOUT,
 			onStop: async (reason) => {
 				if (reason === "idle") {
-					const [, editError] = await t(
+					const [editOk, editError] = await t(
 						message.edit({
 							components: [this.getNavigationRow(true)],
 						}),
 					);
-					if (editError) {
+					if (!editOk) {
 						this.ctx.client.logger.error(
 							`Failed to disable paginator buttons: ${editError}`,
 						);

@@ -6,6 +6,7 @@ import {
 	Options,
 	SubCommand,
 } from "seyfert";
+import { t } from "try";
 
 const options = {
 	query: createStringOption({
@@ -30,13 +31,11 @@ export default class CheckCommand extends SubCommand {
 		await ctx.write({
 			content: "```Fetching...```",
 		});
-		let check: Awaited<ReturnType<typeof checkLink>>;
-		try {
-			check = await checkLink(ctx.options.query);
-		} catch (e) {
+		const [checkOk, checkError, check] = await t(checkLink(ctx.options.query));
+		if (!checkOk) {
 			await ctx.editResponse({
 				content: `\`\`\`Failed to check the URL against the filter checker.
-				Error: ${e}\`\`\``,
+				Error: ${checkError}\`\`\``,
 			});
 			return;
 		}

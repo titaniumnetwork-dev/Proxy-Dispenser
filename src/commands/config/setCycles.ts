@@ -56,13 +56,13 @@ export default class SetCycleCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const mode = ctx.options.mode as "first" | "relative";
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			db
 				.update(schema.guild)
 				.set({ monthlyCycle: mode })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to set monthly cycle: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting the monthly cycle mode")],

@@ -39,13 +39,13 @@ export default class DocsCommand extends Command {
 
 		const guildId = ctx.guildId;
 
-		const [, error, guildRow] = await t(
+		const [ok, error, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 				columns: { docsUrl: true },
 			}),
 		);
-		if (error || !guildRow) {
+		if (!ok || !guildRow) {
 			ctx.client.logger.error(`Failed to fetch docs URL: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching docs URL")],
