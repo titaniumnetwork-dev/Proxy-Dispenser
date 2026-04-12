@@ -75,8 +75,8 @@ const options = {
 @Declare({
 	name: "unset",
 	description: "Unset a BYOD host",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
 })
 @Options(options)
 export class UnsetCommand extends SubCommand {

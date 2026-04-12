@@ -36,8 +36,8 @@ const options = {
 @Declare({
 	name: "search",
 	description: "Search BYOD hosts by hostname",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
 })
 @Options(options)
 export class SearchCommand extends SubCommand {

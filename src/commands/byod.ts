@@ -6,8 +6,8 @@ import { UnsetCommand } from "./byod/unset";
 @Declare({
 	name: "byod",
 	description: "Manage BYOD (link admins only)",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
 	defaultMemberPermissions: 0n,
 })
 @Options([ListCommand, UnsetCommand, SearchCommand])

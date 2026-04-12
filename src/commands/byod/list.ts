@@ -85,8 +85,8 @@ const options = {
 @Declare({
 	name: "list",
 	description: "List all BYOD hosts",
-	integrationTypes: ["GuildInstall", "UserInstall"],
-	contexts: ["Guild", "BotDM", "PrivateChannel"],
+	integrationTypes: ["GuildInstall"],
+	contexts: ["Guild"],
 })
 @Options(options)
 export class ListCommand extends SubCommand {
