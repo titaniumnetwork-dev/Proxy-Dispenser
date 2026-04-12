@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"start": "bun --env-file=.env ./src/index.ts",
+		"start": "bun ./src/index.ts",
 		"dev": "bun run clear && bun run start",
 		"clear": "rm ./commands.json || true",
 		"fmt": "biome format --write",
