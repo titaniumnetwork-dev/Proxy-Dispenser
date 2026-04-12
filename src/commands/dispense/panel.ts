@@ -101,11 +101,9 @@ export default class PanelCommand extends SubCommand {
 						: `More proxies (${chunk.length})`,
 				);
 
-			for (const [chunkIdx, category] of chunk.entries()) {
-				const position = i + chunkIdx + 1;
-				const label = `${position}: ${category.categoryId}`.slice(0, 100);
+			for (const category of chunk) {
 				const option = new StringSelectOption()
-					.setLabel(label)
+					.setLabel(category.categoryId)
 					.setValue(category.categoryId);
 				if (category.emojiId) {
 					option.setEmoji(category.emojiId);
