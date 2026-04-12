@@ -3,7 +3,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
-import { sql } from "drizzle-orm";
+import { asc, sql } from "drizzle-orm";
 import {
 	type CommandContext,
 	createBooleanOption,
@@ -45,9 +45,14 @@ export default class ListCategoriesCommand extends SubCommand {
 				.select({
 					categoryId: schema.categories.categoryId,
 					emojiId: schema.categories.emojiId,
+					masqrEnabled: schema.categories.masqrEnabled,
 				})
 				.from(schema.categories)
-				.where(sql`${schema.categories.guildId} = ${ctx.guildId}`);
+				.where(sql`${schema.categories.guildId} = ${ctx.guildId}`)
+				.orderBy(
+					asc(schema.categories.sortOrder),
+					asc(schema.categories.categoryId),
+				);
 
 			const links = await db
 				.select({ categoryId: schema.links.categoryId })
@@ -91,9 +96,11 @@ export default class ListCategoriesCommand extends SubCommand {
 			return;
 		}
 
-		const lines = categories.map((cat) => {
+		const lines = categories.map((cat, index) => {
 			const emoji = cat.emojiId ? `${cat.emojiId} ` : "";
-			return `${emoji}**${cat.categoryId}** - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
+			const masqr = cat.masqrEnabled ? " [Masqr]" : "";
+			const position = index + 1;
+			return `${position}: ${emoji}**${cat.categoryId}**${masqr} - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
 		});
 
 		const embed = new Embed()

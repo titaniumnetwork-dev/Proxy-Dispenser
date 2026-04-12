@@ -5,6 +5,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
+import { asc } from "drizzle-orm";
 import {
 	ActionRow,
 	type CommandContext,
@@ -56,6 +57,10 @@ export default class PanelCommand extends SubCommand {
 							)
 						: eq(categories.guildId, guildId),
 				columns: { categoryId: true, emojiId: true },
+				orderBy: (categories) => [
+					asc(categories.sortOrder),
+					asc(categories.categoryId),
+				],
 			}),
 		);
 		if (error) {
@@ -103,9 +108,11 @@ export default class PanelCommand extends SubCommand {
 						: `More proxies (${chunk.length})`,
 				);
 
-			for (const category of chunk) {
+			for (const [chunkIdx, category] of chunk.entries()) {
+				const position = i + chunkIdx + 1;
+				const label = `${position}: ${category.categoryId}`.slice(0, 100);
 				const option = new StringSelectOption()
-					.setLabel(category.categoryId)
+					.setLabel(label)
 					.setValue(category.categoryId);
 				if (category.emojiId) {
 					option.setEmoji(category.emojiId);

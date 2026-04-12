@@ -3,6 +3,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
+import { eq, sql } from "drizzle-orm";
 import {
 	type CommandContext,
 	createBooleanOption,
@@ -62,12 +63,34 @@ export default class CreateCategoryCommand extends SubCommand {
 
 		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
 
+		const [, orderError, orderRow] = await t(
+			db
+				.select({
+					sortOrder: sql<number>`COALESCE(MAX(${schema.categories.sortOrder}), -1)`,
+				})
+				.from(schema.categories)
+				.where(eq(schema.categories.guildId, ctx.guildId)),
+		);
+		if (orderError) {
+			ctx.client.logger.error(
+				`Failed to fetch category sort order: ${orderError}`,
+			);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed(`creating category **${name}**`)],
+				flags,
+			});
+			return;
+		}
+
+		const nextOrder = (orderRow?.[0]?.sortOrder ?? -1) + 1;
+
 		const [, error, result] = await t(
 			db
 				.insert(schema.categories)
 				.values({
 					guildId: ctx.guildId,
 					categoryId: name,
+					sortOrder: nextOrder,
 					emojiId: emoji,
 					filterApiEnabled: ctx.options.filterapi ? 1 : 0,
 				})

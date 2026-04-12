@@ -10,6 +10,7 @@ import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
+import { asc } from "drizzle-orm";
 import {
 	ActionRow,
 	type CommandContext,
@@ -70,6 +71,10 @@ export default class AddFormCommand extends SubCommand {
 			db.query.categories.findMany({
 				where: (categories, { eq }) => eq(categories.guildId, guildId),
 				columns: { categoryId: true },
+				orderBy: (categories) => [
+					asc(categories.sortOrder),
+					asc(categories.categoryId),
+				],
 			}),
 		);
 		if (error) {
@@ -114,10 +119,12 @@ export default class AddFormCommand extends SubCommand {
 						: `More categories (${chunk.length})`,
 				);
 
-			for (const category of chunk) {
+			for (const [chunkIdx, category] of chunk.entries()) {
+				const position = i + chunkIdx + 1;
+				const label = `${position}: ${category.categoryId}`.slice(0, 100);
 				menu.addOption(
 					new StringSelectOption()
-						.setLabel(category.categoryId)
+						.setLabel(label)
 						.setValue(category.categoryId),
 				);
 			}

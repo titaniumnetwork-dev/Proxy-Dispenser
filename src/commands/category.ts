@@ -3,8 +3,10 @@ import CreateCategoryCommand from "./category/create";
 import DeleteCategoryCommand from "./category/delete";
 import ListCategoriesCommand from "./category/list";
 import RenameCategoryCommand from "./category/rename";
+import ReorderCategoryCommand from "./category/reorder";
 import SetEmojiCommand from "./category/setEmoji";
 import ToggleFilterApiCommand from "./category/toggleFilterApi";
+import ToggleMasqrCommand from "./category/toggleMasqr";
 
 @Declare({
 	name: "category",
@@ -19,6 +21,8 @@ import ToggleFilterApiCommand from "./category/toggleFilterApi";
 	DeleteCategoryCommand,
 	SetEmojiCommand,
 	ListCategoriesCommand,
+	ReorderCategoryCommand,
 	ToggleFilterApiCommand,
+	ToggleMasqrCommand,
 ])
 export default class CategoryCommand extends Command {}

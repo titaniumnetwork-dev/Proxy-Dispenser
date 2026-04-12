@@ -6,7 +6,7 @@
 import { filters } from "@../config.json";
 import { DISCORD_MAX_CHOICES } from "@consts";
 import { db, schema } from "@db";
-import { and, desc, eq, like, sql } from "drizzle-orm";
+import { and, asc, desc, eq, like, sql } from "drizzle-orm";
 import type { AutocompleteInteraction } from "seyfert";
 import { t } from "try";
 
@@ -38,6 +38,10 @@ export async function categoryAutocomplete(
 			})
 			.from(schema.categories)
 			.where(and(...whereConditions))
+			.orderBy(
+				asc(schema.categories.sortOrder),
+				asc(schema.categories.categoryId),
+			)
 			.limit(DISCORD_MAX_CHOICES),
 	);
 

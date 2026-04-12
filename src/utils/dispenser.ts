@@ -1,4 +1,5 @@
 import { db, schema } from "@db";
+import { applyMasqr } from "@utils/masqr";
 import { and, eq } from "drizzle-orm";
 import type { GuildMember, Logger, UsingClient } from "seyfert";
 import { t } from "try";
@@ -15,6 +16,7 @@ export interface Options {
 export interface Success {
 	readonly success: true;
 	readonly link: string;
+	readonly sourceLink: string;
 	readonly remaining: number;
 	readonly hasMore: boolean;
 	readonly filterFallback: boolean;
@@ -192,7 +194,7 @@ export async function dispense(options: Options): Promise<Result> {
 		db.query.categories.findFirst({
 			where: (c, { eq, and }) =>
 				and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
-			columns: { filterApiEnabled: true },
+			columns: { filterApiEnabled: true, masqrEnabled: true },
 		}),
 	);
 	if (catError) {
@@ -244,6 +246,19 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
+	let deliveredLink = selectedLink.link;
+	if (catRow?.masqrEnabled) {
+		const masqrResult = await applyMasqr(selectedLink.link);
+		if (!masqrResult.ok) {
+			return {
+				success: false,
+				error: masqrResult.error,
+			};
+		}
+
+		deliveredLink = masqrResult.link;
+	}
+
 	const newLinks = [...receivedLinks, selectedLink.link];
 	const [, updateError] = await t(
 		db
@@ -268,6 +283,10 @@ export async function dispense(options: Options): Promise<Result> {
 	}
 
 	if (guildRow?.logChannelId) {
+		const linkDisplay = catRow?.masqrEnabled
+			? `\`${deliveredLink}\``
+			: deliveredLink;
+
 		await t(
 			client.messages.write(guildRow.logChannelId, {
 				embeds: [
@@ -277,7 +296,7 @@ export async function dispense(options: Options): Promise<Result> {
 						color: 0x5865f2,
 						fields: [
 							{ name: "Type", value: categoryId, inline: true },
-							{ name: "Link", value: selectedLink.link, inline: false },
+							{ name: "Link", value: linkDisplay, inline: false },
 							{
 								name: "User",
 								value: `<@${userId}>`,
@@ -301,7 +320,8 @@ export async function dispense(options: Options): Promise<Result> {
 
 	return {
 		success: true,
-		link: selectedLink.link,
+		link: deliveredLink,
+		sourceLink: selectedLink.link,
 		remaining: maxLinks - (used + 1),
 		hasMore: sortedAvailable.length > 1,
 		filterFallback,

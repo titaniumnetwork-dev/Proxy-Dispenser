@@ -32,7 +32,7 @@ export async function handleDispense(
 		return;
 	}
 
-	const unblocked = await getUnblocked(result.link);
+	const unblocked = await getUnblocked(result.sourceLink);
 
 	const embed = new Embed()
 		.setColor("#5865F2")
@@ -44,7 +44,7 @@ export async function handleDispense(
 		)
 		.addFields(
 			{ name: "Type", value: categoryId, inline: true },
-			{ name: "Link", value: result.link, inline: false },
+			{ name: "Link", value: `\`${result.link}\``, inline: false },
 			{
 				name: "Unblocked On",
 				value: unblocked.length > 0 ? unblocked.join(", ") : "Unknown",
@@ -68,7 +68,7 @@ export async function handleDispense(
 		row.addComponents(requestAnother);
 	}
 
-	const reportCustomId = `report:${categoryId}:${result.link}`;
+	const reportCustomId = `report:${categoryId}:${result.sourceLink}`;
 	const reportButton = new Button()
 		.setCustomId(reportCustomId.slice(0, 100))
 		.setStyle(ButtonStyle.Danger)

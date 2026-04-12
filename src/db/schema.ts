@@ -134,8 +134,10 @@ export const categories = sqliteTable(
 	{
 		guildId: snowflake("guild_id").notNull(),
 		categoryId: text("category_id").notNull(),
+		sortOrder: integer("sort_order").notNull().default(0),
 		emojiId: text("emoji_id").notNull().default(""),
 		filterApiEnabled: integer("filter_api_enabled").notNull().default(1),
+		masqrEnabled: integer("masqr_enabled").notNull().default(0),
 	},
 	(t) => [
 		primaryKey({ columns: [t.guildId, t.categoryId] }),
