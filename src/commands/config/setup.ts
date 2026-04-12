@@ -39,14 +39,14 @@ export default class SetupConfigCommand extends SubCommand {
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 
-		const [, setupError, insertedGuild] = await t(
+		const [setupOk, setupError, insertedGuild] = await t(
 			db
 				.insert(schema.guild)
 				.values({ guildId })
 				.onConflictDoNothing()
 				.returning({ guildId: schema.guild.guildId }),
 		);
-		if (setupError) {
+		if (!setupOk) {
 			ctx.client.logger.error(`Failed to set up guild: ${setupError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting up guild")],

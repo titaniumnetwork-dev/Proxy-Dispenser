@@ -40,7 +40,7 @@ export default class ListCategoriesCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 
-		const [, error, categories] = await t(async () => {
+		const [ok, error, categories] = await t(async () => {
 			const cats = await db
 				.select({
 					categoryId: schema.categories.categoryId,
@@ -66,15 +66,8 @@ export default class ListCategoriesCommand extends SubCommand {
 			}));
 		});
 
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to list categories: ${error}`);
-		}
-		if (!categories) {
-			ctx.client.logger.error(
-				`Categories query returned an unexpected null result`,
-			);
-		}
-		if (error || !categories) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("listing categories")],
 				flags,

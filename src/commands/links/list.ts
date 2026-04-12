@@ -63,7 +63,7 @@ export default class ListCommand extends SubCommand {
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 
-		const [, error, links] = await t(
+		const [ok, error, links] = await t(
 			db.query.links.findMany({
 				where: (links, { eq, and }) =>
 					ctx.options.category
@@ -74,13 +74,8 @@ export default class ListCommand extends SubCommand {
 						: eq(links.guildId, guildId),
 			}),
 		);
-		if (error) {
+		if (!ok || !links) {
 			ctx.client.logger.error(`Failed to list links: ${error}`);
-		}
-		if (!links) {
-			ctx.client.logger.error(`Links query returned an unexpected null result`);
-		}
-		if (error || !links) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("listing links")],
 				flags,
@@ -121,7 +116,7 @@ export default class ListCommand extends SubCommand {
 		let linkUserCounts: Map<string, number> = new Map();
 		if (links.length !== 0) {
 			if (ctx.options["display-user-stats"]) {
-				const [, statsError, stats] = await t(
+				const [statsOk, statsError, stats] = await t(
 					db
 						.select({
 							link: schema.links.link,
@@ -140,7 +135,7 @@ export default class ListCommand extends SubCommand {
 						)
 						.groupBy(schema.links.link),
 				);
-				if (!statsError && stats) {
+				if (statsOk && stats) {
 					linkUserCounts = new Map(stats.map((s) => [s.link, s.userCount]));
 				}
 			}

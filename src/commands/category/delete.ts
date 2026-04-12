@@ -48,14 +48,14 @@ export default class DeleteCategoryCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const categoryId = ctx.options.category;
 
-		const [, fetchError, linkRows] = await t(
+		const [fetchOk, fetchError, linkRows] = await t(
 			db.query.links.findMany({
 				where: (l, { eq, and }) =>
 					and(eq(l.guildId, guildId), eq(l.categoryId, categoryId)),
 				columns: { link: true },
 			}),
 		);
-		if (fetchError) {
+		if (!fetchOk) {
 			ctx.client.logger.error(
 				`Failed to fetch links before deletion: ${fetchError}`,
 			);
@@ -68,7 +68,7 @@ export default class DeleteCategoryCommand extends SubCommand {
 			return;
 		}
 
-		const [, error, result] = await t(
+		const [deleteOk, deleteError, result] = await t(
 			db
 				.delete(schema.categories)
 				.where(
@@ -79,8 +79,8 @@ export default class DeleteCategoryCommand extends SubCommand {
 				)
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to delete category: ${error}`);
+		if (!deleteOk) {
+			ctx.client.logger.error(`Failed to delete category: ${deleteError}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(`deleting category **${categoryId}**`),
@@ -90,7 +90,7 @@ export default class DeleteCategoryCommand extends SubCommand {
 			return;
 		}
 
-		if (!result || result.length === 0) {
+		if (result.length === 0) {
 			await ctx.editOrReply({
 				content: `Category **${categoryId}** not found`,
 				flags,
@@ -98,16 +98,16 @@ export default class DeleteCategoryCommand extends SubCommand {
 			return;
 		}
 
-		if (linkRows && linkRows.length > 0) {
+		if (linkRows.length > 0) {
 			const linkUrls = new Set(linkRows.map((l) => l.link));
 
-			const [, usersError, guildUserRows] = await t(
+			const [usersOk, usersError, guildUserRows] = await t(
 				db.query.guildUsers.findMany({
 					where: (u, { eq }) => eq(u.guildId, guildId),
 					columns: { userId: true, receivedLinks: true },
 				}),
 			);
-			if (usersError) {
+			if (!usersOk) {
 				ctx.client.logger.error(
 					`Failed to fetch guild users for receivedLinks cleanup: ${usersError}`,
 				);
@@ -118,7 +118,7 @@ export default class DeleteCategoryCommand extends SubCommand {
 
 				await Promise.all(
 					toUpdate.map(async (u) => {
-						const [, updateError] = await t(
+						const [updateOk, updateError] = await t(
 							db
 								.update(schema.guildUsers)
 								.set({
@@ -133,7 +133,7 @@ export default class DeleteCategoryCommand extends SubCommand {
 									),
 								),
 						);
-						if (updateError) {
+						if (!updateOk) {
 							ctx.client.logger.error(
 								`Failed to clean receivedLinks for user ${u.userId}: ${updateError}`,
 							);

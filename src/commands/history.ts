@@ -44,14 +44,14 @@ export default class HistoryCommand extends Command {
 		const userId = ctx.author.id;
 		const categoryFilter = ctx.options.category as string | undefined;
 
-		const [, error, userRow] = await t(
+		const [userOk, error, userRow] = await t(
 			db.query.guildUsers.findFirst({
 				where: (u, { eq, and }) =>
 					and(eq(u.guildId, guildId), eq(u.userId, userId)),
 				columns: { receivedLinks: true },
 			}),
 		);
-		if (error) {
+		if (!userOk) {
 			ctx.client.logger.error(`Failed to fetch user history: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching your history")],
@@ -71,14 +71,14 @@ export default class HistoryCommand extends Command {
 
 		let filtered = receivedLinks;
 		if (categoryFilter) {
-			const [, linksError, categoryLinks] = await t(
+			const [linksOk, linksError, categoryLinks] = await t(
 				db.query.links.findMany({
 					where: (l, { eq, and }) =>
 						and(eq(l.guildId, guildId), eq(l.categoryId, categoryFilter)),
 					columns: { link: true },
 				}),
 			);
-			if (linksError || !categoryLinks) {
+			if (!linksOk || !categoryLinks) {
 				ctx.client.logger.error(
 					`Failed to fetch category links: ${linksError}`,
 				);

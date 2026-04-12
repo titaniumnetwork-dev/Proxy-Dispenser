@@ -41,20 +41,19 @@ export default class SetLogChannelCommand extends SubCommand {
 			await createSlashCommandErrorEmbed(ctx);
 			return;
 		}
-
 		await ctx.deferReply(ctx.options.ephemeral ?? true);
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 		const channelId = ctx.options.channel?.id ?? null;
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			db
 				.update(schema.guild)
 				.set({ logChannelId: channelId })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to set log channel: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting the log channel")],
@@ -68,11 +67,10 @@ export default class SetLogChannelCommand extends SubCommand {
 				content: `Log channel set to <#${channelId}>.`,
 				flags,
 			});
-		} else {
-			await ctx.editOrReply({
-				content: "Log channel has been disabled.",
-				flags,
-			});
 		}
+		await ctx.editOrReply({
+			content: "Log channel has been disabled.",
+			flags,
+		});
 	}
 }

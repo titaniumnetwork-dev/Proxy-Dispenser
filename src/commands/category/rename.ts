@@ -59,7 +59,7 @@ export default class RenameCategoryCommand extends SubCommand {
 			return;
 		}
 
-		const [, error, result] = await t(
+		const [ok, error, result] = await t(
 			db
 				.update(schema.categories)
 				.set({
@@ -73,7 +73,7 @@ export default class RenameCategoryCommand extends SubCommand {
 				)
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to rename category: ${error}`);
 			await ctx.editOrReply({
 				embeds: [
@@ -86,7 +86,7 @@ export default class RenameCategoryCommand extends SubCommand {
 			return;
 		}
 
-		if (!result || result.length === 0) {
+		if (result.length === 0) {
 			await ctx.editOrReply({
 				content: `Category **${ctx.options.category}** not found.`,
 				flags,

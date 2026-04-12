@@ -40,7 +40,7 @@ export default class ResetCommand extends SubCommand {
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const guildId = ctx.guildId;
 
-		const [, error] = await t(
+		const [resetOk, resetErr] = await t(
 			db
 				.update(schema.guildUsers)
 				.set({
@@ -49,8 +49,8 @@ export default class ResetCommand extends SubCommand {
 				})
 				.where(eq(schema.guildUsers.guildId, guildId)),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to reset proxy limit: ${error}`);
+		if (!resetOk) {
+			ctx.client.logger.error(`Failed to reset proxy limit: ${resetErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("resetting proxy limit")],
 				flags: MessageFlags.Ephemeral,

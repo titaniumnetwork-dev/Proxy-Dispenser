@@ -47,17 +47,11 @@ export default class SetDocsCommand extends SubCommand {
 		const url = (ctx.options.url as string | undefined) ?? null;
 
 		if (url) {
-			let parsedUrl: URL;
-			try {
-				parsedUrl = new URL(url);
-			} catch {
-				await ctx.editOrReply({
-					content: "Invalid URL.",
-					flags: MessageFlags.Ephemeral,
-				});
-				return;
-			}
-			if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+			const [ok, error, parsedUrl] = t(() => new URL(url));
+			if (
+				!ok ||
+				(parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:")
+			) {
 				await ctx.editOrReply({
 					content: "Invalid URL.",
 					flags: MessageFlags.Ephemeral,
@@ -66,13 +60,13 @@ export default class SetDocsCommand extends SubCommand {
 			}
 		}
 
-		const [, error] = await t(
+		const [ok, error] = await t(
 			db
 				.update(schema.guild)
 				.set({ docsUrl: url })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to set docs URL: ${error}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("setting the docs URL")],
@@ -86,11 +80,11 @@ export default class SetDocsCommand extends SubCommand {
 				content: `Docs URL set to ${url}`,
 				flags,
 			});
-		} else {
-			await ctx.editOrReply({
-				content: "Docs URL has been cleared.",
-				flags,
-			});
+			return;
 		}
+		await ctx.editOrReply({
+			content: "Docs URL has been cleared.",
+			flags,
+		});
 	}
 }

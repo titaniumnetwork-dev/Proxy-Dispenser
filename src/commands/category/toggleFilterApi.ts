@@ -56,7 +56,7 @@ export default class ToggleFilterApiCommand extends SubCommand {
 		const categoryId = ctx.options.category;
 		const action = ctx.options.action;
 
-		const [, error, result] = await t(
+		const [ok, error, result] = await t(
 			db
 				.update(schema.categories)
 				.set({ filterApiEnabled: action === "add" ? 1 : 0 })
@@ -68,7 +68,7 @@ export default class ToggleFilterApiCommand extends SubCommand {
 				)
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(
 				`Failed to set filter API status for category: ${error}`,
 			);
@@ -83,7 +83,7 @@ export default class ToggleFilterApiCommand extends SubCommand {
 			return;
 		}
 
-		if (!result || result.length === 0) {
+		if (result.length === 0) {
 			await ctx.editOrReply({
 				content: `Category **${categoryId}** not found`,
 				flags,
@@ -96,11 +96,12 @@ export default class ToggleFilterApiCommand extends SubCommand {
 				content: `Enabled filter API for category **${categoryId}**`,
 				flags,
 			});
-		} else {
-			await ctx.editOrReply({
-				content: `Disabled filter API for category **${categoryId}**`,
-				flags,
-			});
+			return;
 		}
+
+		await ctx.editOrReply({
+			content: `Disabled filter API for category **${categoryId}**`,
+			flags,
+		});
 	}
 }

@@ -65,7 +65,7 @@ export default class ReportModal extends ModalCommand {
 		const userId = ctx.author.id;
 		const guildId = ctx.guildId;
 
-		const [, fetchError, guildRow] = await t(
+		const [fetchOk, fetchError, guildRow] = await t(
 			db.query.guild.findFirst({
 				where: (g, { eq }) => eq(g.guildId, guildId),
 				columns: {
@@ -75,7 +75,7 @@ export default class ReportModal extends ModalCommand {
 				},
 			}),
 		);
-		if (fetchError || !guildRow) {
+		if (!fetchOk || !guildRow) {
 			ctx.client.logger.error(
 				`Failed to fetch guild for report: ${fetchError}`,
 			);
@@ -118,13 +118,13 @@ export default class ReportModal extends ModalCommand {
 			.setStyle(ButtonStyle.Secondary);
 		row.addComponents(closeButton);
 
-		const [, sendError] = await t(
+		const [sendOk, sendError] = await t(
 			ctx.client.messages.write(targetChannelId, {
 				embeds: [reportEmbed],
 				components: [row],
 			}),
 		);
-		if (sendError) {
+		if (!sendOk) {
 			ctx.client.logger.error(`Failed to send report: ${sendError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("sending your report")],

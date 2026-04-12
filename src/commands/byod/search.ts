@@ -53,7 +53,7 @@ export class SearchCommand extends SubCommand {
 
 		const query = ctx.options.query.toLowerCase();
 
-		const [, error, response] = await t(
+		const [ok, error, response] = await t(
 			fetch(
 				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts`,
 				{
@@ -65,29 +65,24 @@ export class SearchCommand extends SubCommand {
 				},
 			),
 		);
-
-		if (error) {
-			ctx.client.logger.error(`Failed to fetch hosts: ${error}`);
-		}
-		if (!response) {
-			ctx.client.logger.error(`Hosts API returned a null response`);
-		}
-		if (error || !response) {
+		if (!ok) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching hosts")],
 				flags,
 			});
 			return;
 		}
+		const [hostsOk, hostsErr, data] = await t(
+			response.json() as Promise<
+				Array<{
+					service: string;
+					hostname: string;
+				}>
+			>,
+		);
 
-		let all: Array<{ service: string; hostname: string }>;
-		try {
-			all = (await response.json()) as Array<{
-				service: string;
-				hostname: string;
-			}>;
-		} catch (jsonError) {
-			ctx.client.logger.error(`Failed to parse hosts response: ${jsonError}`);
+		if (!hostsOk) {
+			ctx.client.logger.error(`Failed to parse hosts response: ${hostsErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("parsing hosts response")],
 				flags,
@@ -95,7 +90,7 @@ export class SearchCommand extends SubCommand {
 			return;
 		}
 
-		const hosts = all.filter((host) =>
+		const hosts = data.filter((host) =>
 			host.hostname.toLowerCase().includes(query),
 		);
 

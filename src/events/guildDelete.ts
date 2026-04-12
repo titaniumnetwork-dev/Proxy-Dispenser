@@ -12,10 +12,10 @@ export default createEvent({
 
 		client.logger.info(`I was removed from: ${unguild.id}`);
 
-		const [_, removeGuildError] = await t(
+		const [removeGuildOk, removeGuildError] = await t(
 			db.delete(schema.guild).where(eq(schema.guild.guildId, unguild.id)),
 		);
-		if (removeGuildError) {
+		if (!removeGuildOk) {
 			client.logger.error(
 				`Failed to remove guild (${unguild.id}) from database: ${removeGuildError}`,
 			);

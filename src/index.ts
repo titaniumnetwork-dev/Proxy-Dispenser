@@ -10,10 +10,10 @@ process.on("uncaughtException", (error) => {
 	console.error("Uncaught exception:", error);
 });
 
-client
-	.start()
-	.then(() => client.uploadCommands({ cachePath: "./commands.json" }))
-	.catch((error) => {
+client.start().then(
+	() => client.uploadCommands({ cachePath: "./commands.json" }),
+	(error) => {
 		console.error("Failed to start bot. Error:", error);
 		process.exit(1);
-	});
+	},
+);

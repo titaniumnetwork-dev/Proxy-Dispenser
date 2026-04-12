@@ -64,7 +64,7 @@ export default class RemoveCommand extends SubCommand {
 		const link = ctx.options.link;
 		const category = ctx.options.category;
 
-		const [, error, matchingLinks] = await t(
+		const [ok, error, matchingLinks] = await t(
 			db.query.links.findMany({
 				where: (links, { eq, and }) =>
 					and(eq(links.guildId, guildId), eq(links.link, link)),
@@ -76,7 +76,7 @@ export default class RemoveCommand extends SubCommand {
 		if (!matchingLinks) {
 			ctx.client.logger.error(`Links query returned an unexpected null result`);
 		}
-		if (error || !matchingLinks) {
+		if (!ok || !matchingLinks) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`finding link \`${link}\``)],
 				flags,
@@ -90,7 +90,7 @@ export default class RemoveCommand extends SubCommand {
 		}
 
 		if (category) {
-			const [, error] = await t(
+			const [ok, error] = await t(
 				db
 					.delete(schema.links)
 					.where(
@@ -101,7 +101,7 @@ export default class RemoveCommand extends SubCommand {
 						),
 					),
 			);
-			if (error) {
+			if (!ok) {
 				ctx.client.logger.error(`Failed to remove link: ${error}`);
 				await ctx.editOrReply({
 					embeds: [
@@ -137,10 +137,10 @@ export default class RemoveCommand extends SubCommand {
 				});
 				return;
 			}
-			const [, error] = await t(
+			const [ok, error] = await t(
 				db.delete(schema.links).where(eq(schema.links.id, firstLink.id)),
 			);
-			if (error) {
+			if (!ok) {
 				ctx.client.logger.error(`Failed to remove link: ${error}`);
 				await ctx.editOrReply({
 					embeds: [
@@ -230,10 +230,10 @@ export default class RemoveCommand extends SubCommand {
 
 		for (const match of matchingLinks) {
 			collector.run(`remove-link:${match.id}`, async (interaction) => {
-				const [, error] = await t(
+				const [ok, error] = await t(
 					db.delete(schema.links).where(eq(schema.links.id, match.id)),
 				);
-				if (error) {
+				if (!ok) {
 					ctx.client.logger.error(`Failed to remove link: ${error}`);
 					await interaction.update({
 						embeds: [createUnexpectedErrorEmbed(`removing link \`${link}\``)],

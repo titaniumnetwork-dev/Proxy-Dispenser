@@ -52,7 +52,7 @@ export default class SetEmojiCommand extends SubCommand {
 		const categoryId = ctx.options.category;
 		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
 
-		const [, error, result] = await t(
+		const [resultOk, resultErr, result] = await t(
 			db
 				.update(schema.categories)
 				.set({ emojiId: emoji })
@@ -64,8 +64,8 @@ export default class SetEmojiCommand extends SubCommand {
 				)
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to set emoji for category: ${error}`);
+		if (!resultOk) {
+			ctx.client.logger.error(`Failed to set emoji for category: ${resultErr}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
@@ -77,7 +77,7 @@ export default class SetEmojiCommand extends SubCommand {
 			return;
 		}
 
-		if (!result || result.length === 0) {
+		if (result.length === 0) {
 			await ctx.editOrReply({
 				content: `Category **${categoryId}** not found`,
 				flags,
@@ -90,11 +90,12 @@ export default class SetEmojiCommand extends SubCommand {
 				content: `Set emoji for category **${categoryId}** to ${emoji}`,
 				flags,
 			});
-		} else {
-			await ctx.editOrReply({
-				content: `Removed emoji from category **${categoryId}**`,
-				flags,
-			});
+			return;
 		}
+
+		await ctx.editOrReply({
+			content: `Removed emoji from category **${categoryId}**`,
+			flags,
+		});
 	}
 }

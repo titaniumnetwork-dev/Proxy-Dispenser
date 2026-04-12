@@ -46,7 +46,7 @@ export default class UnblacklistCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const userId = ctx.options.user.id;
 
-		const [, , user] = await t(
+		const [userOk, _userErr, user] = await t(
 			db.query.guildUsers.findFirst({
 				where: (u, { eq, and }) =>
 					and(eq(u.guildId, guildId), eq(u.userId, userId)),
@@ -54,7 +54,15 @@ export default class UnblacklistCommand extends SubCommand {
 			}),
 		);
 
-		if (!user?.isBlacklisted) {
+		if (!userOk || !user) {
+			await ctx.editOrReply({
+				content: `Failed to fetch user information.`,
+				flags,
+			});
+			return;
+		}
+
+		if (!user.isBlacklisted) {
 			await ctx.editOrReply({
 				content: `<@${userId}> is not blacklisted.`,
 				flags,
@@ -62,7 +70,7 @@ export default class UnblacklistCommand extends SubCommand {
 			return;
 		}
 
-		const [, error] = await t(
+		const [unblacklistOk, unblacklistErr] = await t(
 			db
 				.update(schema.guildUsers)
 				.set({ isBlacklisted: 0 })
@@ -73,8 +81,8 @@ export default class UnblacklistCommand extends SubCommand {
 					),
 				),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to unblacklist user: ${error}`);
+		if (!unblacklistOk) {
+			ctx.client.logger.error(`Failed to unblacklist user: ${unblacklistErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`unblacklisting <@${userId}>`)],
 				flags: MessageFlags.Ephemeral,

@@ -7,7 +7,7 @@ export default createEvent({
 	async run(guild, client) {
 		client.logger.info(`I was added to: ${guild.id}`);
 
-		const [_, insertGuildError] = await t(
+		const [insertGuildOk, insertGuildError] = await t(
 			db
 				.insert(schema.guild)
 				.values({
@@ -15,7 +15,7 @@ export default createEvent({
 				})
 				.onConflictDoNothing(),
 		);
-		if (insertGuildError) {
+		if (!insertGuildOk) {
 			client.logger.error(
 				`Failed to add guild (${guild.id}) to database: ${insertGuildError}`,
 			);
@@ -30,17 +30,17 @@ export default createEvent({
 			return;
 		}
 
-		const [, channelError, systemChannel] = await t(
+		const [channelOk, channelError, systemChannel] = await t(
 			client.channels.fetch(guild.systemChannelId),
 		);
-		if (channelError || !systemChannel) {
+		if (!channelOk || !systemChannel) {
 			client.logger.error(
 				`Failed to fetch system channel for guild (${guild.id}): ${channelError}`,
 			);
 			return;
 		}
 
-		const [, messageError] = await t(
+		const [messageOk, messageError] = await t(
 			client.messages.write(systemChannel.id, {
 				embeds: [
 					new Embed().setTitle("Welcome to Dispenser!").setDescription(
@@ -52,7 +52,7 @@ export default createEvent({
 				],
 			}),
 		);
-		if (messageError) {
+		if (!messageOk) {
 			client.logger.error(
 				`Failed to send welcome message to guild (${guild.id}): ${messageError}`,
 			);

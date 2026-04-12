@@ -48,14 +48,14 @@ export default class RemoveAllCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const categoryId = ctx.options.category;
 
-		const [, fetchError, linkRows] = await t(
+		const [fetchOk, fetchError, linkRows] = await t(
 			db.query.links.findMany({
 				where: (l, { eq, and }) =>
 					and(eq(l.guildId, guildId), eq(l.categoryId, categoryId)),
 				columns: { id: true, link: true },
 			}),
 		);
-		if (fetchError) {
+		if (!fetchOk) {
 			ctx.client.logger.error(`Failed to fetch links: ${fetchError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("fetching links")],
@@ -75,7 +75,7 @@ export default class RemoveAllCommand extends SubCommand {
 		const count = linkRows.length;
 		const linkUrls = new Set(linkRows.map((l) => l.link));
 
-		const [, deleteError] = await t(
+		const [deleteOk, deleteError] = await t(
 			db
 				.delete(schema.links)
 				.where(
@@ -85,7 +85,7 @@ export default class RemoveAllCommand extends SubCommand {
 					),
 				),
 		);
-		if (deleteError) {
+		if (!deleteOk) {
 			ctx.client.logger.error(`Failed to remove links: ${deleteError}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("removing links")],
@@ -94,13 +94,13 @@ export default class RemoveAllCommand extends SubCommand {
 			return;
 		}
 
-		const [, usersError, guildUserRows] = await t(
+		const [usersOk, usersError, guildUserRows] = await t(
 			db.query.guildUsers.findMany({
 				where: (u, { eq }) => eq(u.guildId, guildId),
 				columns: { userId: true, receivedLinks: true },
 			}),
 		);
-		if (usersError) {
+		if (!usersOk) {
 			ctx.client.logger.error(
 				`Failed to fetch guild users for receivedLinks cleanup: ${usersError}`,
 			);
@@ -111,7 +111,7 @@ export default class RemoveAllCommand extends SubCommand {
 
 			await Promise.all(
 				toUpdate.map(async (u) => {
-					const [, updateError] = await t(
+					const [updateOk, updateError] = await t(
 						db
 							.update(schema.guildUsers)
 							.set({
@@ -126,7 +126,7 @@ export default class RemoveAllCommand extends SubCommand {
 								),
 							),
 					);
-					if (updateError) {
+					if (!updateOk) {
 						ctx.client.logger.error(
 							`Failed to clean receivedLinks for user ${u.userId}: ${updateError}`,
 						);

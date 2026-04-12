@@ -46,7 +46,7 @@ export default class ResetUserCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const userId = ctx.options.user.id;
 
-		const [, error] = await t(
+		const [resetOk, resetErr] = await t(
 			db
 				.update(schema.guildUsers)
 				.set({
@@ -60,8 +60,8 @@ export default class ResetUserCommand extends SubCommand {
 					),
 				),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to reset user: ${error}`);
+		if (!resetOk) {
+			ctx.client.logger.error(`Failed to reset user: ${resetErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`resetting <@${userId}>`)],
 				flags: MessageFlags.Ephemeral,

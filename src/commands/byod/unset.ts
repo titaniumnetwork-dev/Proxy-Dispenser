@@ -92,7 +92,7 @@ export class UnsetCommand extends SubCommand {
 
 		const host = ctx.options.host;
 
-		const [, error, response] = await t(
+		const [ok, error, response] = await t(
 			fetch(
 				`http://${process.env.BYOD_API_IP}:${process.env.BYOD_API_PORT || 3000}/hosts/${encodeURIComponent(host)}`,
 				{
@@ -104,13 +104,8 @@ export class UnsetCommand extends SubCommand {
 				},
 			),
 		);
-		if (error) {
+		if (!ok) {
 			ctx.client.logger.error(`Failed to unset BYOD host: ${error}`);
-		}
-		if (!response) {
-			ctx.client.logger.error(`BYOD host API returned a null response`);
-		}
-		if (error || !response) {
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed("unset BYOD host")],
 				flags,

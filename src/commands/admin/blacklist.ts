@@ -45,15 +45,22 @@ export default class BlacklistCommand extends SubCommand {
 		const guildId = ctx.guildId;
 		const userId = ctx.options.user.id;
 
-		const [, , user] = await t(
+		const [userOk, _userErr, user] = await t(
 			db.query.guildUsers.findFirst({
 				where: (u, { eq, and }) =>
 					and(eq(u.guildId, guildId), eq(u.userId, userId)),
 				columns: { isBlacklisted: true },
 			}),
 		);
+		if (!userOk || !user) {
+			await ctx.editOrReply({
+				content: `Failed to fetch user information.`,
+				flags,
+			});
+			return;
+		}
 
-		if (user?.isBlacklisted) {
+		if (user.isBlacklisted) {
 			await ctx.editOrReply({
 				content: `<@${userId}> is already blacklisted.`,
 				flags,
@@ -61,7 +68,7 @@ export default class BlacklistCommand extends SubCommand {
 			return;
 		}
 
-		const [, error] = await t(
+		const [blacklistOk, blacklistErr] = await t(
 			db
 				.insert(schema.guildUsers)
 				.values({
@@ -74,8 +81,8 @@ export default class BlacklistCommand extends SubCommand {
 					set: { isBlacklisted: 1 },
 				}),
 		);
-		if (error) {
-			ctx.client.logger.error(`Failed to blacklist user: ${error}`);
+		if (!blacklistOk) {
+			ctx.client.logger.error(`Failed to blacklist user: ${blacklistErr}`);
 			await ctx.editOrReply({
 				embeds: [createUnexpectedErrorEmbed(`blacklisting <@${userId}>`)],
 				flags: MessageFlags.Ephemeral,
