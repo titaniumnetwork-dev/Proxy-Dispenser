@@ -44,7 +44,9 @@ export async function handleDispense(
 		return;
 	}
 
-	const unblocked = await getUnblocked(result.sourceLink);
+	const unblocked = result.priorityEnabled
+		? await getUnblocked(result.sourceLink)
+		: [];
 
 	const embed = new Embed()
 		.setColor("#5865F2")

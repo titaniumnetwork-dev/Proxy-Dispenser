@@ -14,13 +14,14 @@ export interface Options {
 }
 
 export interface Success {
-	readonly success: true;
-	readonly link: string;
-	readonly sourceLink: string;
-	readonly remaining: number;
-	readonly hasMore: boolean;
-	readonly filterFallback: boolean;
-}
+		readonly success: true;
+		readonly link: string;
+		readonly sourceLink: string;
+		readonly remaining: number;
+		readonly hasMore: boolean;
+		readonly filterFallback: boolean;
+		readonly priorityEnabled: boolean;
+	}
 
 export interface Failure {
 	readonly success: false;
@@ -326,5 +327,6 @@ export async function dispense(options: Options): Promise<Result> {
 		remaining: maxLinks - (used + 1),
 		hasMore: sortedAvailable.length > 1,
 		filterFallback,
+		priorityEnabled,
 	};
 }
