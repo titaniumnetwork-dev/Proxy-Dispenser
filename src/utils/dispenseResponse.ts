@@ -6,9 +6,21 @@ import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 export async function handleDispense(
 	ctx: ComponentContext,
 	categoryId: string,
+	responseType: "editOrReply" | "write" | "followup" = "editOrReply",
 ): Promise<void> {
+	const respond = (() => {
+		switch (responseType) {
+			case "write":
+				return ctx.write.bind(ctx);
+			case "followup":
+				return ctx.followup.bind(ctx);
+			default:
+				return ctx.editOrReply.bind(ctx);
+		}
+	})();
+
 	if (!ctx.guildId) {
-		await ctx.write({
+		await respond({
 			content: "This can only be used in a server.",
 			flags: MessageFlags.Ephemeral,
 		});
@@ -25,7 +37,7 @@ export async function handleDispense(
 	});
 
 	if (!result.success) {
-		await ctx.editOrReply({
+		await respond({
 			content: result.error,
 			flags: MessageFlags.Ephemeral,
 		});
@@ -75,7 +87,7 @@ export async function handleDispense(
 		.setLabel("Report");
 	row.addComponents(reportButton);
 
-	await ctx.editOrReply({
+	await respond({
 		embeds: [embed],
 		components: [row],
 		flags: MessageFlags.Ephemeral,

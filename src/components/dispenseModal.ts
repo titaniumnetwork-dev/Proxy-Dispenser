@@ -12,6 +12,8 @@ export default class DispenseSelect extends ComponentCommand {
 
 	async run(ctx: ComponentContext<typeof this.componentType>) {
 		const categoryId = ctx.interaction.values[0] as string;
-		await handleDispense(ctx, categoryId);
+		await ctx.update({});
+
+		await handleDispense(ctx, categoryId, "followup");
 	}
 }

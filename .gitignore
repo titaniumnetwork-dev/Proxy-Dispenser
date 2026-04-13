@@ -35,5 +35,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env
 config.json
 commands.json
-sqlite.db
+database.db*
 dist/
