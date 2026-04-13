@@ -62,14 +62,16 @@ export default class SetLogChannelCommand extends SubCommand {
 			return;
 		}
 
-		if (channelId) {
+		if (!channelId) {
 			await ctx.editOrReply({
-				content: `Log channel set to <#${channelId}>.`,
+				content: "Log channel has been disabled.",
 				flags,
 			});
+			return;
 		}
+
 		await ctx.editOrReply({
-			content: "Log channel has been disabled.",
+			content: `Log channel set to <#${channelId}>.`,
 			flags,
 		});
 	}
