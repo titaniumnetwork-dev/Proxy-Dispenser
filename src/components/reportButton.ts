@@ -3,8 +3,6 @@ import {
 	type ComponentContext,
 	Label,
 	Modal,
-	StringSelectMenu,
-	StringSelectOption,
 	TextInput,
 } from "seyfert";
 import { MessageFlags, TextInputStyle } from "seyfert/lib/types";
@@ -36,13 +34,12 @@ export default class ReportButton extends ComponentCommand {
 			.setRequired(true)
 			.setLength({ max: 1000 });
 
-		const typeInput = new StringSelectMenu()
+		const typeInput = new TextInput()
 			.setCustomId("type")
-			.setPlaceholder("Select what issue you are having")
+			.setStyle(TextInputStyle.Short)
+			.setPlaceholder("Blocked, Broken, or Other")
 			.setRequired(true)
-			.addOption(new StringSelectOption().setLabel("Blocked"))
-			.addOption(new StringSelectOption().setLabel("Broken"))
-			.addOption(new StringSelectOption().setLabel("Other"));
+			.setLength({ max: 100 });
 
 		const reasonLabel = new Label()
 			.setLabel(
