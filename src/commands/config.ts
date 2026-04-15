@@ -3,6 +3,7 @@ import SetCycleCommand from "@commands/config/setCycles";
 import SetDocsCommand from "@commands/config/setDocs";
 import SetLimitCommand from "@commands/config/setLimit";
 import SetLogChannelCommand from "@commands/config/setLogChannel";
+import SetReportChannelCommand from "@commands/config/setReportChannel";
 import SetupConfigCommand from "@commands/config/setup";
 import ViewCommand from "@commands/config/view";
 import { Command, Declare, Options } from "seyfert";
@@ -19,6 +20,7 @@ import { Command, Declare, Options } from "seyfert";
 	SetLimitCommand,
 	SetBonusCommand,
 	SetLogChannelCommand,
+	SetReportChannelCommand,
 	SetCycleCommand,
 	SetDocsCommand,
 	SetupConfigCommand,

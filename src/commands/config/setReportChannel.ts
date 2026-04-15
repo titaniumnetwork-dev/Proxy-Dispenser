@@ -18,7 +18,7 @@ import { t } from "try";
 const options = {
 	channel: createChannelOption({
 		description:
-			"The channel to log dispensed links to (leave empty to disable)",
+			"The channel to log link reports to (leave empty to disable)",
 		required: false,
 		channel_types: [ChannelType.GuildText],
 	}),
@@ -29,13 +29,13 @@ const options = {
 };
 
 @Declare({
-	name: "set-log-channel",
-	description: "Set the channel for dispenser logs",
+	name: "set-report-channel",
+	description: "Set the channel for dispenser reports",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
 @Options(options)
-export default class SetLogChannelCommand extends SubCommand {
+export default class SetReportChannelCommand extends SubCommand {
 	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
@@ -50,13 +50,13 @@ export default class SetLogChannelCommand extends SubCommand {
 		const [ok, error] = await t(
 			db
 				.update(schema.guild)
-				.set({ logChannelId: channelId })
+				.set({ logChannelBlockedLinkReports: channelId })
 				.where(eq(schema.guild.guildId, guildId)),
 		);
 		if (!ok) {
-			ctx.client.logger.error(`Failed to set log channel: ${error}`);
+			ctx.client.logger.error(`Failed to set report channel: ${error}`);
 			await ctx.editOrReply({
-				embeds: [createUnexpectedErrorEmbed("setting the log channel")],
+				embeds: [createUnexpectedErrorEmbed("setting the report channel")],
 				flags: MessageFlags.Ephemeral,
 			});
 			return;
@@ -64,14 +64,14 @@ export default class SetLogChannelCommand extends SubCommand {
 
 		if (!channelId) {
 			await ctx.editOrReply({
-				content: "Log channel has been disabled.",
+				content: "Report channel has been disabled.",
 				flags,
 			});
 			return;
 		}
 
 		await ctx.editOrReply({
-			content: `Log channel set to <#${channelId}>.`,
+			content: `Report channel set to <#${channelId}>.`,
 			flags,
 		});
 	}
