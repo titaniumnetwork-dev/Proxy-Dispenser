@@ -58,7 +58,7 @@ export async function handleDispense(
 		)
 		.addFields(
 			{ name: "Type", value: categoryId, inline: true },
-			{ name: "Link", value: `\`${result.link}\``, inline: false },
+			{ name: "Link", value: `${result.link}`, inline: false },
 			{
 				name: "Unblocked On",
 				value: unblocked.length > 0 ? unblocked.join(", ") : "Unknown",
