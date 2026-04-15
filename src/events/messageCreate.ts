@@ -8,7 +8,7 @@ export default createEvent({
 		const content = message.content?.trim();
 		if (!content) return;
 
-		if (content.includes("/proxy")) {
+		if (content.startsWith("/proxy")) {
 			await client.messages.write(message.channelId, {
 				content: `quit using /proxy ya blockhead. go to the panel to request links`, // change later
 			});
