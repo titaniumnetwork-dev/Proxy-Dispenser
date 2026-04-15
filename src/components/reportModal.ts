@@ -113,10 +113,14 @@ export default class ReportModal extends ModalCommand {
 
 		const row = new ActionRow<Button>();
 		const closeButton = new Button()
-			.setCustomId(`report-close:${userId}`)
+			.setCustomId(`report-close:${userId}:${categoryId}:${link}`)
 			.setLabel("Close Report")
 			.setStyle(ButtonStyle.Secondary);
-		row.addComponents(closeButton);
+		const restoreButton = new Button()
+			.setCustomId(`report-restore:${userId}:${categoryId}:${link}`)
+			.setLabel("Restore User Link & Remove Link from Database")
+			.setStyle(ButtonStyle.Danger);
+		row.addComponents(closeButton, restoreButton);
 
 		const [sendOk, sendError] = await t(
 			ctx.client.messages.write(targetChannelId, {
