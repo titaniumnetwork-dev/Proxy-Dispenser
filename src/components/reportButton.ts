@@ -3,6 +3,8 @@ import {
 	type ComponentContext,
 	Label,
 	Modal,
+	StringSelectMenu,
+	StringSelectOption,
 	TextInput,
 } from "seyfert";
 import { MessageFlags, TextInputStyle } from "seyfert/lib/types";
@@ -30,20 +32,32 @@ export default class ReportButton extends ComponentCommand {
 		const reasonInput = new TextInput()
 			.setCustomId("reason")
 			.setStyle(TextInputStyle.Paragraph)
-			.setPlaceholder(
-				"Describe the issue (e.g. link is blocked, doesn't work, etc.)",
-			)
+			.setPlaceholder("Describe the issue")
 			.setRequired(true)
 			.setLength({ max: 1000 });
 
+		const typeInput = new StringSelectMenu()
+			.setCustomId("type")
+			.setPlaceholder("Select what issue you are having")
+			.setRequired(true)
+			.addOption(new StringSelectOption().setLabel("Blocked"))
+			.addOption(new StringSelectOption().setLabel("Broken"))
+			.addOption(new StringSelectOption().setLabel("Other"));
+
 		const reasonLabel = new Label()
-			.setLabel("What's wrong with this link?")
+			.setLabel(
+				"Describe your problem (Like what filter it's blocked on, if applicable)",
+			)
 			.setComponent(reasonInput);
+
+		const typeLabel = new Label()
+			.setLabel("What's wrong with this link?")
+			.setComponent(typeInput);
 
 		const modal = new Modal()
 			.setCustomId(`report-modal:${categoryId}:${link}`)
 			.setTitle("Report Link")
-			.setComponents([reasonLabel]);
+			.setComponents([typeLabel, reasonLabel]);
 
 		await ctx.interaction.modal(modal);
 	}

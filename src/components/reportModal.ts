@@ -62,6 +62,21 @@ export default class ReportModal extends ModalCommand {
 			});
 			return;
 		}
+
+		let type: string;
+		try {
+			type = ctx.interaction.getInputValue("type", true) as string;
+		} catch (error) {
+			ctx.client.logger.error(
+				`Failed to get input value "type" from modal. Components: ${JSON.stringify(ctx.components)}`,
+				error,
+			);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("reading your report details")],
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
 		const userId = ctx.author.id;
 		const guildId = ctx.guildId;
 
@@ -106,6 +121,7 @@ export default class ReportModal extends ModalCommand {
 			.addFields(
 				{ name: "Category", value: categoryId, inline: true },
 				{ name: "Link", value: link, inline: true },
+				{ name: "Type", value: type, inline: true },
 				{ name: "Reporter", value: `<@${userId}>`, inline: true },
 				{ name: "Reason", value: reason, inline: false },
 			)
