@@ -30,31 +30,20 @@ export default class ReportButton extends ComponentCommand {
 		const reasonInput = new TextInput()
 			.setCustomId("reason")
 			.setStyle(TextInputStyle.Paragraph)
-			.setPlaceholder("Describe the issue")
+			.setPlaceholder(
+				"Describe the issue. Please specify if the link is broken, blocked (and what filter), or something else.",
+			)
 			.setRequired(true)
 			.setLength({ max: 1000 });
 
-		const typeInput = new TextInput()
-			.setCustomId("type")
-			.setStyle(TextInputStyle.Short)
-			.setPlaceholder("Blocked, Broken, or Other")
-			.setRequired(true)
-			.setLength({ max: 100 });
-
 		const reasonLabel = new Label()
-			.setLabel(
-				"Describe your problem (Like what filter it's blocked on, if applicable)",
-			)
-			.setComponent(reasonInput);
-
-		const typeLabel = new Label()
 			.setLabel("What's wrong with this link?")
-			.setComponent(typeInput);
+			.setComponent(reasonInput);
 
 		const modal = new Modal()
 			.setCustomId(`report-modal:${categoryId}:${link}`)
 			.setTitle("Report Link")
-			.setComponents([typeLabel, reasonLabel]);
+			.setComponents([reasonLabel]);
 
 		await ctx.interaction.modal(modal);
 	}
