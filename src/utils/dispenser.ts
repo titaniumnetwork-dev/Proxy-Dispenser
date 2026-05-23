@@ -29,6 +29,9 @@ export interface Failure {
 }
 
 export type Result = Success | Failure;
+class DispenseRejection extends Error {
+	override readonly name = "DispenseRejection";
+}
 
 async function getLimit(
 	guildId: string,
@@ -124,47 +127,8 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	await t(
-		db
-			.insert(schema.guildUsers)
-			.values({
-				guildId,
-				userId,
-				receivedLinks: [],
-				timesMonthlyCycle: 0,
-				timesUserCycle: 0,
-			})
-			.onConflictDoNothing(),
-	);
-
-	const [userOk, userErr, user] = await t(
-		db.query.guildUsers.findFirst({
-			where: (u, { eq, and }) =>
-				and(eq(u.guildId, guildId), eq(u.userId, userId)),
-		}),
-	);
-
-	if (!userOk || !user) {
-		logger.error(`Failed to get or create record for ${userId}: ${userErr}`);
-		return {
-			success: false,
-			error: "An unexpected error occurred. Please try again.",
-		};
-	}
-
-	await t(
-		db
-			.insert(schema.categoryUsers)
-			.values({
-				guildId,
-				categoryId,
-				userId,
-				timesUserCycle: 0,
-			})
-			.onConflictDoNothing(),
-	);
-
-	const [catUserOk, catUserErr, catUser] = await t(
+	
+	const [preCatUserOk, , preCatUser] = await t(
 		db.query.categoryUsers.findFirst({
 			where: (cu, { eq, and }) =>
 				and(
@@ -175,21 +139,9 @@ export async function dispense(options: Options): Promise<Result> {
 			columns: { timesUserCycle: true },
 		}),
 	);
-
-	if (!catUserOk || !catUser) {
-		logger.error(
-			`Failed to get or create category usage record for ${userId}/${categoryId}: ${catUserErr}`,
-		);
-		return {
-			success: false,
-			error: "An unexpected error occurred. Please try again.",
-		};
-	}
-
 	const maxLinks = await getLimit(guildId, categoryId, member);
-	const used = catUser.timesUserCycle;
-
-	if (used >= maxLinks) {
+	const preUsed = preCatUserOk && preCatUser ? preCatUser.timesUserCycle : 0;
+	if (preUsed >= maxLinks) {
 		return {
 			success: false,
 			error: `You have reached your link limit for **${categoryId}**!`,
@@ -218,8 +170,18 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const receivedLinks = user.receivedLinks ?? [];
-	const available = allLinks.filter((l) => !receivedLinks.includes(l.link));
+	const [preUserOk, , preUser] = await t(
+		db.query.guildUsers.findFirst({
+			where: (u, { eq, and }) =>
+				and(eq(u.guildId, guildId), eq(u.userId, userId)),
+			columns: { receivedLinks: true },
+		}),
+	);
+	const preReceivedLinks =
+		preUserOk && preUser ? (preUser.receivedLinks ?? []) : [];
+	const available = allLinks.filter(
+		(l) => !preReceivedLinks.includes(l.link),
+	);
 
 	if (available.length === 0) {
 		return {
@@ -294,54 +256,137 @@ export async function dispense(options: Options): Promise<Result> {
 				error: masqrResult.error,
 			};
 		}
-
 		deliveredLink = masqrResult.link;
 	}
 
-	const newLinks = [...receivedLinks, selectedLink.link];
-	const [updateOk, updateError] = await t(
-		db
-			.update(schema.guildUsers)
-			.set({
-				receivedLinks: newLinks,
-				timesUserCycle: user.timesUserCycle + 1,
-			})
-			.where(
-				and(
-					eq(schema.guildUsers.guildId, guildId),
-					eq(schema.guildUsers.userId, userId),
-				),
-			),
-	);
-	if (!updateOk) {
-		logger.error(`Failed to update user record: ${updateError}`);
-		return {
-			success: false,
-			error: "An unexpected error occurred while updating your record.",
-		};
-	}
+	
+	let committed: { used: number } | null = null;
+	const [txOk, txErr] = await t(
+		(async () => {
+			committed = db.transaction((tx) => {
+				tx.insert(schema.guildUsers)
+					.values({
+						guildId,
+						userId,
+						receivedLinks: [],
+						timesMonthlyCycle: 0,
+						timesUserCycle: 0,
+					})
+					.onConflictDoNothing()
+					.run();
 
-	const [catUpdateOk, catUpdateError] = await t(
-		db
-			.update(schema.categoryUsers)
-			.set({ timesUserCycle: used + 1 })
-			.where(
-				and(
-					eq(schema.categoryUsers.guildId, guildId),
-					eq(schema.categoryUsers.categoryId, categoryId),
-					eq(schema.categoryUsers.userId, userId),
-				),
-			),
+				tx.insert(schema.categoryUsers)
+					.values({
+						guildId,
+						categoryId,
+						userId,
+						timesUserCycle: 0,
+					})
+					.onConflictDoNothing()
+					.run();
+
+				const userRow = tx
+					.select({
+						receivedLinks: schema.guildUsers.receivedLinks,
+						timesUserCycle: schema.guildUsers.timesUserCycle,
+					})
+					.from(schema.guildUsers)
+					.where(
+						and(
+							eq(schema.guildUsers.guildId, guildId),
+							eq(schema.guildUsers.userId, userId),
+						),
+					)
+					.get();
+				if (!userRow) {
+					throw new Error("guildUsers row missing after upsert");
+				}
+
+				const catUserRow = tx
+					.select({
+						timesUserCycle: schema.categoryUsers.timesUserCycle,
+					})
+					.from(schema.categoryUsers)
+					.where(
+						and(
+							eq(schema.categoryUsers.guildId, guildId),
+							eq(schema.categoryUsers.categoryId, categoryId),
+							eq(schema.categoryUsers.userId, userId),
+						),
+					)
+					.get();
+				if (!catUserRow) {
+					throw new Error("categoryUsers row missing after upsert");
+				}
+
+				const used = catUserRow.timesUserCycle;
+				if (used >= maxLinks) {
+					throw new DispenseRejection(
+						`You have reached your link limit for **${categoryId}**!`,
+					);
+				}
+
+				const receivedLinks = userRow.receivedLinks ?? [];
+				if (receivedLinks.includes(selectedLink.link)) {
+					throw new DispenseRejection(
+						"That link was just dispensed to you. Please try again.",
+					);
+				}
+
+				tx.update(schema.guildUsers)
+					.set({
+						receivedLinks: [...receivedLinks, selectedLink.link],
+						timesUserCycle: userRow.timesUserCycle + 1,
+					})
+					.where(
+						and(
+							eq(schema.guildUsers.guildId, guildId),
+							eq(schema.guildUsers.userId, userId),
+						),
+					)
+					.run();
+
+				tx.update(schema.categoryUsers)
+					.set({ timesUserCycle: used + 1 })
+					.where(
+						and(
+							eq(schema.categoryUsers.guildId, guildId),
+							eq(schema.categoryUsers.categoryId, categoryId),
+							eq(schema.categoryUsers.userId, userId),
+						),
+					)
+					.run();
+
+				return { used };
+			});
+		})(),
 	);
-	if (!catUpdateOk) {
+
+	if (!txOk) {
+		if (txErr instanceof DispenseRejection) {
+			return { success: false, error: txErr.message };
+		}
 		logger.error(
-			`Failed to update category usage record: ${catUpdateError}`,
+			`Dispense transaction failed for ${userId} in ${guildId}/${categoryId}: ${txErr}`,
 		);
 		return {
 			success: false,
 			error: "An unexpected error occurred while updating your record.",
 		};
 	}
+
+	if (!committed) {
+		logger.error(
+			`Dispense transaction returned no result for ${userId} in ${guildId}/${categoryId}`,
+		);
+		return {
+			success: false,
+			error: "An unexpected error occurred while updating your record.",
+		};
+	}
+
+	const used = (committed as { used: number }).used;
+	const remaining = maxLinks - (used + 1);
 
 	if (guildRow?.logChannelId) {
 		const linkDisplay = catRow?.masqrEnabled
@@ -365,7 +410,7 @@ export async function dispense(options: Options): Promise<Result> {
 							},
 							{
 								name: "Remaining (this category)",
-								value: String(maxLinks - (used + 1)),
+								value: String(remaining),
 								inline: true,
 							},
 						],
@@ -383,7 +428,7 @@ export async function dispense(options: Options): Promise<Result> {
 		success: true,
 		link: deliveredLink,
 		sourceLink: selectedLink.link,
-		remaining: maxLinks - (used + 1),
+		remaining,
 		hasMore: sortedAvailable.length > 1,
 		filterFallback,
 		priorityEnabled,
