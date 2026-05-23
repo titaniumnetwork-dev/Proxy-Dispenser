@@ -66,8 +66,8 @@ export default class ViewCommand extends SubCommand {
 			.setTitle("Guild Configuration")
 			.addFields(
 				{
-					name: "Monthly Limit",
-					value: String(guildRow.monthlyLimit),
+					name: "Default Per-Category Limit",
+					value: `${guildRow.monthlyLimit} (used by any category without its own limit)`,
 					inline: true,
 				},
 				{

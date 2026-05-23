@@ -13,7 +13,7 @@
 		"verbatimModuleSyntax": true,
 		"noEmit": true,
 		"strict": true,
-		"types": ["node", "bun"],
+		"types": ["node"],
 		"skipLibCheck": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedIndexedAccess": true,

@@ -69,6 +69,28 @@ export default class ResetUserCommand extends SubCommand {
 			return;
 		}
 
+		const [catResetOk, catResetErr] = await t(
+			db
+				.update(schema.categoryUsers)
+				.set({ timesUserCycle: 0 })
+				.where(
+					and(
+						eq(schema.categoryUsers.guildId, guildId),
+						eq(schema.categoryUsers.userId, userId),
+					),
+				),
+		);
+		if (!catResetOk) {
+			ctx.client.logger.error(
+				`Failed to reset per-category counters for ${userId}: ${catResetErr}`,
+			);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed(`resetting <@${userId}>`)],
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		await ctx.editOrReply({
 			content: `Reset proxy limit for <@${userId}>`,
 			flags,

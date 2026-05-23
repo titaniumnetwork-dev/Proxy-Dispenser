@@ -137,6 +137,7 @@ export const categories = sqliteTable(
 		sortOrder: integer("sort_order").notNull().default(0),
 		emojiId: text("emoji_id").notNull().default(""),
 		filterApiEnabled: integer("filter_api_enabled").notNull().default(1),
+		dispenserLimit: integer("dispenser_limit"),
 		masqrEnabled: integer("masqr_enabled").notNull().default(0),
 	},
 	(t) => [
@@ -148,6 +149,35 @@ export const categories = sqliteTable(
 		}).onDelete("cascade"),
 	],
 );
+
+export const categoryUsers = sqliteTable(
+	"category_users",
+	{
+		guildId: snowflake("guild_id").notNull(),
+		categoryId: text("category_id").notNull(),
+		userId: snowflake("user_id").notNull(),
+		timesUserCycle: integer("times_user_cycle").notNull().default(0),
+		firstTimeUserCycleTimestamp: integer("first_time_user_cycle_timestamp", {
+			mode: "timestamp_ms",
+		}),
+	},
+	(t) => [
+		primaryKey({ columns: [t.guildId, t.categoryId, t.userId] }),
+		foreignKey({
+			columns: [t.guildId, t.categoryId],
+			foreignColumns: [categories.guildId, categories.categoryId],
+			name: "category_users_category_fk",
+		}).onDelete("cascade"),
+	],
+);
+
+export const categoryUsersRelations = relations(categoryUsers, ({ one }) => ({
+	category: one(categories, {
+		fields: [categoryUsers.guildId, categoryUsers.categoryId],
+		references: [categories.guildId, categories.categoryId],
+	}),
+}));
+
 
 export const links = sqliteTable(
 	"links",
@@ -208,6 +238,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
 		references: [guild.guildId],
 	}),
 	links: many(links),
+	users: many(categoryUsers),
 }));
 
 export const linksRelations = relations(links, ({ one }) => ({
@@ -238,6 +269,9 @@ export type SelectGlobalUser = typeof globalUsers.$inferSelect;
 
 export type InsertCategory = typeof categories.$inferInsert;
 export type SelectCategory = typeof categories.$inferSelect;
+
+export type InsertCategoryUser = typeof categoryUsers.$inferInsert;
+export type SelectCategoryUser = typeof categoryUsers.$inferSelect;
 
 export type InsertLink = typeof links.$inferInsert;
 export type SelectLink = typeof links.$inferSelect;

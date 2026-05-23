@@ -8,6 +8,13 @@
       "when": 1776033072424,
       "tag": "0000_mature_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1779556625788,
+      "tag": "0001_add_per_category_limits",
+      "breakpoints": true
     }
   ]
 }

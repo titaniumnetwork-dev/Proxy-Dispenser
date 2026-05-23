@@ -46,6 +46,7 @@ export default class ListCategoriesCommand extends SubCommand {
 					categoryId: schema.categories.categoryId,
 					emojiId: schema.categories.emojiId,
 					masqrEnabled: schema.categories.masqrEnabled,
+					dispenserLimit: schema.categories.dispenserLimit,
 				})
 				.from(schema.categories)
 				.where(sql`${schema.categories.guildId} = ${ctx.guildId}`)
@@ -92,8 +93,12 @@ export default class ListCategoriesCommand extends SubCommand {
 		const lines = categories.map((cat, index) => {
 			const emoji = cat.emojiId ? `${cat.emojiId} ` : "";
 			const masqr = cat.masqrEnabled ? " [Masqr]" : "";
+			const limit =
+				cat.dispenserLimit != null
+					? ` [limit: ${cat.dispenserLimit}]`
+					: " [limit: default]";
 			const position = index + 1;
-			return `${position}: ${emoji}**${cat.categoryId}**${masqr} - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
+			return `${position}: ${emoji}**${cat.categoryId}**${masqr}${limit} - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
 		});
 
 		const embed = new Embed()

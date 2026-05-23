@@ -58,6 +58,23 @@ export default class ResetCommand extends SubCommand {
 			return;
 		}
 
+		const [catResetOk, catResetErr] = await t(
+			db
+				.update(schema.categoryUsers)
+				.set({ timesUserCycle: 0 })
+				.where(eq(schema.categoryUsers.guildId, guildId)),
+		);
+		if (!catResetOk) {
+			ctx.client.logger.error(
+				`Failed to reset per-category counters: ${catResetErr}`,
+			);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("resetting proxy limit")],
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		await ctx.editOrReply({
 			content: "The proxy limit has been reset!",
 			flags,

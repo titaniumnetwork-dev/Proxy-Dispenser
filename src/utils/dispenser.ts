@@ -14,14 +14,14 @@ export interface Options {
 }
 
 export interface Success {
-		readonly success: true;
-		readonly link: string;
-		readonly sourceLink: string;
-		readonly remaining: number;
-		readonly hasMore: boolean;
-		readonly filterFallback: boolean;
-		readonly priorityEnabled: boolean;
-	}
+	readonly success: true;
+	readonly link: string;
+	readonly sourceLink: string;
+	readonly remaining: number;
+	readonly hasMore: boolean;
+	readonly filterFallback: boolean;
+	readonly priorityEnabled: boolean;
+}
 
 export interface Failure {
 	readonly success: false;
@@ -32,24 +32,36 @@ export type Result = Success | Failure;
 
 async function getLimit(
 	guildId: string,
+	categoryId: string,
 	member?: GuildMember,
 ): Promise<number> {
-	const [guildOk, guildErr, guildRow] = await t(
+	const [guildOk, , guildRow] = await t(
 		db.query.guild.findFirst({
 			where: (g, { eq }) => eq(g.guildId, guildId),
 			columns: { monthlyLimit: true, premiumLimits: true },
 		}),
 	);
 
-	if (!guildOk || !guildRow) return 3;
+	const guildDefault = guildOk && guildRow ? guildRow.monthlyLimit : 3;
+	const premiumLimits = guildOk && guildRow ? guildRow.premiumLimits : {};
 
-	const monthlyLimit = guildRow.monthlyLimit;
-	const premiumLimits = guildRow.premiumLimits;
-	if (!member) return monthlyLimit;
+	const [, , categoryRow] = await t(
+		db.query.categories.findFirst({
+			where: (c, { eq, and }) =>
+				and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
+			columns: { dispenserLimit: true },
+		}),
+	);
 
-	const limits = [monthlyLimit];
+	const baseLimit =
+		categoryRow?.dispenserLimit != null
+			? categoryRow.dispenserLimit
+			: guildDefault;
+
+	if (!member) return baseLimit;
+
+	const limits = [baseLimit];
 	const memberRoles = member.roles.keys;
-
 	for (const [roleId, limit] of Object.entries(premiumLimits)) {
 		if (memberRoles.includes(roleId)) {
 			limits.push(limit);
@@ -112,27 +124,18 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const [, , existingUser] = await t(
-		db.query.guildUsers.findFirst({
-			where: (u, { eq, and }) =>
-				and(eq(u.guildId, guildId), eq(u.userId, userId)),
-		}),
+	await t(
+		db
+			.insert(schema.guildUsers)
+			.values({
+				guildId,
+				userId,
+				receivedLinks: [],
+				timesMonthlyCycle: 0,
+				timesUserCycle: 0,
+			})
+			.onConflictDoNothing(),
 	);
-
-	if (!existingUser) {
-		await t(
-			db
-				.insert(schema.guildUsers)
-				.values({
-					guildId,
-					userId,
-					receivedLinks: [],
-					timesMonthlyCycle: 0,
-					timesUserCycle: 0,
-				})
-				.onConflictDoNothing(),
-		);
-	}
 
 	const [userOk, userErr, user] = await t(
 		db.query.guildUsers.findFirst({
@@ -142,20 +145,54 @@ export async function dispense(options: Options): Promise<Result> {
 	);
 
 	if (!userOk || !user) {
-		logger.error(`Failed to get or create record for ${userId}`);
+		logger.error(`Failed to get or create record for ${userId}: ${userErr}`);
 		return {
 			success: false,
 			error: "An unexpected error occurred. Please try again.",
 		};
 	}
 
-	const maxLinks = await getLimit(guildId, member);
-	const used = user.timesUserCycle;
+	await t(
+		db
+			.insert(schema.categoryUsers)
+			.values({
+				guildId,
+				categoryId,
+				userId,
+				timesUserCycle: 0,
+			})
+			.onConflictDoNothing(),
+	);
+
+	const [catUserOk, catUserErr, catUser] = await t(
+		db.query.categoryUsers.findFirst({
+			where: (cu, { eq, and }) =>
+				and(
+					eq(cu.guildId, guildId),
+					eq(cu.categoryId, categoryId),
+					eq(cu.userId, userId),
+				),
+			columns: { timesUserCycle: true },
+		}),
+	);
+
+	if (!catUserOk || !catUser) {
+		logger.error(
+			`Failed to get or create category usage record for ${userId}/${categoryId}: ${catUserErr}`,
+		);
+		return {
+			success: false,
+			error: "An unexpected error occurred. Please try again.",
+		};
+	}
+
+	const maxLinks = await getLimit(guildId, categoryId, member);
+	const used = catUser.timesUserCycle;
 
 	if (used >= maxLinks) {
 		return {
 			success: false,
-			error: "You have reached your maximum proxy link limit for this month!",
+			error: `You have reached your link limit for **${categoryId}**!`,
 		};
 	}
 
@@ -267,7 +304,7 @@ export async function dispense(options: Options): Promise<Result> {
 			.update(schema.guildUsers)
 			.set({
 				receivedLinks: newLinks,
-				timesUserCycle: used + 1,
+				timesUserCycle: user.timesUserCycle + 1,
 			})
 			.where(
 				and(
@@ -278,6 +315,28 @@ export async function dispense(options: Options): Promise<Result> {
 	);
 	if (!updateOk) {
 		logger.error(`Failed to update user record: ${updateError}`);
+		return {
+			success: false,
+			error: "An unexpected error occurred while updating your record.",
+		};
+	}
+
+	const [catUpdateOk, catUpdateError] = await t(
+		db
+			.update(schema.categoryUsers)
+			.set({ timesUserCycle: used + 1 })
+			.where(
+				and(
+					eq(schema.categoryUsers.guildId, guildId),
+					eq(schema.categoryUsers.categoryId, categoryId),
+					eq(schema.categoryUsers.userId, userId),
+				),
+			),
+	);
+	if (!catUpdateOk) {
+		logger.error(
+			`Failed to update category usage record: ${catUpdateError}`,
+		);
 		return {
 			success: false,
 			error: "An unexpected error occurred while updating your record.",
@@ -305,7 +364,7 @@ export async function dispense(options: Options): Promise<Result> {
 								inline: true,
 							},
 							{
-								name: "Remaining Links",
+								name: "Remaining (this category)",
 								value: String(maxLinks - (used + 1)),
 								inline: true,
 							},
