@@ -334,107 +334,103 @@ export async function dispense(options: Options): Promise<Result> {
 		deliveredLink = masqrResult.link;
 	}
 
-	
-	let committed: { used: number } | null = null;
-	const [txOk, txErr] = await t(
-		(async () => {
-			committed = db.transaction((tx) => {
-				tx.insert(schema.guildUsers)
-					.values({
-						guildId,
-						userId,
-						receivedLinks: [],
-						timesMonthlyCycle: 0,
-						timesUserCycle: 0,
-					})
-					.onConflictDoNothing()
-					.run();
+	const [txOk, txErr, txResult] = t(() =>
+		db.transaction((tx) => {
+			tx.insert(schema.guildUsers)
+				.values({
+					guildId,
+					userId,
+					receivedLinks: [],
+					timesMonthlyCycle: 0,
+					timesUserCycle: 0,
+				})
+				.onConflictDoNothing()
+				.run();
 
-				tx.insert(schema.categoryUsers)
-					.values({
-						guildId,
-						categoryId,
-						userId,
-						timesUserCycle: 0,
-					})
-					.onConflictDoNothing()
-					.run();
+			tx.insert(schema.categoryUsers)
+				.values({
+					guildId,
+					categoryId,
+					userId,
+					timesUserCycle: 0,
+				})
+				.onConflictDoNothing()
+				.run();
 
-				const userRow = tx
-					.select({
-						receivedLinks: schema.guildUsers.receivedLinks,
-						timesUserCycle: schema.guildUsers.timesUserCycle,
-					})
-					.from(schema.guildUsers)
-					.where(
-						and(
-							eq(schema.guildUsers.guildId, guildId),
-							eq(schema.guildUsers.userId, userId),
-						),
-					)
-					.get();
-				if (!userRow) {
-					throw new Error("guildUsers row missing after upsert");
-				}
+			const userRow = tx
+				.select({
+					receivedLinks: schema.guildUsers.receivedLinks,
+					timesUserCycle: schema.guildUsers.timesUserCycle,
+				})
+				.from(schema.guildUsers)
+				.where(
+					and(
+						eq(schema.guildUsers.guildId, guildId),
+						eq(schema.guildUsers.userId, userId),
+					),
+				)
+				.get();
+			if (!userRow) {
+				throw new Error("guildUsers row missing after upsert");
+			}
 
-				const catUserRow = tx
-					.select({
-						timesUserCycle: schema.categoryUsers.timesUserCycle,
-					})
-					.from(schema.categoryUsers)
-					.where(
-						and(
-							eq(schema.categoryUsers.guildId, guildId),
-							eq(schema.categoryUsers.categoryId, categoryId),
-							eq(schema.categoryUsers.userId, userId),
-						),
-					)
-					.get();
-				if (!catUserRow) {
-					throw new Error("categoryUsers row missing after upsert");
-				}
+			const catUserRow = tx
+				.select({
+					timesUserCycle: schema.categoryUsers.timesUserCycle,
+				})
+				.from(schema.categoryUsers)
+				.where(
+					and(
+						eq(schema.categoryUsers.guildId, guildId),
+						eq(schema.categoryUsers.categoryId, categoryId),
+						eq(schema.categoryUsers.userId, userId),
+					),
+				)
+				.get();
+			if (!catUserRow) {
+				throw new Error("categoryUsers row missing after upsert");
+			}
 
-				const used = catUserRow.timesUserCycle;
-				if (used >= maxLinks) {
-					throw new DispenseRejection(
-						`You have reached your link limit for **${categoryId}**!`,
-					);
-				}
+			const used = catUserRow.timesUserCycle;
+			if (used >= maxLinks) {
+				throw new DispenseRejection(
+					`You have reached your link limit for **${categoryId}**!`,
+				);
+			}
 
-				const receivedLinks = userRow.receivedLinks ?? [];
-				if (receivedLinks.includes(selectedLink.link)) {
-					throw new DispenseRejection(
-						"That link was just dispensed to you. Please try again.",
-					);
-				}
+			const receivedLinks = userRow.receivedLinks ?? [];
+			if (receivedLinks.includes(selectedLink.link)) {
+				throw new DispenseRejection(
+					"That link was just dispensed to you. Please try again.",
+				);
+			}
 
-				tx.update(schema.guildUsers)
-					.set({
-						receivedLinks: [...receivedLinks, selectedLink.link],
-						timesUserCycle: userRow.timesUserCycle + 1,
-					})
-					.where(
-						and(
-							eq(schema.guildUsers.guildId, guildId),
-							eq(schema.guildUsers.userId, userId),
-						),
-					)
-					.run();
+			tx.update(schema.guildUsers)
+				.set({
+					receivedLinks: [...receivedLinks, selectedLink.link],
+					timesUserCycle: userRow.timesUserCycle + 1,
+				})
+				.where(
+					and(
+						eq(schema.guildUsers.guildId, guildId),
+						eq(schema.guildUsers.userId, userId),
+					),
+				)
+				.run();
 
-				tx.update(schema.categoryUsers)
-					.set({ timesUserCycle: used + 1 })
-					.where(
-						and(
-							eq(schema.categoryUsers.guildId, guildId),
-							eq(schema.categoryUsers.categoryId, categoryId),
-							eq(schema.categoryUsers.userId, userId),
-						),
-					)
-					.run();
+			tx.update(schema.categoryUsers)
+				.set({ timesUserCycle: used + 1 })
+				.where(
+					and(
+						eq(schema.categoryUsers.guildId, guildId),
+						eq(schema.categoryUsers.categoryId, categoryId),
+						eq(schema.categoryUsers.userId, userId),
+					),
+				)
+				.run();
 
-				return { used };
-			});
-		})(),
+			return { used };
+		}),
 	);
 
 	if (!txOk) {
@@ -450,17 +446,7 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	if (!committed) {
-		logger.error(
-			`Dispense transaction returned no result for ${userId} in ${guildId}/${categoryId}`,
-		);
-		return {
-			success: false,
-			error: "An unexpected error occurred while updating your record.",
-		};
-	}
-
-	const used = (committed as { used: number }).used;
+	const { used } = txResult;
 	const remaining = maxLinks - (used + 1);
 
 	if (guildRow?.logChannelId) {

@@ -79,7 +79,7 @@ export default class ReportRestoreButton extends ComponentCommand {
 			});
 			return;
 		}
-		
+
 		const [catUserOk, catUserError, catUserRow] = await t(
 			db.query.categoryUsers.findFirst({
 				where: (cu, { eq, and }) =>

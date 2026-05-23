@@ -51,9 +51,10 @@ export default class SetLimitCommand extends SubCommand {
 			return;
 		}
 
-		await ctx.deferReply(ctx.options.ephemeral ?? true);
+ 		const ephemeral = ctx.options.ephemeral ?? true;
+ 		await ctx.deferReply(ephemeral);
 
-		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
+ 		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 		const categoryId = ctx.options.category;
 		const limit = ctx.options.limit ?? null;
 
