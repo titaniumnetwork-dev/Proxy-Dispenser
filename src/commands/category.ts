@@ -1,6 +1,7 @@
 import { Command, Declare, Options } from "seyfert";
 import CreateCategoryCommand from "./category/create";
 import DeleteCategoryCommand from "./category/delete";
+import SetLimitCommand from "./category/limit";
 import ListCategoriesCommand from "./category/list";
 import RenameCategoryCommand from "./category/rename";
 import ReorderCategoryCommand from "./category/reorder";
@@ -22,6 +23,7 @@ import ToggleMasqrCommand from "./category/toggleMasqr";
 	SetEmojiCommand,
 	ListCategoriesCommand,
 	ReorderCategoryCommand,
+	SetLimitCommand,
 	ToggleFilterApiCommand,
 	ToggleMasqrCommand,
 ])

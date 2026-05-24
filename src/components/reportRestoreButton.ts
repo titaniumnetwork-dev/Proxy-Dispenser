@@ -80,6 +80,43 @@ export default class ReportRestoreButton extends ComponentCommand {
 			return;
 		}
 
+		const [catUserOk, catUserError, catUserRow] = await t(
+			db.query.categoryUsers.findFirst({
+				where: (cu, { eq, and }) =>
+					and(
+						eq(cu.guildId, guildId),
+						eq(cu.categoryId, categoryId),
+						eq(cu.userId, userId),
+					),
+				columns: { timesUserCycle: true },
+			}),
+		);
+		if (!catUserOk) {
+			ctx.client.logger.error(
+				`Failed to fetch category usage for ${userId}/${categoryId}: ${catUserError}`,
+			);
+		} else if (catUserRow) {
+			const [catRestoreOk, catRestoreError] = await t(
+				db
+					.update(schema.categoryUsers)
+					.set({
+						timesUserCycle: Math.max(0, catUserRow.timesUserCycle - 1),
+					})
+					.where(
+						and(
+							eq(schema.categoryUsers.guildId, guildId),
+							eq(schema.categoryUsers.categoryId, categoryId),
+							eq(schema.categoryUsers.userId, userId),
+						),
+					),
+			);
+			if (!catRestoreOk) {
+				ctx.client.logger.error(
+					`Failed to decrement per-category counter for ${userId}/${categoryId}: ${catRestoreError}`,
+				);
+			}
+		}
+
 		const [deleteOk, deleteError] = await t(
 			db
 				.delete(schema.links)

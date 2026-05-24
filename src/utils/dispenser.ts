@@ -14,14 +14,14 @@ export interface Options {
 }
 
 export interface Success {
-		readonly success: true;
-		readonly link: string;
-		readonly sourceLink: string;
-		readonly remaining: number;
-		readonly hasMore: boolean;
-		readonly filterFallback: boolean;
-		readonly priorityEnabled: boolean;
-	}
+	readonly success: true;
+	readonly link: string;
+	readonly sourceLink: string;
+	readonly remaining: number;
+	readonly hasMore: boolean;
+	readonly filterFallback: boolean;
+	readonly priorityEnabled: boolean;
+}
 
 export interface Failure {
 	readonly success: false;
@@ -29,72 +29,123 @@ export interface Failure {
 }
 
 export type Result = Success | Failure;
+class DispenseRejection extends Error {
+	override readonly name = "DispenseRejection";
+}
+
+type LookupResult<T> =
+	| { readonly ok: true; readonly value: T }
+	| { readonly ok: false; readonly error: unknown };
 
 async function getLimit(
 	guildId: string,
-	member?: GuildMember,
-): Promise<number> {
+	categoryId: string,
+	member: GuildMember | undefined,
+	logger: Logger,
+): Promise<LookupResult<number>> {
 	const [guildOk, guildErr, guildRow] = await t(
 		db.query.guild.findFirst({
 			where: (g, { eq }) => eq(g.guildId, guildId),
 			columns: { monthlyLimit: true, premiumLimits: true },
 		}),
 	);
+	if (!guildOk) {
+		logger.error(
+			`Failed to fetch guild row for limit lookup (${guildId}): ${guildErr}`,
+		);
+		return { ok: false, error: guildErr };
+	}
 
-	if (!guildOk || !guildRow) return 3;
+	const guildDefault = guildRow ? guildRow.monthlyLimit : 3;
+	const premiumLimits = guildRow ? guildRow.premiumLimits : {};
 
-	const monthlyLimit = guildRow.monthlyLimit;
-	const premiumLimits = guildRow.premiumLimits;
-	if (!member) return monthlyLimit;
+	const [categoryOk, categoryErr, categoryRow] = await t(
+		db.query.categories.findFirst({
+			where: (c, { eq, and }) =>
+				and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
+			columns: { dispenserLimit: true },
+		}),
+	);
+	if (!categoryOk) {
+		logger.error(
+			`Failed to fetch category row for limit lookup (${guildId}/${categoryId}): ${categoryErr}`,
+		);
+		return { ok: false, error: categoryErr };
+	}
 
-	const limits = [monthlyLimit];
+	const baseLimit =
+		categoryRow?.dispenserLimit != null
+			? categoryRow.dispenserLimit
+			: guildDefault;
+
+	if (!member) return { ok: true, value: baseLimit };
+
+	const limits = [baseLimit];
 	const memberRoles = member.roles.keys;
-
 	for (const [roleId, limit] of Object.entries(premiumLimits)) {
 		if (memberRoles.includes(roleId)) {
 			limits.push(limit);
 		}
 	}
 
-	return Math.max(...limits);
+	return { ok: true, value: Math.max(...limits) };
 }
 
 async function isBlacklisted(
 	guildId: string,
 	userId: string,
-): Promise<boolean> {
-	const [, , guildUser] = await t(
+	logger: Logger,
+): Promise<LookupResult<boolean>> {
+	const [guildUserOk, guildUserErr, guildUser] = await t(
 		db.query.guildUsers.findFirst({
 			where: (u, { eq, and }) =>
 				and(eq(u.guildId, guildId), eq(u.userId, userId)),
 			columns: { isBlacklisted: true },
 		}),
 	);
-	if (guildUser?.isBlacklisted) return true;
+	if (!guildUserOk) {
+		logger.error(
+			`Failed to fetch guild_users row for blacklist check (${guildId}/${userId}): ${guildUserErr}`,
+		);
+		return { ok: false, error: guildUserErr };
+	}
+	if (guildUser?.isBlacklisted) return { ok: true, value: true };
 
-	const [, , globalUser] = await t(
+	const [globalUserOk, globalUserErr, globalUser] = await t(
 		db.query.globalUsers.findFirst({
 			where: (u, { eq }) => eq(u.userId, userId),
 			columns: { isBlacklisted: true },
 		}),
 	);
-	if (globalUser?.isBlacklisted) return true;
+	if (!globalUserOk) {
+		logger.error(
+			`Failed to fetch global_users row for blacklist check (${userId}): ${globalUserErr}`,
+		);
+		return { ok: false, error: globalUserErr };
+	}
+	if (globalUser?.isBlacklisted) return { ok: true, value: true };
 
-	return false;
+	return { ok: true, value: false };
 }
 
 export async function dispense(options: Options): Promise<Result> {
 	const { guildId, categoryId, userId, member, logger, client } = options;
 
-	const blacklisted = await isBlacklisted(guildId, userId);
-	if (blacklisted) {
+	const blacklistResult = await isBlacklisted(guildId, userId, logger);
+	if (!blacklistResult.ok) {
+		return {
+			success: false,
+			error: "An unexpected error occurred while verifying your access.",
+		};
+	}
+	if (blacklistResult.value) {
 		return {
 			success: false,
 			error: "You are blacklisted from receiving proxy links.",
 		};
 	}
 
-	const [, , guildRow] = await t(
+	const [guildRowOk, guildRowErr, guildRow] = await t(
 		db.query.guild.findFirst({
 			where: (g, { eq }) => eq(g.guildId, guildId),
 			columns: {
@@ -105,6 +156,15 @@ export async function dispense(options: Options): Promise<Result> {
 			},
 		}),
 	);
+	if (!guildRowOk) {
+		logger.error(
+			`Failed to fetch guild row for ${guildId}: ${guildRowErr}`,
+		);
+		return {
+			success: false,
+			error: "An unexpected error occurred while loading server settings.",
+		};
+	}
 	if (guildRow?.isBlacklisted) {
 		return {
 			success: false,
@@ -112,50 +172,40 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const [, , existingUser] = await t(
-		db.query.guildUsers.findFirst({
-			where: (u, { eq, and }) =>
-				and(eq(u.guildId, guildId), eq(u.userId, userId)),
+	const [preCatUserOk, preCatUserErr, preCatUser] = await t(
+		db.query.categoryUsers.findFirst({
+			where: (cu, { eq, and }) =>
+				and(
+					eq(cu.guildId, guildId),
+					eq(cu.categoryId, categoryId),
+					eq(cu.userId, userId),
+				),
+			columns: { timesUserCycle: true },
 		}),
 	);
-
-	if (!existingUser) {
-		await t(
-			db
-				.insert(schema.guildUsers)
-				.values({
-					guildId,
-					userId,
-					receivedLinks: [],
-					timesMonthlyCycle: 0,
-					timesUserCycle: 0,
-				})
-				.onConflictDoNothing(),
+	if (!preCatUserOk) {
+		logger.error(
+			`Failed category usage lookup for ${userId} in ${guildId}/${categoryId}: ${preCatUserErr}`,
 		);
-	}
-
-	const [userOk, userErr, user] = await t(
-		db.query.guildUsers.findFirst({
-			where: (u, { eq, and }) =>
-				and(eq(u.guildId, guildId), eq(u.userId, userId)),
-		}),
-	);
-
-	if (!userOk || !user) {
-		logger.error(`Failed to get or create record for ${userId}`);
 		return {
 			success: false,
-			error: "An unexpected error occurred. Please try again.",
+			error: "An unexpected error occurred while checking your usage.",
 		};
 	}
 
-	const maxLinks = await getLimit(guildId, member);
-	const used = user.timesUserCycle;
-
-	if (used >= maxLinks) {
+	const limitResult = await getLimit(guildId, categoryId, member, logger);
+	if (!limitResult.ok) {
 		return {
 			success: false,
-			error: "You have reached your maximum proxy link limit for this month!",
+			error: "An unexpected error occurred while loading the link limit.",
+		};
+	}
+	const maxLinks = limitResult.value;
+	const preUsed = preCatUser ? preCatUser.timesUserCycle : 0;
+	if (preUsed >= maxLinks) {
+		return {
+			success: false,
+			error: `You have reached your link limit for **${categoryId}**!`,
 		};
 	}
 
@@ -181,8 +231,26 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 
-	const receivedLinks = user.receivedLinks ?? [];
-	const available = allLinks.filter((l) => !receivedLinks.includes(l.link));
+	const [preUserOk, preUserErr, preUser] = await t(
+		db.query.guildUsers.findFirst({
+			where: (u, { eq, and }) =>
+				and(eq(u.guildId, guildId), eq(u.userId, userId)),
+			columns: { receivedLinks: true },
+		}),
+	);
+	if (!preUserOk) {
+		logger.error(
+			`Failed received links lookup for ${userId} in ${guildId}: ${preUserErr}`,
+		);
+		return {
+			success: false,
+			error: "An unexpected error occurred while checking your history.",
+		};
+	}
+	const preReceivedLinks = preUser ? (preUser.receivedLinks ?? []) : [];
+	const available = allLinks.filter(
+		(l) => !preReceivedLinks.includes(l.link),
+	);
 
 	if (available.length === 0) {
 		return {
@@ -199,11 +267,17 @@ export async function dispense(options: Options): Promise<Result> {
 			columns: { filterApiEnabled: true, masqrEnabled: true },
 		}),
 	);
-	if (catError) {
-		logger.error(`Failed to fetch category settings: ${catError}`);
+	if (!catOk) {
+		logger.error(
+			`Failed to fetch category settings for ${guildId}/${categoryId}: ${catError}`,
+		);
+		return {
+			success: false,
+			error: "An unexpected error occurred while loading category settings.",
+		};
 	}
 
-	const priorityEnabled = catOk && Boolean(catRow?.filterApiEnabled);
+	const priorityEnabled = Boolean(catRow?.filterApiEnabled);
 
 	const filterRoleIds = guildRow?.filterRoleIds ?? {};
 	const memberRoleIds = member?.roles.keys ?? [];
@@ -257,39 +331,130 @@ export async function dispense(options: Options): Promise<Result> {
 				error: masqrResult.error,
 			};
 		}
-
 		deliveredLink = masqrResult.link;
 	}
 
-	const newLinks = [...receivedLinks, selectedLink.link];
-	const [updateOk, updateError] = await t(
-		db
-			.update(schema.guildUsers)
-			.set({
-				receivedLinks: newLinks,
-				timesUserCycle: used + 1,
-			})
-			.where(
-				and(
-					eq(schema.guildUsers.guildId, guildId),
-					eq(schema.guildUsers.userId, userId),
-				),
-			),
+	const [txOk, txErr, txResult] = t(() =>
+		db.transaction((tx) => {
+			tx.insert(schema.guildUsers)
+				.values({
+					guildId,
+					userId,
+					receivedLinks: [],
+					timesMonthlyCycle: 0,
+					timesUserCycle: 0,
+				})
+				.onConflictDoNothing()
+				.run();
+
+			tx.insert(schema.categoryUsers)
+				.values({
+					guildId,
+					categoryId,
+					userId,
+					timesUserCycle: 0,
+				})
+				.onConflictDoNothing()
+				.run();
+
+			const userRow = tx
+				.select({
+					receivedLinks: schema.guildUsers.receivedLinks,
+					timesUserCycle: schema.guildUsers.timesUserCycle,
+				})
+				.from(schema.guildUsers)
+				.where(
+					and(
+						eq(schema.guildUsers.guildId, guildId),
+						eq(schema.guildUsers.userId, userId),
+					),
+				)
+				.get();
+			if (!userRow) {
+				throw new Error("guildUsers row missing after upsert");
+			}
+
+			const catUserRow = tx
+				.select({
+					timesUserCycle: schema.categoryUsers.timesUserCycle,
+				})
+				.from(schema.categoryUsers)
+				.where(
+					and(
+						eq(schema.categoryUsers.guildId, guildId),
+						eq(schema.categoryUsers.categoryId, categoryId),
+						eq(schema.categoryUsers.userId, userId),
+					),
+				)
+				.get();
+			if (!catUserRow) {
+				throw new Error("categoryUsers row missing after upsert");
+			}
+
+			const used = catUserRow.timesUserCycle;
+			if (used >= maxLinks) {
+				throw new DispenseRejection(
+					`You have reached your link limit for **${categoryId}**!`,
+				);
+			}
+
+			const receivedLinks = userRow.receivedLinks ?? [];
+			if (receivedLinks.includes(selectedLink.link)) {
+				throw new DispenseRejection(
+					"That link was just dispensed to you. Please try again.",
+				);
+			}
+
+			tx.update(schema.guildUsers)
+				.set({
+					receivedLinks: [...receivedLinks, selectedLink.link],
+					timesUserCycle: userRow.timesUserCycle + 1,
+				})
+				.where(
+					and(
+						eq(schema.guildUsers.guildId, guildId),
+						eq(schema.guildUsers.userId, userId),
+					),
+				)
+				.run();
+
+			tx.update(schema.categoryUsers)
+				.set({ timesUserCycle: used + 1 })
+				.where(
+					and(
+						eq(schema.categoryUsers.guildId, guildId),
+						eq(schema.categoryUsers.categoryId, categoryId),
+						eq(schema.categoryUsers.userId, userId),
+					),
+				)
+				.run();
+
+			return { used };
+		}),
 	);
-	if (!updateOk) {
-		logger.error(`Failed to update user record: ${updateError}`);
+
+	if (!txOk) {
+		if (txErr instanceof DispenseRejection) {
+			return { success: false, error: txErr.message };
+		}
+		logger.error(
+			`Dispense transaction failed for ${userId} in ${guildId}/${categoryId}: ${txErr}`,
+		);
 		return {
 			success: false,
 			error: "An unexpected error occurred while updating your record.",
 		};
 	}
 
+	const { used } = txResult;
+	const remaining = maxLinks - (used + 1);
+
 	if (guildRow?.logChannelId) {
 		const linkDisplay = catRow?.masqrEnabled
 			? `\`${deliveredLink}\``
 			: deliveredLink;
 
-		await t(
+		const [logOk, logErr] = await t(
 			client.messages.write(guildRow.logChannelId, {
 				embeds: [
 					{
@@ -305,8 +470,8 @@ export async function dispense(options: Options): Promise<Result> {
 								inline: true,
 							},
 							{
-								name: "Remaining Links",
-								value: String(maxLinks - (used + 1)),
+								name: "Remaining (this category)",
+								value: String(remaining),
 								inline: true,
 							},
 						],
@@ -314,6 +479,11 @@ export async function dispense(options: Options): Promise<Result> {
 				],
 			}),
 		);
+		if (!logOk) {
+			logger.error(
+				`Failed to write proxy log message to ${guildRow.logChannelId} in ${guildId}: ${logErr}`,
+			);
+		}
 	}
 
 	logger.info(
@@ -324,7 +494,7 @@ export async function dispense(options: Options): Promise<Result> {
 		success: true,
 		link: deliveredLink,
 		sourceLink: selectedLink.link,
-		remaining: maxLinks - (used + 1),
+		remaining,
 		hasMore: sortedAvailable.length > 1,
 		filterFallback,
 		priorityEnabled,

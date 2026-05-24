@@ -1,12 +1,18 @@
-FROM oven/bun:alpine
+FROM node:22-alpine
+
+# better-sqlite3 has a native build step
+RUN apk add --no-cache python3 make g++
+
+# Enable Corepack so the pnpm version is pinned by package.json
+RUN corepack enable
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY patches ./patches
 
-RUN bun install
+RUN pnpm install --frozen-lockfile
 
 COPY . /app
 
-CMD ["bun", "run", "start"]
+CMD ["pnpm", "run", "start"]

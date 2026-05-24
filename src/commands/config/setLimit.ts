@@ -17,7 +17,8 @@ import { t } from "try";
 
 const options = {
 	limit: createIntegerOption({
-		description: "The maximum number of links a user can request per month",
+		description:
+			"Default per-category link limit (used when a category has no explicit limit)",
 		required: true,
 		min_value: 1,
 		max_value: 100,
@@ -30,7 +31,8 @@ const options = {
 
 @Declare({
 	name: "set-limit",
-	description: "Set the monthly link limit for all users",
+	description:
+		"Set the default per-category link limit for this server",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
@@ -64,7 +66,7 @@ export default class SetLimitCommand extends SubCommand {
 		}
 
 		await ctx.editOrReply({
-			content: `Monthly limit set to **${limit}**.`,
+			content: `Default per-category link limit set to **${limit}**. Categories with their own \`/category set-limit\` keep that value.`,
 			flags,
 		});
 	}
