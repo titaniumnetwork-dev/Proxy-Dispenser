@@ -57,7 +57,7 @@ async function getLimit(
 	}
 
 	const guildDefault = guildRow ? guildRow.monthlyLimit : 3;
-	const premiumLimits = guildRow ? guildRow.premiumLimits : {};
+	const premiumLimits = guildRow?.premiumLimits ?? {};
 
 	const [categoryOk, categoryErr, categoryRow] = await t(
 		db.query.categories.findFirst({
