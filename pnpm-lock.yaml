@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  try@1.0.3: 8a01b5d24f9dc0fa1286807bed18dd989117ba847b305b2faf7393e6465f2dfc
+
 importers:
 
   .:
@@ -19,7 +22,7 @@ importers:
         version: 4.3.0
       try:
         specifier: ^1.0.3
-        version: 1.0.3
+        version: 1.0.3(patch_hash=8a01b5d24f9dc0fa1286807bed18dd989117ba847b305b2faf7393e6465f2dfc)
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.14
@@ -1697,7 +1700,7 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
-  try@1.0.3: {}
+  try@1.0.3(patch_hash=8a01b5d24f9dc0fa1286807bed18dd989117ba847b305b2faf7393e6465f2dfc): {}
 
   tsx@4.22.3:
     dependencies:

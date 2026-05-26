@@ -35,14 +35,5 @@
 		"rimraf": "^6.0.1",
 		"tsx": "^4.19.2",
 		"typescript": "^6.0.2"
-	},
-	"pnpm": {
-		"patchedDependencies": {
-			"try@1.0.3": "patches/try@1.0.3.patch"
-		},
-		"onlyBuiltDependencies": [
-			"better-sqlite3",
-			"esbuild"
-		]
 	}
 }
