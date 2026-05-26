@@ -216,7 +216,12 @@ export async function dispense(options: Options): Promise<Result> {
 			columns: { id: true, link: true, blockedFilters: true },
 		}),
 	);
-	if (!linksOk || !allLinks) {
+	if (!linksOk || !allLinks || !Array.isArray(allLinks)) {
+		if (linksOk && allLinks && !Array.isArray(allLinks)) {
+			logger.error(
+				`Unexpected links payload for ${guildId}/${categoryId}: ${typeof allLinks}`,
+			);
+		}
 		logger.error(`Failed to fetch links: ${linksError}`);
 		return {
 			success: false,
