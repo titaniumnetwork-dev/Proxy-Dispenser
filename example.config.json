@@ -1,20 +1,23 @@
 {
-	"filters": {
-		"aristotlek12": "Aristotle K12",
-		"blocksi": "Blocksi",
-		"blocksi-ai": "Blocksi AI",
-		"cisco": "Cisco",
-		"content-keeper": "Content Keeper",
-		"deldao": "Deldao",
-		"fortiguard": "FortiGuard",
-		"gaggle": "Gaggle",
-		"goguardian": "GoGuardian",
-		"iboss": "IBoss",
-		"lanschool": "LanSchool",
-		"linewize": "LineWize",
-		"palo": "Palo",
-		"securly": "Securly",
-		"sensocloud": "Sensocloud",
-		"sophos": "Sophos"
-	}
+  "filters": {
+    "aristotlek12": "Aristotle K12",
+    "barracuda": "Barracuda",
+    "blocksi": "Blocksi",
+    "blocksi-ai": "Blocksi AI",
+    "cisco": "Cisco",
+    "content-keeper": "Content Keeper",
+    "dnsfilter": "DNS Filter",
+    "fortiguard": "FortiGuard",
+    "gaggle": "Gaggle",
+    "goguardian": "GoGuardian",
+    "iboss": "IBoss",
+    "lanschool": "LanSchool",
+    "lightspeed": "Lightspeed Systems",
+    "linewize": "LineWize",
+    "palo": "Palo",
+    "qustodio": "Qustodio",
+    "securly": "Securly",
+    "sensocloud": "Sensocloud",
+    "sophos": "Sophos"
+  }
 }
