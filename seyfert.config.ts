@@ -3,10 +3,10 @@ import { config } from "seyfert";
 export default config.bot({
 	token: process.env.DISCORD_TOKEN ?? "",
 	locations: {
-		base: "src",
-		commands: "commands",
+    base: "src",
 		events: "events",
+		commands: "commands",
 		components: "components",
 	},
-	intents: ["Guilds", "GuildMessages", "MessageContent", "GuildMembers"],
+	intents: ["Guilds"],
 });
