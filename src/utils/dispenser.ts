@@ -157,9 +157,7 @@ export async function dispense(options: Options): Promise<Result> {
 		}),
 	);
 	if (!guildRowOk) {
-		logger.error(
-			`Failed to fetch guild row for ${guildId}: ${guildRowErr}`,
-		);
+		logger.error(`Failed to fetch guild row for ${guildId}: ${guildRowErr}`);
 		return {
 			success: false,
 			error: "An unexpected error occurred while loading server settings.",
@@ -253,9 +251,7 @@ export async function dispense(options: Options): Promise<Result> {
 		};
 	}
 	const preReceivedLinks = preUser ? (preUser.receivedLinks ?? []) : [];
-	const available = allLinks.filter(
-		(l) => !preReceivedLinks.includes(l.link),
-	);
+	const available = allLinks.filter((l) => !preReceivedLinks.includes(l.link));
 
 	if (available.length === 0) {
 		return {

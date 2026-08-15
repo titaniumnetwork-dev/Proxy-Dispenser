@@ -17,8 +17,7 @@ import { t } from "try";
 
 const options = {
 	channel: createChannelOption({
-		description:
-			"The channel to log link reports to (leave empty to disable)",
+		description: "The channel to log link reports to (leave empty to disable)",
 		required: false,
 		channel_types: [ChannelType.GuildText],
 	}),

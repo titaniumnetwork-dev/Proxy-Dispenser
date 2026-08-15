@@ -1,7 +1,5 @@
 import { db, schema } from "@db";
-import {
-	createSlashCommandErrorEmbed,
-} from "@utils/infoEmbeds";
+import { createSlashCommandErrorEmbed } from "@utils/infoEmbeds";
 import {
 	type CommandContext,
 	createStringOption,
@@ -37,6 +35,6 @@ export default class ResetUserCommand extends SubCommand {
 			flags: MessageFlags.Ephemeral,
 		});
 
-    await ctx.write({ content: options.say })
+		await ctx.write({ content: options.say });
 	}
 }

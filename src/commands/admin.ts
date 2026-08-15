@@ -12,5 +12,11 @@ import { Command, Declare, Options } from "seyfert";
 	contexts: ["Guild"],
 	defaultMemberPermissions: 0n,
 })
-@Options([BlacklistCommand, UnblacklistCommand, ResetCommand, ResetUserCommand, SayCommand])
+@Options([
+	BlacklistCommand,
+	UnblacklistCommand,
+	ResetCommand,
+	ResetUserCommand,
+	SayCommand,
+])
 export default class AdminCommand extends Command {}

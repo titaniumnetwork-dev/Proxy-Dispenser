@@ -38,8 +38,7 @@ const options = {
 
 @Declare({
 	name: "set-limit",
-	description:
-		"Set or clear the per-user dispense limit for a category (pool)",
+	description: "Set or clear the per-user dispense limit for a category (pool)",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
@@ -51,10 +50,10 @@ export default class SetLimitCommand extends SubCommand {
 			return;
 		}
 
- 		const ephemeral = ctx.options.ephemeral ?? true;
- 		await ctx.deferReply(ephemeral);
+		const ephemeral = ctx.options.ephemeral ?? true;
+		await ctx.deferReply(ephemeral);
 
- 		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+		const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 		const categoryId = ctx.options.category;
 		const limit = ctx.options.limit ?? null;
 

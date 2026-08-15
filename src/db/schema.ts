@@ -178,7 +178,6 @@ export const categoryUsersRelations = relations(categoryUsers, ({ one }) => ({
 	}),
 }));
 
-
 export const links = sqliteTable(
 	"links",
 	{

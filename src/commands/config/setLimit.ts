@@ -31,8 +31,7 @@ const options = {
 
 @Declare({
 	name: "set-limit",
-	description:
-		"Set the default per-category link limit for this server",
+	description: "Set the default per-category link limit for this server",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
