@@ -9,7 +9,7 @@ import {
 	type CommandContext,
 	createBooleanOption,
 	createStringOption,
-	createIntegerOption,
+	createChannelOption,
 	Declare,
 	Options,
 	SubCommand,
@@ -23,7 +23,7 @@ const options = {
 		required: true,
 		autocomplete: categoryAutocomplete,
 	}),
-	channel: createStringOption({
+	channel: createChannelOption({
 		description: "The channel to set (leave empty to remove)",
 		required: false,
 	}),
@@ -51,7 +51,7 @@ export default class ChannelCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const categoryId = ctx.options.category;
-		const channelId = ctx.options.channel;
+		const channelId = ctx.options.channel?.id;
 
 		const [resultOk, resultErr, result] = await t(
 			db
