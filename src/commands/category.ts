@@ -5,7 +5,8 @@ import SetLimitCommand from "./category/limit";
 import ListCategoriesCommand from "./category/list";
 import RenameCategoryCommand from "./category/rename";
 import ReorderCategoryCommand from "./category/reorder";
-import SetEmojiCommand from "./category/setEmoji";
+import EmojiCommand from "./category/emoji";
+import ChannelCommand from "./category/channel";
 import ToggleFilterApiCommand from "./category/toggleFilterApi";
 import ToggleMasqrCommand from "./category/toggleMasqr";
 
@@ -20,7 +21,8 @@ import ToggleMasqrCommand from "./category/toggleMasqr";
 	CreateCategoryCommand,
 	RenameCategoryCommand,
 	DeleteCategoryCommand,
-	SetEmojiCommand,
+	EmojiCommand,
+	ChannelCommand,
 	ListCategoriesCommand,
 	ReorderCategoryCommand,
 	SetLimitCommand,

@@ -86,7 +86,26 @@ export default class ReportModal extends ModalCommand {
 			return;
 		}
 
+		const [categoryOk, categoryError, categoryRow] = await t(
+			db.query.categories.findFirst({
+				where: (c, { eq, and }) =>
+					and(eq(c.guildId, guildId), eq(c.categoryId, categoryId)),
+				columns: { channelId: true, emojiId: true },
+			}),
+		);
+		if (!categoryOk || !categoryRow) {
+			ctx.client.logger.error(
+				`Failed to fetch category for report: ${categoryError}`,
+			);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("submitting your report")],
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		const targetChannelId =
+			categoryRow.channelId ??
 			guildRow.reportsChannelId ??
 			guildRow.logChannelBlockedLinkReports ??
 			guildRow.logChannelId;
@@ -104,7 +123,7 @@ export default class ReportModal extends ModalCommand {
 			.setColor("#ED4245")
 			.setTitle("Link Report")
 			.addFields(
-				{ name: "Category", value: categoryId, inline: true },
+				{ name: "Category", value: `${categoryRow.emojiId + " " || ''}${categoryId}`, inline: true },
 				{ name: "Link", value: link, inline: true },
 				{ name: "Reporter", value: `<@${userId}>`, inline: true },
 				{ name: "Reason", value: reason, inline: false },

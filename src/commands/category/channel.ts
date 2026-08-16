@@ -9,6 +9,7 @@ import {
 	type CommandContext,
 	createBooleanOption,
 	createStringOption,
+	createIntegerOption,
 	Declare,
 	Options,
 	SubCommand,
@@ -18,12 +19,12 @@ import { t } from "try";
 
 const options = {
 	category: createStringOption({
-		description: "The category to set the emoji for",
+		description: "The category to set the channel for",
 		required: true,
 		autocomplete: categoryAutocomplete,
 	}),
-	emoji: createStringOption({
-		description: "The emoji to set (leave empty to remove)",
+	channel: createStringOption({
+		description: "The channel to set (leave empty to remove)",
 		required: false,
 	}),
 	ephemeral: createBooleanOption({
@@ -33,13 +34,13 @@ const options = {
 };
 
 @Declare({
-	name: "set-emoji",
-	description: "Set or update the emoji for a category",
+	name: "channel",
+	description: "Set or update the channel for a category",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
 })
 @Options(options)
-export default class SetEmojiCommand extends SubCommand {
+export default class ChannelCommand extends SubCommand {
 	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.guildId) {
 			await createSlashCommandErrorEmbed(ctx);
@@ -50,12 +51,12 @@ export default class SetEmojiCommand extends SubCommand {
 
 		const flags = ctx.options.ephemeral ? MessageFlags.Ephemeral : undefined;
 		const categoryId = ctx.options.category;
-		const emoji = (ctx.options.emoji as string | undefined)?.trim() ?? "";
+		const channelId = ctx.options.channel;
 
 		const [resultOk, resultErr, result] = await t(
 			db
 				.update(schema.categories)
-				.set({ emojiId: emoji })
+				.set({ channelId })
 				.where(
 					and(
 						eq(schema.categories.guildId, ctx.guildId),
@@ -65,11 +66,11 @@ export default class SetEmojiCommand extends SubCommand {
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
 		if (!resultOk) {
-			ctx.client.logger.error(`Failed to set emoji for category: ${resultErr}`);
+			ctx.client.logger.error(`Failed to set channel for category: ${resultErr}`);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
-						`setting emoji for category **${categoryId}**`,
+						`setting channel for category **${categoryId}**`,
 					),
 				],
 				flags,
@@ -85,16 +86,16 @@ export default class SetEmojiCommand extends SubCommand {
 			return;
 		}
 
-		if (emoji) {
+		if (channelId) {
 			await ctx.editOrReply({
-				content: `Set emoji for category **${categoryId}** to ${emoji}`,
+				content: `Set channel for category **${categoryId}** to ${channelId}`,
 				flags,
 			});
 			return;
 		}
 
 		await ctx.editOrReply({
-			content: `Removed emoji from category **${categoryId}**`,
+			content: `Removed channel from category **${categoryId}**`,
 			flags,
 		});
 	}

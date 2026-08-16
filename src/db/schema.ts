@@ -136,6 +136,7 @@ export const categories = sqliteTable(
 		categoryId: text("category_id").notNull(),
 		sortOrder: integer("sort_order").notNull().default(0),
 		emojiId: text("emoji_id").notNull().default(""),
+		channelId: text("channel_id").notNull().default(""),
 		filterApiEnabled: integer("filter_api_enabled").notNull().default(1),
 		dispenserLimit: integer("dispenser_limit"),
 		masqrEnabled: integer("masqr_enabled").notNull().default(0),
