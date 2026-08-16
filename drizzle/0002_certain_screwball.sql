@@ -1,0 +1,1 @@
+ALTER TABLE `categories` ADD `channel_id` text DEFAULT '' NOT NULL;
