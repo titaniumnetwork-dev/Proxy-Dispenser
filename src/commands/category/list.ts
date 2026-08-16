@@ -44,6 +44,7 @@ export default class ListCategoriesCommand extends SubCommand {
 			const cats = await db
 				.select({
 					categoryId: schema.categories.categoryId,
+					channelId: schema.categories.channelId,
 					emojiId: schema.categories.emojiId,
 					masqrEnabled: schema.categories.masqrEnabled,
 					dispenserLimit: schema.categories.dispenserLimit,
@@ -92,13 +93,14 @@ export default class ListCategoriesCommand extends SubCommand {
 
 		const lines = categories.map((cat, index) => {
 			const emoji = cat.emojiId ? `${cat.emojiId} ` : "";
+			const channel = cat.channelId ? ` [<#${cat.channelId}>] ` : " [No channel] ";
 			const masqr = cat.masqrEnabled ? " [Masqr]" : "";
 			const limit =
 				cat.dispenserLimit != null
 					? ` [limit: ${cat.dispenserLimit}]`
 					: " [limit: default]";
 			const position = index + 1;
-			return `${position}: ${emoji}**${cat.categoryId}**${masqr}${limit} - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
+			return `${position}: ${emoji}**${cat.categoryId}**${channel}${masqr}${limit} - ${cat.linkCount} link${cat.linkCount !== 1 ? "s" : ""}`;
 		});
 
 		const embed = new Embed()
