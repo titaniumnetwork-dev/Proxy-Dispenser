@@ -1,5 +1,5 @@
 import { checkLink } from "@utils/filterCheck";
-import { formatFilterList } from "@utils/filterDisplay";
+import { formatFilterFields } from "@utils/filterDisplay";
 import {
 	type CommandContext,
 	createStringOption,
@@ -63,50 +63,64 @@ export default class CheckCommand extends SubCommand {
 						? "Unknown"
 						: "No Results";
 
-		const embed = new Embed()
-			.setColor("#5865F2")
-			.setTitle("Filter Check")
-			.setDescription(`Results for \`${ctx.options.query}\``)
-			.addFields(
-				{
-					name: "Status",
-					value: status,
-					inline: true,
-				},
-				{
-					name: "Filters Checked",
-					value: String(totalFilters),
-					inline: true,
-				},
-				{
-					name: `Unblocked (${check.unblocked.length})`,
-					value: formatFilterList(check.unblocked, {
-						statusEmoji: "✅",
-						categories: check.categories,
-					}),
-					inline: false,
-				},
-				{
-					name: `Blocked (${check.blocked.length})`,
-					value: formatFilterList(check.blocked, {
-						statusEmoji: "❌",
-						categories: check.categories,
-					}),
-					inline: false,
-				},
-				{
-					name: `Unknown (${check.unknown.length})`,
-					value: formatFilterList(check.unknown, {
-						statusEmoji: "❓",
-						categories: check.categories,
-					}),
-					inline: false,
-				},
-			)
-			.setTimestamp();
+		const description = `Results for \`${ctx.options.query}\``;
+		const fields: { name: string; value: string; inline?: boolean }[] = [
+			{
+				name: "Status",
+				value: status,
+				inline: true,
+			},
+			{
+				name: "Filters Checked",
+				value: String(totalFilters),
+				inline: true,
+			},
+			...formatFilterFields(check.unblocked, "Unblocked", {
+				statusEmoji: "✅",
+				categories: check.categories,
+			}),
+			...formatFilterFields(check.blocked, "Blocked", {
+				statusEmoji: "❌",
+				categories: check.categories,
+			}),
+			...formatFilterFields(check.unknown, "Unknown", {
+				statusEmoji: "❓",
+				categories: check.categories,
+			}),
+		];
+
+		const groups: (typeof fields)[] = [];
+		let group: typeof fields = [];
+		let used = "Filter Check".length + description.length;
+		for (const field of fields) {
+			const fieldChars = field.name.length + field.value.length;
+			if (
+				group.length > 0 &&
+				(group.length >= 25 || used + fieldChars > 6000)
+			) {
+				groups.push(group);
+				group = [];
+				used = "Filter Check (continued)".length;
+			}
+			group.push(field);
+			used += fieldChars;
+		}
+		if (group.length > 0) {
+			groups.push(group);
+		}
+
+		const embeds = groups.map((group, index) => {
+			const embed = new Embed().setColor("#5865F2");
+			if (index > 0) {
+				embed.setTitle("Filter Check (continued)");
+			} else {
+				embed.setTitle("Filter Check").setDescription(description);
+			}
+			return embed.addFields(...group).setTimestamp();
+		});
 
 		await ctx.editResponse({
-			embeds: [embed],
+			embeds,
 		});
 	}
 }

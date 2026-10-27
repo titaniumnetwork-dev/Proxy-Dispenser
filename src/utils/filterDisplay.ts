@@ -17,23 +17,31 @@ export function displayFilter(filterId: string, category?: string): string {
 	return category ? `${base} (${category})` : base;
 }
 
-export function formatFilterList(
+export interface FilterListField {
+	name: string;
+	value: string;
+}
+
+export function formatFilterFields(
 	filterIds: readonly string[],
+	label: string,
 	options: {
 		statusEmoji?: string;
 		categories?: Readonly<Record<string, string>>;
 		emptyText?: string;
 		maxLines?: number;
+		maxLength?: number;
 	} = {},
-): string {
+): FilterListField[] {
 	const {
 		statusEmoji,
 		categories,
 		emptyText = "None",
 		maxLines = 25,
+		maxLength = 1024,
 	} = options;
 
-	const uniqueNames = [
+	const lines = [
 		...new Set(
 			filterIds.map((filterId) => {
 				const display = displayFilter(filterId, categories?.[filterId]);
@@ -42,12 +50,31 @@ export function formatFilterList(
 		),
 	];
 
-	if (uniqueNames.length === 0) {
-		return emptyText;
+	if (lines.length === 0) {
+		return [{ name: `${label} (0)`, value: emptyText }];
 	}
 
-	return uniqueNames
-		.slice(0, maxLines)
-		.map((name) => `- ${name}`)
-		.join("\n");
+	const chunks: string[] = [];
+	let current: string[] = [];
+	let used = 0;
+	for (const line of lines.map((display) => `- ${display}`)) {
+		if (
+			current.length > 0 &&
+			(current.length >= maxLines || used + line.length + 1 > maxLength)
+		) {
+			chunks.push(current.join("\n"));
+			current = [];
+			used = 0;
+		}
+		used += current.length > 0 ? line.length + 1 : line.length;
+		current.push(line);
+	}
+	if (current.length > 0) {
+		chunks.push(current.join("\n"));
+	}
+
+	return chunks.map((value, index) => ({
+		name: `${label} (${lines.length})${index > 0 ? " (continued)" : ""}`,
+		value,
+	}));
 }
