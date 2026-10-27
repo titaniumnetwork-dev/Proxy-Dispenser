@@ -1,5 +1,8 @@
+import { setDefaultAutoSelectFamilyAttemptTimeout } from 'node:net';
+setDefaultAutoSelectFamilyAttemptTimeout(500)
 import { Client } from "seyfert";
 import { PermissionsHandleCommand } from "@utils/commandHandler";
+
 
 const client = new Client();
 client.setServices({ handleCommand: PermissionsHandleCommand });
