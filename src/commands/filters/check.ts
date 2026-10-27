@@ -79,18 +79,18 @@ export default class CheckCommand extends SubCommand {
 					inline: true,
 				},
 				{
-					name: `Blocked (${check.blocked.length})`,
-					value: formatFilterList(check.blocked),
+					name: `Unblocked (${check.unblocked.length})`,
+					value: formatFilterList(check.unblocked, "✅"),
 					inline: false,
 				},
 				{
-					name: `Unblocked (${check.unblocked.length})`,
-					value: formatFilterList(check.unblocked),
+					name: `Blocked (${check.blocked.length})`,
+					value: formatFilterList(check.blocked, "❌"),
 					inline: false,
 				},
 				{
 					name: `Unknown (${check.unknown.length})`,
-					value: formatFilterList(check.unknown),
+					value: formatFilterList(check.unknown, "❓"),
 					inline: false,
 				},
 			)

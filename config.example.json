@@ -1,23 +1,26 @@
 {
-	"filters": {
-		"aristotlek12": "Aristotle K12",
-		"barracuda": "Barracuda",
-		"blocksi": "Blocksi",
-		"blocksi-ai": "Blocksi AI",
-		"cisco": "Cisco",
-		"content-keeper": "Content Keeper",
-		"dnsfilter": "DNS Filter",
-		"fortiguard": "FortiGuard",
-		"gaggle": "Gaggle",
-		"goguardian": "GoGuardian",
-		"iboss": "IBoss",
-		"lanschool": "LanSchool",
-		"lightspeed": "Lightspeed Systems",
-		"linewize": "LineWize",
-		"palo": "Palo",
-		"qustodio": "Qustodio",
-		"securly": "Securly",
-		"sensocloud": "Sensocloud",
-		"sophos": "Sophos"
-	}
+  "filters": {
+    "aristotlek12": ["Aristotle K12", "<:aristotlek12:1564481523862868059>"],
+    "barracuda": ["Barracuda", "🐍"],
+    "blocksi": ["Blocksi", "<:blocksi:1564481881880399873>"],
+    "blocksi-ai": ["Blocksi AI", "<:blocksi:1564481881880399873>"],
+    "cisco": ["Cisco", "<:cisco:1564482022041194626>"],
+    "content-keeper": ["Content Keeper", "<:contentkeeper:1564482137695068251>"],
+    "deldao": ["Deldao", "<:deledao:1564482274940948650>"],
+    "dnsfilter": ["DNSFilter", "<dnsfilter:1564487439878193162>"],
+    "fortiguard": ["FortiGuard", "<:fortiguard:1564482438850158712>"],
+    "gaggle": ["Gaggle", "<:gaggle:1564482609663442954>"],
+    "goguardian": ["GoGuardian", "<:goguardian:1564482753687326861>"],
+    "goguardian_ai": ["GoGuardian AI", "<:goguardian:1564482753687326861>"],
+    "iboss": ["IBoss", "<:iboss:1564482913754550342>"],
+    "lanschool": ["LanSchool", "<:lanschool:1564483010739572756>"],
+    "lightspeed": ["Lightspeed Systems", "<:lightspeed:1564483212426743959>"],
+    "linewize": ["LineWize", "<:linewize:1564483105836761118>"],
+    "palo": ["Palo", "<:palo:1564483336833859814>"],
+    "qustodio": ["Qustodio", "<qustodio:1564487764802805811>"],
+    "securly": ["Securly", "<:securly:1564483499724111903>"],
+    "sensocloud": ["Sensocloud", "<:sensocloud:1564483598634188860>"],
+    "sophos": ["Sophos", "<sophos:1564488047309881394>"],
+    "zscaler": ["ZScaler", "<zscaler:1564488167590199448>"]
+  }
 }

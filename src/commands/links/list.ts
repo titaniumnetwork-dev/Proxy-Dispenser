@@ -6,6 +6,7 @@ import { filters } from "@../config.json";
 import { db, schema } from "@db";
 import { categoryAutocomplete } from "@utils/autocomplete";
 import { checkLinks } from "@utils/filterCheck";
+import { getFilterName } from "@utils/filterDisplay";
 import {
 	createSlashCommandErrorEmbed,
 	createUnexpectedErrorEmbed,
@@ -158,7 +159,7 @@ export default class ListCommand extends SubCommand {
 					for (const filter of Object.keys(filters)) {
 						if (!filter) continue;
 						if (!check.blocked.includes(filter)) {
-							ubf += `${filters[filter as keyof typeof filters]}, `;
+							ubf += `${getFilterName(filter)}, `;
 						}
 					}
 					if (ubf === "") {
