@@ -63,8 +63,8 @@ export async function categoryAutocomplete(
 	return interaction.respond(choices);
 }
 
-export const filterOptions = Object.entries(filters).map(([value, name]) => ({
-	name,
+export const filterOptions = Object.entries(filters).map(([value, entry]) => ({
+	name: entry[0] ?? value,
 	value,
 }));
 
