@@ -14,6 +14,6 @@ export default class DispenseSelect extends ComponentCommand {
 		const categoryId = ctx.interaction.values[0] as string;
 		await ctx.update({});
 
-		await handleDispense(ctx, categoryId, "followup");
+		await handleDispense(ctx, categoryId, "wait");
 	}
 }

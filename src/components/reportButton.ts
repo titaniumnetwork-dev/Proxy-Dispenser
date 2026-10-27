@@ -31,7 +31,7 @@ export default class ReportButton extends ComponentCommand {
 			.setCustomId("reason")
 			.setStyle(TextInputStyle.Paragraph)
 			.setPlaceholder(
-				"Describe the issue. Please specify if the link is broken, blocked, or something else.",
+				"Describe the issue. Please specify if the link is broken, blocked on way too many filters, or something else. If a link is blocked specifically for just your filter, we cannot help you. Your report will be immediately closed. Please do not make reports for these.",
 			)
 			.setRequired(true)
 			.setLength({ max: 1000 });

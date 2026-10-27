@@ -2,15 +2,22 @@ import { dispense } from "@utils/dispenser";
 import { ActionRow, Button, type ComponentContext, Embed } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 
+export type DispenseResponseType =
+	| "editOrReply"
+	| "write"
+	| "followup"
+	| "wait";
+
 export async function handleDispense(
 	ctx: ComponentContext,
 	categoryId: string,
-	responseType: "editOrReply" | "write" | "followup" = "editOrReply",
+	responseType: DispenseResponseType = "editOrReply",
 ): Promise<void> {
 	const respond = (() => {
 		switch (responseType) {
 			case "write":
 				return ctx.write.bind(ctx);
+			case "wait":
 			case "followup":
 				return ctx.followup.bind(ctx);
 			default:
@@ -26,6 +33,14 @@ export async function handleDispense(
 		return;
 	}
 
+	let waitMessage: WebhookMessageStructure | undefined;
+	if (responseType === "wait") {
+		waitMessage = await ctx.followup({
+			content: "Please wait...",
+			flags: MessageFlags.Ephemeral,
+		});
+	}
+
 	const result = await dispense({
 		guildId: ctx.guildId,
 		categoryId,
@@ -36,10 +51,14 @@ export async function handleDispense(
 	});
 
 	if (!result.success) {
-		await respond({
-			content: result.error,
-			flags: MessageFlags.Ephemeral,
-		});
+		await (waitMessage
+			? waitMessage.edit({
+					content: result.error,
+				})
+			: respond({
+					content: result.error,
+					flags: MessageFlags.Ephemeral,
+				}));
 		return;
 	}
 
@@ -86,9 +105,15 @@ export async function handleDispense(
 		.setLabel("Report");
 	row.addComponents(reportButton);
 
-	await respond({
-		embeds: [embed],
-		components: [row],
-		flags: MessageFlags.Ephemeral,
-	});
+	await (waitMessage
+		? waitMessage.edit({
+				content: null,
+				embeds: [embed],
+				components: [row],
+			})
+		: respond({
+				embeds: [embed],
+				components: [row],
+				flags: MessageFlags.Ephemeral,
+			}));
 }
