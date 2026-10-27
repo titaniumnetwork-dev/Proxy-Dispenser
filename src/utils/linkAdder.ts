@@ -1,6 +1,4 @@
 import { db, schema } from "@db";
-import { getBlocked } from "@utils/filterCheck";
-import { sql } from "drizzle-orm";
 import type { Logger } from "seyfert";
 import { t } from "try";
 
@@ -242,8 +240,6 @@ export class LinkAdder {
 						guildId: this.guildId,
 						categoryId: this.categoryId,
 						link,
-						blockedFilters: await getBlocked(link),
-						lastBlockCheckTimestamp: sql`${Date.now()}`,
 					});
 				}),
 			),

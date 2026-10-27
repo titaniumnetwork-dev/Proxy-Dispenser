@@ -1,5 +1,4 @@
 import { dispense } from "@utils/dispenser";
-import { getUnblocked } from "@utils/filterCheck";
 import { ActionRow, Button, type ComponentContext, Embed } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 
@@ -44,9 +43,7 @@ export async function handleDispense(
 		return;
 	}
 
-	const unblocked = result.priorityEnabled
-		? await getUnblocked(result.sourceLink)
-		: [];
+	const { unblocked } = result;
 
 	const embed = new Embed()
 		.setColor("#5865F2")

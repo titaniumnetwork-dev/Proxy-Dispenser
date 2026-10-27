@@ -1,4 +1,5 @@
 import { db, schema } from "@db";
+import { checkLink, type Link as LinkCheck } from "@utils/filterCheck";
 import { applyMasqr } from "@utils/masqr";
 import { and, eq } from "drizzle-orm";
 import type { GuildMember, Logger, UsingClient } from "seyfert";
@@ -21,6 +22,8 @@ export interface Success {
 	readonly hasMore: boolean;
 	readonly filterFallback: boolean;
 	readonly priorityEnabled: boolean;
+	/** Filters the source link is unblocked on (empty if the filter API is disabled for the category) */
+	readonly unblocked: readonly string[];
 }
 
 export interface Failure {
@@ -31,6 +34,54 @@ export interface Failure {
 export type Result = Success | Failure;
 class DispenseRejection extends Error {
 	override readonly name = "DispenseRejection";
+}
+
+const FILTER_CHECK_BATCH_SIZE = 10;
+
+// TODO: fix the slop code
+/**
+ * Finds the links that are unblocked on the most of the given filters, checking
+ * them against the filter check API on demand. Links are checked in random order,
+ * in batches, and checking stops early once a link unblocked on every filter is found.
+ * Every check result is recorded in `checks`.
+ */
+async function findBestLinks<T extends { readonly link: string }>(
+	candidates: readonly T[],
+	filters: readonly string[],
+	checks: Map<string, LinkCheck>,
+): Promise<T[]> {
+	const shuffled = [...candidates];
+	for (let i = shuffled.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[shuffled[i], shuffled[j]] = [shuffled[j] as T, shuffled[i] as T];
+	}
+
+	let best: T[] = [];
+	let maxUnblocked = 0;
+	for (let i = 0; i < shuffled.length; i += FILTER_CHECK_BATCH_SIZE) {
+		const batch = shuffled.slice(i, i + FILTER_CHECK_BATCH_SIZE);
+		const results = await Promise.all(batch.map((l) => checkLink(l.link)));
+		batch.forEach((link, j) => {
+			const result = results[j];
+			if (!result) return;
+			checks.set(link.link, result);
+
+			const blocked = new Set(result.blocked);
+			const unblockedCount = filters.reduce(
+				(count, filterId) => count + (blocked.has(filterId) ? 0 : 1),
+				0,
+			);
+			if (unblockedCount > maxUnblocked) {
+				maxUnblocked = unblockedCount;
+				best = [link];
+			} else if (unblockedCount > 0 && unblockedCount === maxUnblocked) {
+				best.push(link);
+			}
+		});
+		if (maxUnblocked === filters.length) break;
+	}
+
+	return best;
 }
 
 type LookupResult<T> =
@@ -211,7 +262,7 @@ export async function dispense(options: Options): Promise<Result> {
 		db.query.links.findMany({
 			where: (l, { eq, and }) =>
 				and(eq(l.guildId, guildId), eq(l.categoryId, categoryId)),
-			columns: { id: true, link: true, blockedFilters: true },
+			columns: { id: true, link: true },
 		}),
 	);
 	if (!linksOk || !allLinks || !Array.isArray(allLinks)) {
@@ -286,29 +337,10 @@ export async function dispense(options: Options): Promise<Result> {
 		.filter(([, roleId]) => memberRoleIds.includes(roleId))
 		.map(([filterId]) => filterId);
 
+	const checks = new Map<string, LinkCheck>();
 	const prioritized =
 		priorityEnabled && filters.length > 0
-			? (() => {
-					const scored = available.map((link) => {
-						const blocked = new Set(link.blockedFilters ?? []);
-						const unblockedCount = filters.reduce(
-							(count, filterId) => count + (blocked.has(filterId) ? 0 : 1),
-							0,
-						);
-						return { link, unblockedCount };
-					});
-
-					const maxUnblocked = Math.max(
-						...scored.map((item) => item.unblockedCount),
-					);
-					if (maxUnblocked <= 0) {
-						return [];
-					}
-
-					return scored
-						.filter((item) => item.unblockedCount === maxUnblocked)
-						.map((item) => item.link);
-				})()
+			? await findBestLinks(available, filters, checks)
 			: [];
 
 	const filterFallback =
@@ -491,13 +523,19 @@ export async function dispense(options: Options): Promise<Result> {
 		`Dispensed link to ${userId} in ${guildId}: ${selectedLink.link} (${categoryId})`,
 	);
 
+	const unblocked = priorityEnabled
+		? (checks.get(selectedLink.link) ?? (await checkLink(selectedLink.link)))
+				.unblocked
+		: [];
+
 	return {
 		success: true,
 		link: deliveredLink,
 		sourceLink: selectedLink.link,
 		remaining,
-		hasMore: sortedAvailable.length > 1,
+		hasMore: available.length > 1,
 		filterFallback,
 		priorityEnabled,
+		unblocked,
 	};
 }

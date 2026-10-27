@@ -186,13 +186,6 @@ export const links = sqliteTable(
 		guildId: snowflake("guild_id").notNull(),
 		categoryId: text("category_id").notNull(),
 		link: text("link").notNull(),
-		blockedFilters: text("blocked_filters", { mode: "json" })
-			.$type<string[]>()
-			.notNull()
-			.default(sql`(json_array())`),
-		lastBlockCheckTimestamp: integer("last_blocked_check_timestamp", {
-			mode: "timestamp_ms",
-		}),
 	},
 	(t) => [
 		foreignKey({

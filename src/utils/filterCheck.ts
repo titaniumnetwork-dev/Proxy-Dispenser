@@ -61,4 +61,24 @@ async function checkLink(url: string): Promise<Link> {
 	}
 }
 
-export { checkLink, getBlocked, getUnblocked };
+/**
+ * Checks many URLs against the filter check API, at most `concurrency` at a time.
+ * Duplicate URLs are only checked once.
+ */
+async function checkLinks(
+	urls: readonly string[],
+	concurrency = 10,
+): Promise<Map<string, Link>> {
+	const unique = [...new Set(urls)];
+	const results = new Map<string, Link>();
+	for (let i = 0; i < unique.length; i += concurrency) {
+		const batch = unique.slice(i, i + concurrency);
+		const checks = await Promise.all(batch.map((url) => checkLink(url)));
+		batch.forEach((url, j) => {
+			results.set(url, checks[j] ?? EMPTY_RESULT);
+		});
+	}
+	return results;
+}
+
+export { checkLink, checkLinks, getBlocked, getUnblocked };
