@@ -29,6 +29,7 @@ const options = {
 	description: "View your previously received proxy links",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
+	defaultMemberPermissions: ["SendMessages"],
 })
 @Options(options)
 export default class HistoryCommand extends Command {

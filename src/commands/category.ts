@@ -15,7 +15,7 @@ import ToggleMasqrCommand from "./category/toggleMasqr";
 	description: "Manage categories",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: ["ManageRoles"],
 })
 @Options([
 	CreateCategoryCommand,

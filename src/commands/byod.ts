@@ -8,7 +8,7 @@ import { UnsetCommand } from "./byod/unset";
 	description: "Manage BYOD (link admins only)",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: ["Administrator"],
+	defaultMemberPermissions: ["ManageRoles"],
 })
 @Options([ListCommand, UnsetCommand, SearchCommand])
 export default class BYODCommand extends Command {}
