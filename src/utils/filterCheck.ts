@@ -2,12 +2,14 @@ export interface Link {
 	readonly blocked: string[];
 	readonly unblocked: string[];
 	readonly unknown: string[];
+	readonly categories: Readonly<Record<string, string>>;
 }
 
 const EMPTY_RESULT: Link = Object.freeze({
 	blocked: [],
 	unblocked: [],
 	unknown: [],
+	categories: {},
 });
 
 async function getBlocked(url: string): Promise<string[]> {
@@ -47,13 +49,33 @@ async function checkLink(url: string): Promise<Link> {
 		const result = (await response.json()) as {
 			blocked?: string[];
 			unblocked?: string[];
+			errors?: string[];
 			unknown?: string[];
+			results?: Record<
+				string,
+				{ filter?: string; category?: string; status?: string }
+			>;
 		};
+
+		const categories: Record<string, string> = {};
+		for (const [filterId, filterResult] of Object.entries(
+			result?.results ?? {},
+		)) {
+			const category = filterResult?.category?.trim();
+			if (category) {
+				categories[filterId] = category;
+			}
+		}
 
 		return {
 			blocked: Array.isArray(result?.blocked) ? result.blocked : [],
 			unblocked: Array.isArray(result?.unblocked) ? result.unblocked : [],
-			unknown: Array.isArray(result?.unknown) ? result.unknown : [],
+			unknown: Array.isArray(result?.errors)
+				? result.errors
+				: Array.isArray(result?.unknown)
+					? result.unknown
+					: [],
+			categories,
 		};
 	} catch (error) {
 		console.error(`Filter check API error for ${url}:`, error);

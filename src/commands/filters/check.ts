@@ -80,17 +80,26 @@ export default class CheckCommand extends SubCommand {
 				},
 				{
 					name: `Unblocked (${check.unblocked.length})`,
-					value: formatFilterList(check.unblocked, "✅"),
+					value: formatFilterList(check.unblocked, {
+						statusEmoji: "✅",
+						categories: check.categories,
+					}),
 					inline: false,
 				},
 				{
 					name: `Blocked (${check.blocked.length})`,
-					value: formatFilterList(check.blocked, "❌"),
+					value: formatFilterList(check.blocked, {
+						statusEmoji: "❌",
+						categories: check.categories,
+					}),
 					inline: false,
 				},
 				{
 					name: `Unknown (${check.unknown.length})`,
-					value: formatFilterList(check.unknown, "❓"),
+					value: formatFilterList(check.unknown, {
+						statusEmoji: "❓",
+						categories: check.categories,
+					}),
 					inline: false,
 				},
 			)

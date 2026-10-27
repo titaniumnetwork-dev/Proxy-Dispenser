@@ -10,22 +10,33 @@ export function getFilterEmoji(filterId: string): string | undefined {
 	return entry?.[1];
 }
 
-export function displayFilter(filterId: string): string {
+export function displayFilter(filterId: string, category?: string): string {
 	const name = getFilterName(filterId);
 	const emoji = getFilterEmoji(filterId);
-	return emoji ? `${emoji} ${name}` : name;
+	const base = emoji ? `${emoji} ${name}` : name;
+	return category ? `${base} (${category})` : base;
 }
 
 export function formatFilterList(
 	filterIds: readonly string[],
-	statusEmoji?: string,
-	emptyText = "None",
-	maxLines = 25,
+	options: {
+		statusEmoji?: string;
+		categories?: Readonly<Record<string, string>>;
+		emptyText?: string;
+		maxLines?: number;
+	} = {},
 ): string {
+	const {
+		statusEmoji,
+		categories,
+		emptyText = "None",
+		maxLines = 25,
+	} = options;
+
 	const uniqueNames = [
 		...new Set(
 			filterIds.map((filterId) => {
-				const display = displayFilter(filterId);
+				const display = displayFilter(filterId, categories?.[filterId]);
 				return statusEmoji ? `${display} ${statusEmoji}` : display;
 			}),
 		),
