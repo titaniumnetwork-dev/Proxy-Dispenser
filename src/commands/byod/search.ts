@@ -151,7 +151,7 @@ export class SearchCommand extends SubCommand {
 			embeds: [embed(currentPage)],
 			components: [row],
 			flags,
-		})) as WebhookMessage;
+		})) as unknown as WebhookMessage;
 
 		const collector = message.createComponentCollector({
 			filter: (interaction) =>

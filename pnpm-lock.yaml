@@ -18,8 +18,8 @@ importers:
         specifier: ^0.45.2
         version: 0.45.2(@libsql/client@0.17.4)(@types/better-sqlite3@9.6.0)(better-sqlite3@13.0.3)
       seyfert:
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^5.2.1
+        version: 5.2.1
       try:
         specifier: ^1.0.3
         version: 1.0.3(patch_hash=8a01b5d24f9dc0fa1286807bed18dd989117ba847b305b2faf7393e6465f2dfc)
@@ -936,8 +936,8 @@ packages:
     engines: {node: 20 || >=22}
     hasBin: true
 
-  seyfert@5.0.0:
-    resolution: {integrity: sha512-73tb7/RiToy7+IO1in84zzn736XMXtf2Td0I26bSL2+09wcyEdZG1J4vj5M6twesMACFqv498ELImx6CpddCCQ==}
+  seyfert@5.2.1:
+    resolution: {integrity: sha512-TfqUqbSclvEcoslTz8dTHk05qgT12PFCrOG29gcMolN2Qxu2BiK+6T2xPLWuPeXQyA5Z3xx4JlhcWKfqgwdB3w==}
 
   source-map-support@0.5.21:
     resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
@@ -1543,7 +1543,7 @@ snapshots:
       glob: 13.0.6
       package-json-from-dist: 1.0.1
 
-  seyfert@5.0.0: {}
+  seyfert@5.2.1: {}
 
   source-map-support@0.5.21:
     dependencies:

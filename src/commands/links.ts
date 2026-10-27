@@ -14,7 +14,7 @@ import RemoveAllCommand from "./links/removeAll";
 	description: "Manage links for your server's panel (link admins only)",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: 0n,
+	defaultMemberPermissions: ["Administrator"],
 })
 @Options([
 	AddCommand,

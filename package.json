@@ -24,7 +24,7 @@
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.2",
-    "seyfert": "^5.0.0",
+    "seyfert": "^5.2.1",
     "try": "^1.0.3"
   },
   "devDependencies": {

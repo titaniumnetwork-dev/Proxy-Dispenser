@@ -13,7 +13,7 @@ import { Command, Declare, Options } from "seyfert";
 	description: "Configure guild settings",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: 0n,
+	defaultMemberPermissions: ["Administrator"],
 })
 @Options([
 	ViewCommand,

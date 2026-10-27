@@ -10,10 +10,11 @@ import { Command, type CommandContext, Declare } from "seyfert";
 	description: "Show latency with Discord",
 	integrationTypes: ["GuildInstall", "UserInstall"],
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
-	defaultMemberPermissions: 0n,
+	defaultMemberPermissions: ["Administrator"],
 })
 export default class PingCommand extends Command {
-	override async run(ctx: CommandContext) {
+  override async run(ctx: CommandContext) {
+    //@ts-expect-error for some reason this isnt exposed on the typedef :sob:
 		const ping = ctx.client.gateway.latency;
 		await ctx.write({
 			content: `Pong!\n\nLatency: \`${ping}ms\``,

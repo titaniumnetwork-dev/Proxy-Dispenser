@@ -8,7 +8,7 @@ import SetRoleCommand from "./filters/setRole";
 	description: "Manage filters",
 	integrationTypes: ["GuildInstall"],
 	contexts: ["Guild"],
-	defaultMemberPermissions: 0n,
+	defaultMemberPermissions: ["Administrator"],
 })
 @Options([SetRoleCommand, ListCommand, CheckCommand])
 export default class FilterCommand extends Command {}

@@ -1,33 +1,39 @@
 {
-	"compilerOptions": {
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"lib": ["ESNext"],
-		"target": "ESNext",
-		"module": "Preserve",
-		"moduleDetection": "force",
-		"jsx": "react-jsx",
-		"allowJs": true,
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"noEmit": true,
-		"strict": true,
-		"types": ["node"],
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
 
-		"paths": {
-			"@*": ["./src/*"]
-		}
-	},
-	"include": [
-		"src/**/*.ts",
-		"types.d.ts",
-		"seyfert.config.ts",
-		"drizzle.config.ts"
-	],
-	"exclude": ["node_modules", "dist", "drizzle"]
+    "paths": {
+      "@*": ["./src/*"],
+    },
+  },
+  "include": [
+    "src/**/*.ts",
+    "types.d.ts",
+    "seyfert.config.ts",
+    "drizzle.config.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "drizzle",
+    "src/utils/embedPaginator.ts",
+    "src/utils/linkListPaginator.ts",
+  ],
 }
