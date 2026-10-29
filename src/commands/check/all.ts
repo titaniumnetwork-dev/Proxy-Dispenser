@@ -20,9 +20,9 @@ const options = {
 @Options(options)
 @Declare({
 	name: "check",
-	description: "Check a URL against the filter checker",
+	description: "Check a URL against all filters",
 })
-export default class CheckCommand extends SubCommand {
+export default class CheckAllCommand extends SubCommand {
 	override async run(ctx: CommandContext<typeof options>) {
 		if (!ctx.options.query) {
 			await ctx.write({

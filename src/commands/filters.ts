@@ -1,5 +1,4 @@
 import { Command, Declare, Options } from "seyfert";
-import CheckCommand from "./filters/check";
 import ListCommand from "./filters/list";
 import SetRoleCommand from "./filters/setRole";
 
@@ -10,5 +9,5 @@ import SetRoleCommand from "./filters/setRole";
 	contexts: ["Guild"],
 	defaultMemberPermissions: ["ManageRoles"],
 })
-@Options([SetRoleCommand, ListCommand, CheckCommand])
+@Options([SetRoleCommand, ListCommand])
 export default class FilterCommand extends Command {}
