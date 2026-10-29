@@ -19,7 +19,7 @@ const options = {
 
 @Options(options)
 @Declare({
-	name: "check",
+	name: "all",
 	description: "Check a URL against all filters",
 })
 export default class CheckAllCommand extends SubCommand {
