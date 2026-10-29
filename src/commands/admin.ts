@@ -2,6 +2,7 @@ import BlacklistCommand from "@commands/admin/blacklist";
 import ResetCommand from "@commands/admin/reset";
 import ResetUserCommand from "@commands/admin/resetUser";
 import UnblacklistCommand from "@commands/admin/unblacklist";
+import { GenerateMasqrCommand } from "@commands/admin/generateMasqr";
 import { Command, Declare, Options } from "seyfert";
 
 @Declare({
@@ -15,6 +16,7 @@ import { Command, Declare, Options } from "seyfert";
 	BlacklistCommand,
 	UnblacklistCommand,
 	ResetCommand,
-	ResetUserCommand,
+  ResetUserCommand,
+	GenerateMasqrCommand
 ])
 export default class AdminCommand extends Command {}

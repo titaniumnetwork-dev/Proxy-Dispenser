@@ -1,6 +1,7 @@
 export interface MasqrResult {
 	readonly ok: true;
-	readonly link: string;
+  readonly link: string;
+  readonly expires: number;
 }
 
 export interface MasqrFailure {
@@ -47,7 +48,8 @@ export async function applyMasqr(link: string): Promise<MasqrApplyResult> {
 	}
 
 	const payload = (await response.json()) as {
-		assignedLicense?: string;
+    assignedLicense?: string;
+    expires: number;
 	};
 
 	if (!payload.assignedLicense) {
@@ -62,6 +64,7 @@ export async function applyMasqr(link: string): Promise<MasqrApplyResult> {
 
 	return {
 		ok: true,
-		link: parsed.href,
+    link: parsed.href,
+		expires: payload.expires
 	};
 }
