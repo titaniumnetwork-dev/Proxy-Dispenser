@@ -12,16 +12,6 @@ const EMPTY_RESULT: Link = Object.freeze({
 	categories: {},
 });
 
-async function getBlocked(url: string): Promise<string[]> {
-	const result = await checkLink(url);
-	return result.blocked;
-}
-
-async function getUnblocked(url: string): Promise<string[]> {
-	const result = await checkLink(url);
-	return result.unblocked;
-}
-
 async function checkLink(url: string): Promise<Link> {
 	if (!process.env.FC_URL || !process.env.FC_API_KEY) {
 		console.error(
@@ -103,4 +93,4 @@ async function checkLinks(
 	return results;
 }
 
-export { checkLink, checkLinks, getBlocked, getUnblocked };
+export { checkLink, checkLinks };
