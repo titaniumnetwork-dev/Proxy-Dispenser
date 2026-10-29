@@ -13,8 +13,8 @@ import { Command, type CommandContext, Declare } from "seyfert";
 	defaultMemberPermissions: ["SendMessages"],
 })
 export default class PingCommand extends Command {
-  override async run(ctx: CommandContext) {
-    //@ts-expect-error for some reason this isnt exposed on the typedef :sob:
+	override async run(ctx: CommandContext) {
+		//@ts-expect-error for some reason this isnt exposed on the typedef :sob:
 		const ping = ctx.client.gateway.latency;
 		await ctx.write({
 			content: `Pong!\n\nLatency: \`${ping}ms\``,

@@ -14,7 +14,6 @@ import {
 	createUnexpectedErrorEmbed,
 } from "@utils/infoEmbeds";
 
-
 const options = {
 	query: createStringOption({
 		description: "The URL to generate a masqr link for",
@@ -24,24 +23,24 @@ const options = {
 
 @Options(options)
 @Declare({
-  name: "generate-masqr",
-  description: "Generate a Masqr link",
+	name: "generate-masqr",
+	description: "Generate a Masqr link",
 })
 export class GenerateMasqrCommand extends SubCommand {
-  override async run(ctx: CommandContext<typeof options>) {
-    const [masqrOk, masqrErr, masqr] = await t(applyMasqr(ctx.options.query))
+	override async run(ctx: CommandContext<typeof options>) {
+		const [masqrOk, masqrErr, masqr] = await t(applyMasqr(ctx.options.query));
 
-    if (!masqrOk || !masqr.ok) {
-      ctx.client.logger.error(`Failed to masqr link: ${masqrErr}`);
-      await ctx.editOrReply({
-        embeds: [createUnexpectedErrorEmbed("making ")],
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
-    }
-    
-    return ctx.editOrReply({
-      content: `\`${masqr.link}\`\nExpires on ${new Date(masqr.expires).toLocaleString()} Eastern Time`
-    })
-  }
+		if (!masqrOk || !masqr.ok) {
+			ctx.client.logger.error(`Failed to masqr link: ${masqrErr}`);
+			await ctx.editOrReply({
+				embeds: [createUnexpectedErrorEmbed("making ")],
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
+		return ctx.editOrReply({
+			content: `\`${masqr.link}\`\nExpires on ${new Date(masqr.expires).toLocaleString()} Eastern Time`,
+		});
+	}
 }

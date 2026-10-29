@@ -93,7 +93,9 @@ export default class ListCategoriesCommand extends SubCommand {
 
 		const lines = categories.map((cat, index) => {
 			const emoji = cat.emojiId ? `${cat.emojiId} ` : "";
-			const channel = cat.channelId ? ` [<#${cat.channelId}>] ` : " [No channel] ";
+			const channel = cat.channelId
+				? ` [<#${cat.channelId}>] `
+				: " [No channel] ";
 			const masqr = cat.masqrEnabled ? " [Masqr]" : "";
 			const limit =
 				cat.dispenserLimit != null

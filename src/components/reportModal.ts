@@ -123,7 +123,11 @@ export default class ReportModal extends ModalCommand {
 			.setColor("#ED4245")
 			.setTitle("Link Report")
 			.addFields(
-				{ name: "Category", value: `${categoryRow.emojiId + " " || ''}${categoryId}`, inline: true },
+				{
+					name: "Category",
+					value: `${categoryRow.emojiId + " " || ""}${categoryId}`,
+					inline: true,
+				},
 				{ name: "Link", value: link, inline: true },
 				{ name: "Reporter", value: `<@${userId}>`, inline: true },
 				{ name: "Reason", value: reason, inline: false },

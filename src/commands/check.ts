@@ -11,7 +11,5 @@ import CheckAllCommand from "./check/all";
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 	defaultMemberPermissions: ["SendMessages"],
 })
-@Options([
-  CheckAllCommand
-])
+@Options([CheckAllCommand])
 export default class CheckCommand extends Command {}

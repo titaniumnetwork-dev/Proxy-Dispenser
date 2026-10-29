@@ -7,7 +7,7 @@ export class PermissionsHandleCommand extends HandleCommand {
 	override checkMemberPermissions(
 		command: Command | SubCommand,
 		context: CommandContext,
-		permissions: PermissionsBitField
+		permissions: PermissionsBitField,
 	) {
 		if (context.interaction) return;
 		return super.checkMemberPermissions(command, context, permissions);

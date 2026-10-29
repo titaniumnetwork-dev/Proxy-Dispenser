@@ -66,7 +66,9 @@ export default class ChannelCommand extends SubCommand {
 				.returning({ categoryId: schema.categories.categoryId }),
 		);
 		if (!resultOk) {
-			ctx.client.logger.error(`Failed to set channel for category: ${resultErr}`);
+			ctx.client.logger.error(
+				`Failed to set channel for category: ${resultErr}`,
+			);
 			await ctx.editOrReply({
 				embeds: [
 					createUnexpectedErrorEmbed(
