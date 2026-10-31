@@ -4,6 +4,7 @@
 
 import { Command, Declare, Options } from "seyfert";
 import CheckAllCommand from "./check/all";
+import CheckBulkCommand from "./check/bulk";
 @Declare({
 	name: "check",
 	description: "Check user provided links",
@@ -11,5 +12,5 @@ import CheckAllCommand from "./check/all";
 	contexts: ["Guild", "BotDM", "PrivateChannel"],
 	defaultMemberPermissions: ["SendMessages"],
 })
-@Options([CheckAllCommand])
+@Options([CheckAllCommand, CheckBulkCommand])
 export default class CheckCommand extends Command {}
